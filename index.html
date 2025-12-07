@@ -8,85 +8,86 @@
 
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        /* ================== 1. 核心变量系统 ================== */
+        /* ================== 变量与基础 ================== */
         :root {
             --primary: #2563eb;
+            --primary-light: #eff6ff;
             --primary-hover: #1d4ed8;
             --danger: #ef4444;
             --bg: #f8fafc;
             --card-bg: #ffffff;
-            --text-main: #334155;
+            --text-main: #0f172a;
             --text-sec: #64748b;
             --border: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-            --radius: 10px;
-            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            --font-serif: 'Georgia', 'Times New Roman', serif;
-
-            /* 动态阅读设置默认值 */
-            --read-font-size: 18px;
-            --read-line-height: 1.8;
-            --read-font-family: var(--font-serif);
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 12px;
+            --font-sans: 'Inter', system-ui, sans-serif;
+            --font-serif: 'Georgia', serif;
         }
 
         [data-theme="dark"] {
             --primary: #3b82f6;
+            --primary-light: #1e293b;
             --bg: #0f172a;
             --card-bg: #1e293b;
             --text-main: #f1f5f9;
             --text-sec: #94a3b8;
             --border: #334155;
-            --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --shadow-sm: none;
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
         }
 
         body {
             font-family: var(--font-sans);
-            background-color: var(--bg);
+            background: var(--bg);
             color: var(--text-main);
             margin: 0;
             padding: 0;
             height: 100vh;
             overflow-x: hidden;
-            transition: background 0.3s, color 0.3s;
+            transition: background 0.3s;
         }
 
         .hidden {
             display: none !important;
         }
 
-        /* ================== 2. 高级登录页 (Split Layout & Transitions) ================== */
+        .btn {
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            outline: none;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* ================== 1. 登录页 (Image Buffer System) ================== */
         .auth-wrapper {
             display: flex;
             height: 100vh;
             width: 100vw;
             background: var(--card-bg);
-            overflow: hidden;
         }
 
-        /* 左侧风景区 */
+        /* 风景区 */
         .auth-banner {
-            flex: 1.5;
-            /* 宽屏占比更大 */
-            background-color: #1a1a1a;
+            flex: 1.6;
             position: relative;
             overflow: hidden;
-            transition: flex 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            /* 丝滑展开动画 */
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: #000;
+            cursor: pointer;
+            /* 提示可点击 */
         }
 
-        /* 初始状态：手机排版模式 (Banner 宽度为0) */
-        .auth-wrapper.initializing .auth-banner {
-            flex: 0 !important;
-            min-width: 0;
-        }
-
-        /* 背景图层 */
-        .banner-image {
+        /* 图片层 */
+        .banner-img-layer {
             position: absolute;
             top: 0;
             left: 0;
@@ -95,239 +96,125 @@
             background-size: cover;
             background-position: center;
             opacity: 0;
-            transition: opacity 1s ease;
-            z-index: 1;
+            transition: opacity 1.2s ease-in-out;
         }
 
-        .banner-image.active {
+        .banner-img-layer.active {
             opacity: 1;
         }
 
-        /* 加载转圈圈 */
-        .banner-loader {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(255, 255, 255, 0.1);
+        /* 首次引导蒙版 */
+        .banner-hint-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            z-index: 20;
+            backdrop-filter: blur(5px);
+            opacity: 1;
+            transition: opacity 0.5s;
+            pointer-events: none;
+            /* 让点击穿透到 banner */
+        }
+
+        .banner-hint-overlay i {
+            margin-right: 10px;
+            animation: bounce 2s infinite;
+        }
+
+        /* 加载动画 */
+        .loader-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
             border-top-color: #fff;
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            z-index: 2;
-            position: absolute;
+            z-index: 5;
+            display: none;
+            /* 默认隐藏，加载慢时显示 */
         }
 
-        /* 刷新按钮 */
-        .banner-control {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            z-index: 10;
-            color: rgba(255, 255, 255, 0.8);
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(5px);
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 13px;
-            cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .banner-control:hover {
-            background: rgba(0, 0, 0, 0.5);
-            transform: translateY(-2px);
-        }
-
-        /* 右侧登录表单 */
+        /* 登录框 */
         .auth-side {
             flex: 1;
-            max-width: 500px;
-            /* 限制最大宽度 */
+            max-width: 480px;
+            padding: 60px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 60px;
-            box-sizing: border-box;
+            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.05);
+            z-index: 30;
             background: var(--card-bg);
-            position: relative;
-            z-index: 10;
-            box-shadow: -10px 0 30px rgba(0, 0, 0, 0.05);
-            transition: padding 0.5s;
-        }
-
-        /* 手机端/初始状态适配 */
-        @media (max-width: 900px) {
-            .auth-banner {
-                display: none;
-            }
-
-            /* 强制隐藏 */
-            .auth-side {
-                max-width: 100%;
-                padding: 30px;
-            }
-        }
-
-        /* 当处于初始化模式时，右侧占满 */
-        .auth-wrapper.initializing .auth-side {
-            max-width: 100%;
-            background: var(--bg);
-            /* 稍微区分一下背景 */
-        }
-
-        /* 表单控件 */
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-label {
-            display: block;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-main);
         }
 
         .form-input {
             width: 100%;
-            height: 48px;
+            height: 50px;
             padding: 0 16px;
+            margin-bottom: 20px;
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 10px;
             background: var(--bg);
             color: var(--text-main);
+            font-size: 16px;
             box-sizing: border-box;
-            font-size: 15px;
-            transition: all 0.2s;
+            transition: 0.2s;
         }
 
         .form-input:focus {
             border-color: var(--primary);
             background: var(--card-bg);
             box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-            outline: none;
         }
 
-        .btn {
-            height: 48px;
+        .btn-primary {
+            height: 50px;
             width: 100%;
-            border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             background: var(--primary);
             color: white;
             font-weight: 600;
             font-size: 16px;
-            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            transition: all 0.2s;
         }
 
-        .btn:hover {
+        .btn-primary:hover {
             background: var(--primary-hover);
-            transform: translateY(-1px);
         }
 
-        .btn:active {
-            transform: translateY(0);
+        @media (max-width: 900px) {
+            .auth-banner {
+                display: none;
+            }
+
+            .auth-side {
+                max-width: 100%;
+                padding: 30px;
+            }
         }
 
-        /* ================== 3. 设置页重构 (Sidebar Layout) ================== */
-        .settings-layout {
-            display: flex;
-            gap: 30px;
-            min-height: 500px;
-            align-items: flex-start;
-        }
-
-        .settings-sidebar {
-            width: 240px;
-            flex-shrink: 0;
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            overflow: hidden;
-        }
-
-        .settings-tab {
-            width: 100%;
-            text-align: left;
-            padding: 15px 20px;
-            background: transparent;
-            border: none;
-            color: var(--text-sec);
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            border-bottom: 1px solid var(--border);
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .settings-tab:hover {
-            background: var(--bg);
-            color: var(--text-main);
-        }
-
-        .settings-tab.active {
-            background: rgba(37, 99, 235, 0.05);
-            color: var(--primary);
-            border-left: 3px solid var(--primary);
-        }
-
-        .settings-tab:last-child {
-            border-bottom: none;
-        }
-
-        .settings-content {
-            flex: 1;
-            background: var(--card-bg);
-            border-radius: var(--radius);
-            border: 1px solid var(--border);
-            padding: 30px;
-            box-shadow: var(--shadow);
-        }
-
-        .setting-section {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .setting-section.active {
-            display: block;
-        }
-
-        .setting-group {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .setting-group:last-child {
-            border-bottom: none;
-        }
-
-        .setting-title {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        /* ================== 4. 通用 UI 组件 ================== */
+        /* ================== 2. Dashboard 2.0 (Rich UI) ================== */
         .app-layout {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
-            min-height: 100vh;
         }
 
         .navbar {
@@ -335,100 +222,255 @@
             justify-content: space-between;
             align-items: center;
             background: var(--card-bg);
-            padding: 12px 24px;
-            border-radius: 12px;
+            padding: 15px 30px;
+            border-radius: 16px;
             border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 50;
+            /* For tutorial */
+        }
+
+        /* 统计看板 */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
             margin-bottom: 30px;
         }
 
-        .user-panel img {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--border);
-        }
-
-        /* 按钮组 */
-        .btn-icon {
-            background: transparent;
-            border: none;
-            padding: 8px;
-            font-size: 22px;
-            color: var(--text-sec);
-            cursor: pointer;
-            border-radius: 6px;
-            transition: 0.2s;
-        }
-
-        .btn-icon:hover {
-            background: var(--bg);
-            color: var(--text-main);
-        }
-
-        /* 验证码 */
-        .captcha-box {
-            display: flex;
-            gap: 10px;
-        }
-
-        #captcha-canvas {
-            border-radius: 8px;
-            cursor: pointer;
+        .stat-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 16px;
             border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.2s;
         }
 
-        /* 文章网格 */
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        /* 快捷操作区 */
+        .quick-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .action-chip {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-sec);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .action-chip:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .action-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* 文章列表 */
         .article-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
         }
 
         .article-card {
             background: var(--card-bg);
+            border-radius: 16px;
             border: 1px solid var(--border);
-            border-radius: 12px;
             padding: 24px;
-            height: 220px;
+            height: 240px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            top: 0;
+            overflow: hidden;
         }
 
         .article-card:hover {
-            top: -5px;
-            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
             border-color: var(--primary);
         }
 
-        /* 阅读器 */
-        #read-content {
-            font-size: var(--read-font-size);
-            line-height: var(--read-line-height);
-            font-family: var(--read-font-family);
-            white-space: pre-wrap;
+        .article-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s;
         }
 
+        .article-card:hover::after {
+            transform: scaleX(1);
+        }
+
+        /* ================== 3. 新手引导系统 (Onboarding) ================== */
+        .tour-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9000;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tour-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* 高亮元素的替身 */
+        .tour-highlight {
+            position: absolute;
+            background: transparent;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7), 0 0 0 4px var(--primary);
+            border-radius: 12px;
+            z-index: 9001;
+            pointer-events: none;
+            transition: all 0.4s ease;
+        }
+
+        .tour-tooltip {
+            position: absolute;
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            width: 300px;
+            z-index: 9002;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s ease;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .tour-tooltip.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tour-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .tour-title {
+            font-weight: 800;
+            font-size: 18px;
+            color: #0f172a;
+        }
+
+        .tour-step {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .tour-body {
+            color: #475569;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .tour-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* 其他页面样式保持精简 */
+        #page-editor,
+        #page-reader,
+        #page-settings {
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            padding: 40px;
+            margin-top: 20px;
+            box-shadow: var(--shadow-md);
+        }
+
+        textarea {
+            width: 100%;
+            border: none;
+            outline: none;
+            resize: none;
+            background: transparent;
+            font-family: var(--font-serif);
+            font-size: 18px;
+            line-height: 1.8;
+            color: var(--text-main);
+        }
+
+        /* 动画 */
         @keyframes spin {
             100% {
-                transform: rotate(360deg);
+                transform: translate(-50%, -50%) rotate(360deg);
             }
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateX(0);
             }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            50% {
+                transform: translateX(5px);
             }
         }
     </style>
@@ -436,376 +478,427 @@
 
 <body>
 
-    <div id="view-auth" class="auth-wrapper initializing">
-        <div class="auth-banner">
-            <div class="banner-image active" id="bg-1"></div>
-            <div class="banner-image" id="bg-2"></div>
-
-            <div class="banner-loader" id="banner-loader"></div>
-
-            <div class="banner-control" onclick="imgRotator.next(true)">
-                <i class="ph ph-arrows-clockwise"></i> 刷新风景
+    <div id="tour-overlay" class="tour-overlay">
+        <div id="tour-highlight" class="tour-highlight"></div>
+        <div id="tour-tooltip" class="tour-tooltip">
+            <div class="tour-header">
+                <div class="tour-title" id="tour-title">Title</div>
+                <div class="tour-step" id="tour-step">Step 1/3</div>
             </div>
+            <div class="tour-body" id="tour-text">Content goes here.</div>
+            <div class="tour-footer">
+                <button class="btn" style="color:#94a3b8; background:none;" onclick="tour.skip()">跳过</button>
+                <button class="btn" style="background:var(--primary); color:white; padding:8px 16px; border-radius:8px;"
+                    onclick="tour.next()">下一步</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-auth" class="auth-wrapper">
+        <div class="auth-banner" id="smart-banner" onclick="imgBuffer.next(true)">
+            <div class="banner-img-layer active" id="layer-1"></div>
+            <div class="banner-img-layer" id="layer-2"></div>
+
+            <div class="banner-hint-overlay" id="banner-hint">
+                <i class="ph ph-hand-tap"></i> 点击图片切换风景
+            </div>
+
+            <div class="loader-spinner" id="banner-loader"></div>
         </div>
 
         <div class="auth-side">
-            <h1 id="auth-title" style="margin-top:0; font-size:32px;">欢迎回来</h1>
-            <p style="color:var(--text-sec); margin-bottom:40px;">登录 Smart Reader，开启沉浸式阅读。</p>
+            <h1 id="auth-title" style="margin-bottom:10px;">Smart Reader</h1>
+            <p style="color:var(--text-sec); margin-bottom:40px;">极致体验的沉浸式阅读管理工具。</p>
 
-            <div class="form-group">
-                <label class="form-label">电子邮箱</label>
-                <input type="email" id="auth-email" class="form-input" placeholder="name@example.com">
-            </div>
+            <input type="email" id="auth-email" class="form-input" placeholder="电子邮箱">
+            <input type="password" id="auth-password" class="form-input" placeholder="密码">
 
-            <div class="form-group">
-                <label class="form-label">密码</label>
-                <input type="password" id="auth-password" class="form-input" placeholder="••••••">
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">人机验证</label>
-                <div class="captcha-box">
-                    <input type="text" id="auth-captcha-input" class="form-input" placeholder="输入右侧字符">
-                    <canvas id="captcha-canvas" width="120" height="48" onclick="drawCaptcha()" title="点击刷新"></canvas>
-                </div>
+            <div style="display:flex; gap:10px; margin-bottom:20px;">
+                <input type="text" id="captcha-input" class="form-input" style="margin:0;" placeholder="验证码">
+                <canvas id="captcha-canvas" width="120" height="50"
+                    style="border-radius:10px; cursor:pointer; border:1px solid var(--border);"
+                    onclick="drawCaptcha()"></canvas>
             </div>
 
             <div
-                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px; font-size:14px; color:var(--text-sec);">
+                style="display:flex; justify-content:space-between; margin-bottom:30px; font-size:14px; color:var(--text-sec);">
                 <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                     <input type="checkbox" id="remember-me"> 14天免登录
                 </label>
-                <span id="auth-toggle-link" style="color:var(--primary); cursor:pointer; font-weight:600;"
-                    onclick="toggleAuthMode()">没有账号？去注册</span>
+                <span onclick="toggleAuth()" style="color:var(--primary); cursor:pointer;">注册新账号</span>
             </div>
 
-            <button class="btn" onclick="handleAuth()" id="auth-btn">立即登录</button>
-            <div id="auth-msg" style="color:var(--danger); font-size:14px; margin-top:15px; text-align:center;"></div>
+            <button class="btn btn-primary" onclick="handleAuth()" id="auth-btn">登录</button>
+            <div id="auth-msg" style="color:var(--danger); text-align:center; margin-top:15px; font-size:14px;"></div>
         </div>
     </div>
 
     <div id="view-app" class="hidden app-layout">
+
         <div class="navbar">
             <div
-                style="font-weight:800; font-size:20px; display:flex; align-items:center; gap:10px; color:var(--primary);">
-                <i class="ph ph-book-bookmark"></i> Smart Reader
+                style="font-weight:800; font-size:20px; color:var(--primary); display:flex; align-items:center; gap:10px;">
+                <i class="ph ph-read-cv-logo"></i> Smart Reader
             </div>
-            <div class="user-panel">
-                <img id="nav-avatar" src="">
-                <button class="btn-icon" onclick="showPage('dashboard')" title="主页"><i class="ph ph-house"></i></button>
-                <button class="btn-icon" onclick="showPage('settings')" title="设置"><i class="ph ph-gear"></i></button>
-                <button class="btn-icon" onclick="signOut()" title="退出"><i class="ph ph-sign-out"></i></button>
+            <div style="display:flex; gap:15px; align-items:center;">
+                <img id="nav-avatar" src=""
+                    style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--border);">
+                <button class="btn" onclick="signOut()" title="退出"
+                    style="background:var(--bg); padding:8px; border-radius:50%;"><i class="ph ph-sign-out"
+                        style="font-size:20px;"></i></button>
             </div>
         </div>
 
         <div id="page-dashboard" class="hidden">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-                <h2 style="margin:0;">我的文库</h2>
-                <button class="btn" style="width:auto; padding:0 24px;" onclick="openEditor(null)"><i
-                        class="ph ph-plus-circle" style="font-size:20px;"></i> 新建文章</button>
+            <div class="stats-row" id="tour-step-1">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="ph ph-books"></i></div>
+                    <div>
+                        <div style="font-size:24px; font-weight:700;" id="stat-count">0</div>
+                        <div style="font-size:13px; color:var(--text-sec);">总文章数</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#10b981; background:#d1fae5;"><i class="ph ph-clock"></i></div>
+                    <div>
+                        <div style="font-size:24px; font-weight:700;">12h</div>
+                        <div style="font-size:13px; color:var(--text-sec);">累计阅读</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="color:#f59e0b; background:#fef3c7;"><i class="ph ph-fire"></i></div>
+                    <div>
+                        <div style="font-size:24px; font-weight:700;">5天</div>
+                        <div style="font-size:13px; color:var(--text-sec);">连续打卡</div>
+                    </div>
+                </div>
             </div>
+
+            <div class="quick-actions">
+                <div class="action-chip active"><i class="ph ph-squares-four"></i> 全部</div>
+                <div class="action-chip"><i class="ph ph-star"></i> 收藏</div>
+                <div class="action-chip"><i class="ph ph-archive"></i> 归档</div>
+                <div class="action-chip" onclick="showSettings()"><i class="ph ph-gear"></i> 设置</div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="margin:0;">最近阅读</h2>
+                <button class="btn btn-primary" style="width:auto; padding:0 24px;" onclick="openEditor()"
+                    id="tour-step-2">
+                    <i class="ph ph-plus-circle" style="font-size:20px;"></i> 新建
+                </button>
+            </div>
+
             <div id="article-list" class="article-grid"></div>
         </div>
 
-        <div id="page-editor" class="hidden" style="max-width:800px; margin:0 auto;">
-            <div
-                style="background:var(--card-bg); padding:40px; border-radius:12px; border:1px solid var(--border); box-shadow:var(--shadow);">
-                <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                    <h3>编辑文章</h3>
-                    <button class="btn-icon" onclick="showPage('dashboard')"><i class="ph ph-x"></i></button>
-                </div>
-
-                <input type="text" id="edit-title" class="form-input"
-                    style="font-size:20px; font-weight:bold; height:60px; margin-bottom:20px;" placeholder="文章标题">
-
-                <div style="border:2px dashed var(--border); border-radius:12px; padding:20px; text-align:center; margin-bottom:20px; cursor:pointer; transition:0.2s;"
-                    onclick="document.getElementById('file-import').click()"
-                    onmouseover="this.style.borderColor='var(--primary)'"
-                    onmouseout="this.style.borderColor='var(--border)'">
-                    <i class="ph ph-upload-simple" style="font-size:32px; color:var(--primary);"></i>
-                    <p style="margin:5px 0; font-size:14px; color:var(--text-sec);">点击导入 .txt / .md 文件</p>
-                    <input type="file" id="file-import" accept=".txt,.md" hidden onchange="handleImport(this)">
-                </div>
-
-                <textarea id="edit-content"
-                    style="width:100%; min-height:400px; padding:20px; border:1px solid var(--border); border-radius:8px; font-size:16px; line-height:1.8; resize:none; background:var(--bg); color:var(--text-main); font-family:var(--font-serif); outline:none;"
-                    placeholder="开始写作..."></textarea>
-
-                <div style="text-align:right; margin-top:20px;">
-                    <button class="btn" style="width:auto; padding:0 30px;" onclick="saveArticle()">保存</button>
-                </div>
+        <div id="page-editor" class="hidden">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h3>编辑文章</h3>
+                <button class="btn" onclick="showDashboard()"><i class="ph ph-x" style="font-size:24px;"></i></button>
+            </div>
+            <input type="text" id="edit-title" class="form-input"
+                style="font-size:24px; font-weight:bold; height:60px; border:none; padding:0;" placeholder="输入标题...">
+            <div style="border-top:1px solid var(--border); margin:20px 0;"></div>
+            <textarea id="edit-content" placeholder="输入正文或拖入 .txt 文件..." style="min-height:500px;"></textarea>
+            <div style="text-align:right;">
+                <button class="btn btn-primary" style="width:auto; padding:0 30px;" onclick="saveArticle()">保存</button>
             </div>
         </div>
 
         <div id="page-reader" class="hidden">
-            <div
-                style="max-width:900px; margin:0 auto; background:var(--card-bg); border-radius:12px; border:1px solid var(--border); padding:40px; box-shadow:var(--shadow);">
-                <div
-                    style="display:flex; justify-content:space-between; margin-bottom:30px; border-bottom:1px solid var(--border); padding-bottom:20px;">
-                    <button class="btn-icon" onclick="showPage('dashboard')"><i class="ph ph-arrow-left"></i></button>
-                    <button class="btn-icon" onclick="switchToEdit()"><i class="ph ph-pencil-simple"></i></button>
-                </div>
-                <h1 id="read-title" style="font-size:36px; margin-bottom:40px;"></h1>
-                <div id="read-content"></div>
+            <div style="margin-bottom:30px;">
+                <button class="btn" onclick="showDashboard()"
+                    style="background:var(--bg); padding:8px 16px; border-radius:20px; font-size:14px;"><i
+                        class="ph ph-arrow-left"></i> 返回</button>
             </div>
-        </div>
-
-        <div id="page-settings" class="hidden">
-            <h2 style="margin-bottom:30px;">设置中心</h2>
-            <div class="settings-layout">
-                <div class="settings-sidebar">
-                    <button class="settings-tab active" onclick="switchSettingTab('general')">
-                        <i class="ph ph-sliders"></i> 通用设置
-                    </button>
-                    <button class="settings-tab" onclick="switchSettingTab('account')">
-                        <i class="ph ph-user-circle"></i> 账号资料
-                    </button>
-                    <button class="settings-tab" onclick="switchSettingTab('reading')">
-                        <i class="ph ph-book-open"></i> 阅读偏好
-                    </button>
-                    <button class="settings-tab" onclick="switchSettingTab('data')">
-                        <i class="ph ph-database"></i> 数据管理
-                    </button>
-                </div>
-
-                <div class="settings-content">
-                    <div id="set-general" class="setting-section active">
-                        <div class="setting-group">
-                            <div class="setting-title"><i class="ph ph-paint-brush"></i> 主题外观</div>
-                            <select id="theme-select" class="form-input" onchange="changeTheme(this.value)">
-                                <option value="system">跟随系统</option>
-                                <option value="light">浅色模式</option>
-                                <option value="dark">深色模式</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="set-account" class="setting-section">
-                        <div class="setting-group">
-                            <div class="setting-title"><i class="ph ph-image"></i> 头像设置</div>
-                            <div style="display:flex; align-items:center; gap:20px;">
-                                <img id="setting-avatar"
-                                    style="width:64px; height:64px; border-radius:50%; object-fit:cover;">
-                                <div>
-                                    <button class="btn" style="width:auto; font-size:14px; height:36px;"
-                                        onclick="document.getElementById('avatar-up').click()">上传新头像</button>
-                                    <input type="file" id="avatar-up" hidden accept="image/*"
-                                        onchange="uploadAvatar(this)">
-                                    <p style="font-size:12px; color:var(--text-sec); margin-top:5px;">支持 jpg, png, webp
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="setting-group">
-                            <div class="setting-title"><i class="ph ph-lock-key"></i> 修改密码</div>
-                            <button class="btn" style="width:auto; background:var(--danger);"
-                                onclick="updatePassword()">重置密码</button>
-                        </div>
-                    </div>
-
-                    <div id="set-reading" class="setting-section">
-                        <div class="setting-group">
-                            <div class="setting-title">字体大小</div>
-                            <input type="range" min="14" max="24" value="18" style="width:100%"
-                                oninput="updateReadSetting('size', this.value)">
-                            <div style="text-align:right; font-size:12px; color:var(--text-sec);">当前: <span
-                                    id="font-size-val">18px</span></div>
-                        </div>
-                        <div class="setting-group">
-                            <div class="setting-title">行高 (Line Height)</div>
-                            <select class="form-input" onchange="updateReadSetting('line', this.value)">
-                                <option value="1.6">紧凑 (1.6)</option>
-                                <option value="1.8" selected>舒适 (1.8)</option>
-                                <option value="2.2">宽松 (2.2)</option>
-                            </select>
-                        </div>
-                        <div class="setting-group">
-                            <div class="setting-title">字体风格</div>
-                            <select class="form-input" onchange="updateReadSetting('font', this.value)">
-                                <option value="serif">衬线体 (Serif) - 适合阅读</option>
-                                <option value="sans-serif">无衬线 (Sans) - 现代感</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div id="set-data" class="setting-section">
-                        <div class="setting-group">
-                            <div class="setting-title">导出数据</div>
-                            <p style="font-size:14px; color:var(--text-sec); margin-bottom:10px;">将所有文章和笔记导出为 JSON 文件。
-                            </p>
-                            <button class="btn-icon"
-                                style="border:1px solid var(--border); width:100%; border-radius:8px; font-size:14px; padding:10px;"
-                                onclick="exportData()">
-                                <i class="ph ph-download-simple"></i> 下载备份
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <h1 id="read-title" style="font-size:32px; margin-bottom:40px;"></h1>
+            <div id="read-content"
+                style="font-family:var(--font-serif); font-size:20px; line-height:1.8; white-space:pre-wrap;"></div>
         </div>
     </div>
 
     <script>
-        // ================= 配置区 =================
+        // ================= 配置 =================
         const supabaseUrl = 'https://oktgxeukllgglharkutf.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rdGd4ZXVrbGxnZ2xoYXJrdXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNzI1MTAsImV4cCI6MjA4MDY0ODUxMH0.R-XORb7qYMZPGLj4ZdPt3bIrI61TgOs7vCyxwGmnCpg';
         const db = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // ================= 1. 图片缓冲引擎 (Image Rotator) =================
-        const imgRotator = {
-            // Unsplash Nature Collection IDs (精选大片)
-            sources: [
-                'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2560', // 山川
-                'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2560', // 森林
-                'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=2560', // 海岸
-                'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2560', // 雾山
-                'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=2560'  // 群峰
-            ],
-            currentIndex: 0,
-            activeDiv: 1, // 1 or 2
-            isFirstLoad: true,
+        // ================= 1. 智能无限缓冲图片系统 (Smart Image Buffer) =================
+        const imgBuffer = {
+            queue: [], // 存放图片URL的队列
+            currentIndex: -1,
+            activeLayer: 1,
+            timer: null,
+            isPreloading: false,
 
+            // 初始化：加载前10张
             init() {
-                this.next(false); // 立即加载第一张
-                setInterval(() => this.next(false), 8000); // 每8秒自动切换
+                // 检查新手引导状态
+                if (localStorage.getItem('seen_hint')) {
+                    document.getElementById('banner-hint').style.display = 'none';
+                } else {
+                    // 点击蒙版事件 (第一次)
+                    document.getElementById('smart-banner').addEventListener('click', () => {
+                        document.getElementById('banner-hint').style.opacity = '0';
+                        setTimeout(() => document.getElementById('banner-hint').style.display = 'none', 500);
+                        localStorage.setItem('seen_hint', 'true');
+                    }, { once: true });
+                }
+
+                this.fetchImages(10).then(() => {
+                    this.next(false);
+                    // 开启 5分钟 定时器
+                    this.timer = setInterval(() => this.next(false), 5 * 60 * 1000);
+                });
             },
 
-            next(manual) {
-                const url = this.sources[this.currentIndex];
+            // 核心预缓存逻辑
+            async fetchImages(count) {
+                this.isPreloading = true;
+                const newImages = [];
+                // 使用 Unsplash Nature Collection，加随机参防止缓存
+                for (let i = 0; i < count; i++) {
+                    newImages.push(`https://source.unsplash.com/1920x1080/?nature,landscape&sig=${Date.now() + i}`);
+                }
+
+                // 模拟预加载（浏览器缓存）
+                const promises = newImages.map(url => {
+                    return new Promise((resolve) => {
+                        const img = new Image();
+                        img.src = url;
+                        img.onload = resolve;
+                        img.onerror = resolve; // 即使失败也resolve，防卡死
+                    });
+                });
+
+                await Promise.all(promises);
+                this.queue.push(...newImages);
+                this.isPreloading = false;
+                console.log(`[Buffer] Added ${count} images. Total: ${this.queue.length}`);
+            },
+
+            // 切换下一张
+            next(isManual) {
+                if (isManual && this.timer) {
+                    clearInterval(this.timer); // 手动点击重置定时器
+                    this.timer = setInterval(() => this.next(false), 5 * 60 * 1000);
+                }
+
+                this.currentIndex++;
+
+                // 【核心算法】如果播放到当前已缓存队列的倒数第5张，触发后台加载下10张
+                // 比如 current=4 (第5张), queue=10. current=14, queue=20.
+                if (this.queue.length - this.currentIndex <= 5 && !this.isPreloading) {
+                    this.fetchImages(10);
+                }
+
+                // 兜底：如果点太快超过了队列
+                if (this.currentIndex >= this.queue.length) {
+                    this.currentIndex = 0; // 循环或等待（这里简单循环）
+                }
+
+                const url = this.queue[this.currentIndex];
                 const loader = document.getElementById('banner-loader');
 
-                // 始终显示转圈
+                // 显示转圈（虽然已预缓存，但网络波动时仍需UI反馈）
                 loader.style.display = 'block';
 
                 const img = new Image();
                 img.src = url;
-
                 img.onload = () => {
-                    loader.style.display = 'none'; // 加载完隐藏转圈
-
-                    // 切换 active div 实现淡入淡出
-                    const nextDivId = this.activeDiv === 1 ? 'bg-2' : 'bg-1';
-                    const currDivId = this.activeDiv === 1 ? 'bg-1' : 'bg-2';
-
-                    const nextEl = document.getElementById(nextDivId);
-                    const currEl = document.getElementById(currDivId);
+                    loader.style.display = 'none';
+                    // 双层淡入淡出切换
+                    const nextLayer = this.activeLayer === 1 ? 2 : 1;
+                    const currEl = document.getElementById(`layer-${this.activeLayer}`);
+                    const nextEl = document.getElementById(`layer-${nextLayer}`);
 
                     nextEl.style.backgroundImage = `url('${url}')`;
                     nextEl.classList.add('active');
                     currEl.classList.remove('active');
 
-                    this.activeDiv = this.activeDiv === 1 ? 2 : 1;
-
-                    // 核心逻辑：若是第一次加载完成，移除 initializing 类，展开 banner
-                    if (this.isFirstLoad) {
-                        document.querySelector('.auth-wrapper').classList.remove('initializing');
-                        this.isFirstLoad = false;
-                    }
-
-                    // 准备下一张索引
-                    this.currentIndex = (this.currentIndex + 1) % this.sources.length;
-                };
+                    this.activeLayer = nextLayer;
+                }
             }
         };
 
-        // ================= 2. 核心逻辑 =================
+        // ================= 2. 新手引导系统 (Tour System) =================
+        const tour = {
+            steps: [
+                {
+                    target: 'tour-step-1',
+                    title: '数据看板',
+                    text: '这里会显示你的阅读统计、累计时长和连续打卡天数。让阅读成就可视化！'
+                },
+                {
+                    target: 'tour-step-2',
+                    title: '开始创作',
+                    text: '点击“新建”按钮，你可以直接书写，或者拖入本地的 .txt 文件进行智能导入。'
+                },
+                {
+                    target: 'nav-avatar',
+                    title: '个人中心',
+                    text: '在这里管理你的头像、密码和导出数据备份。'
+                }
+            ],
+            currentStep: 0,
+
+            start() {
+                if (localStorage.getItem('tour_finished')) return;
+                // 延迟一点启动，等界面加载
+                setTimeout(() => {
+                    document.getElementById('tour-overlay').classList.add('active');
+                    this.showStep(0);
+                }, 1000);
+            },
+
+            showStep(index) {
+                this.currentStep = index;
+                const step = this.steps[index];
+                const targetEl = document.getElementById(step.target);
+                const rect = targetEl.getBoundingClientRect();
+
+                // 移动高亮框
+                const hl = document.getElementById('tour-highlight');
+                hl.style.width = rect.width + 10 + 'px';
+                hl.style.height = rect.height + 10 + 'px';
+                hl.style.top = rect.top - 5 + 'px';
+                hl.style.left = rect.left - 5 + 'px';
+
+                // 移动提示框
+                const tt = document.getElementById('tour-tooltip');
+                tt.style.top = rect.bottom + 15 + 'px';
+                tt.style.left = rect.left + 'px';
+
+                // 边界处理（如果靠右，往左移）
+                if (rect.left + 300 > window.innerWidth) {
+                    tt.style.left = (window.innerWidth - 320) + 'px';
+                }
+
+                // 更新内容
+                document.getElementById('tour-title').innerText = step.title;
+                document.getElementById('tour-text').innerText = step.text;
+                document.getElementById('tour-step').innerText = `Step ${index + 1}/${this.steps.length}`;
+
+                tt.classList.add('visible');
+            },
+
+            next() {
+                if (this.currentStep < this.steps.length - 1) {
+                    this.showStep(this.currentStep + 1);
+                } else {
+                    this.finish();
+                }
+            },
+
+            skip() {
+                this.finish();
+            },
+
+            finish() {
+                document.getElementById('tour-overlay').classList.remove('active');
+                localStorage.setItem('tour_finished', 'true');
+                // 撒花庆祝
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+            }
+        };
+
+        // ================= 3. 核心业务逻辑 =================
         let currentUser = null;
-        let currentArticleId = null;
         let isSignup = false;
         let captchaCode = '';
+        let currentArticleId = null;
 
         async function init() {
-            // 启动图片引擎
-            imgRotator.init();
-
-            // 绘制验证码
+            imgBuffer.init(); // 启动图片系统
             drawCaptcha();
-
-            // 恢复设置
-            const theme = localStorage.getItem('theme') || 'system';
-            document.getElementById('theme-select').value = theme;
-            changeTheme(theme);
 
             // 检查登录
             const { data: { session } } = await db.auth.getSession();
             const remember = localStorage.getItem('remember_me');
-            const sessionActive = sessionStorage.getItem('active');
 
-            // 14天免登录逻辑
             if (session) {
-                if (remember || sessionActive) {
-                    sessionStorage.setItem('active', 'true');
-                    updateUser(session.user);
-                } else {
+                // 如果没有勾选记住我，且是新会话，则登出 (简单模拟)
+                if (!remember && !sessionStorage.getItem('active')) {
                     await db.auth.signOut();
                     showView('auth');
+                } else {
+                    sessionStorage.setItem('active', 'true');
+                    updateUser(session.user);
                 }
             } else {
                 showView('auth');
             }
-
-            // textarea 自适应
-            const tx = document.getElementById('edit-content');
-            tx.addEventListener("input", function () { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; });
         }
 
-        // ================= 认证 =================
-        function drawCaptcha() {
-            const ctx = document.getElementById('captcha-canvas').getContext('2d');
-            ctx.fillStyle = '#f1f5f9'; ctx.fillRect(0, 0, 120, 48);
-            ctx.font = 'bold 24px Arial'; ctx.fillStyle = '#334155';
-            captchaCode = Math.random().toString(36).substring(2, 6).toUpperCase();
-            ctx.fillText(captchaCode, 30, 32);
-            // 干扰线
-            ctx.beginPath(); ctx.moveTo(0, Math.random() * 48); ctx.lineTo(120, Math.random() * 48); ctx.stroke();
-        }
-
-        function toggleAuthMode() {
-            isSignup = !isSignup;
-            document.getElementById('auth-title').innerText = isSignup ? '创建账号' : '欢迎回来';
-            document.getElementById('auth-btn').innerText = isSignup ? '注册' : '立即登录';
-            document.getElementById('auth-toggle-link').innerText = isSignup ? '已有账号？去登录' : '没有账号？去注册';
-            drawCaptcha();
-        }
-
-        async function handleAuth() {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-password').value;
-            const code = document.getElementById('auth-captcha-input').value.toUpperCase();
-            const remember = document.getElementById('remember-me').checked;
-            const msg = document.getElementById('auth-msg');
-
-            if (!email || !pass) return msg.innerText = "请填写完整";
-            if (code !== captchaCode) { drawCaptcha(); return msg.innerText = "验证码错误"; }
-
-            msg.innerText = "处理中...";
-            let res;
-
-            if (isSignup) res = await db.auth.signUp({ email, password: pass });
-            else res = await db.auth.signInWithPassword({ email, password: pass });
-
-            if (res.error) {
-                msg.innerText = res.error.message;
-            } else {
-                if (isSignup && !res.data.session) {
-                    msg.innerText = "注册成功！请登录"; toggleAuthMode();
-                } else {
-                    if (remember) localStorage.setItem('remember_me', 'true');
-                    else localStorage.removeItem('remember_me');
-                    sessionStorage.setItem('active', 'true');
-                    updateUser(res.data.user);
-                }
-            }
+        function showView(id) {
+            document.getElementById('view-auth').classList.add('hidden');
+            document.getElementById('view-app').classList.add('hidden');
+            document.getElementById('view-' + id).classList.remove('hidden');
         }
 
         function updateUser(user) {
             currentUser = user;
             if (user) {
                 showView('app');
-                showPage('dashboard');
+                showDashboard();
                 const avatar = user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${user.id}`;
                 document.getElementById('nav-avatar').src = avatar;
-                document.getElementById('setting-avatar').src = avatar;
+
+                // 启动新手引导
+                tour.start();
+            }
+        }
+
+        // 认证逻辑
+        function drawCaptcha() {
+            const ctx = document.getElementById('captcha-canvas').getContext('2d');
+            ctx.fillStyle = '#f8fafc'; ctx.fillRect(0, 0, 120, 50);
+            ctx.font = 'bold 24px Arial'; ctx.fillStyle = '#334155';
+            captchaCode = Math.random().toString(36).substring(2, 6).toUpperCase();
+            ctx.fillText(captchaCode, 30, 34);
+            // 干扰线
+            for (let i = 0; i < 5; i++) {
+                ctx.strokeStyle = '#cbd5e1'; ctx.beginPath();
+                ctx.moveTo(Math.random() * 120, Math.random() * 50);
+                ctx.lineTo(Math.random() * 120, Math.random() * 50); ctx.stroke();
+            }
+        }
+
+        function toggleAuth() {
+            isSignup = !isSignup;
+            document.getElementById('auth-title').innerText = isSignup ? '加入我们' : 'Smart Reader';
+            document.getElementById('auth-btn').innerText = isSignup ? '注册' : '登录';
+        }
+
+        async function handleAuth() {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-password').value;
+            const code = document.getElementById('captcha-input').value.toUpperCase();
+            const remember = document.getElementById('remember-me').checked;
+            const msg = document.getElementById('auth-msg');
+
+            if (code !== captchaCode) { drawCaptcha(); return msg.innerText = "验证码错误"; }
+
+            msg.innerText = "处理中...";
+            let res;
+            if (isSignup) res = await db.auth.signUp({ email, password: pass });
+            else res = await db.auth.signInWithPassword({ email, password: pass });
+
+            if (res.error) msg.innerText = res.error.message;
+            else {
+                if (isSignup && !res.data.session) {
+                    msg.innerText = "注册成功，请登录"; toggleAuth();
+                } else {
+                    if (remember) localStorage.setItem('remember_me', 'true');
+                    else localStorage.removeItem('remember_me');
+                    sessionStorage.setItem('active', 'true');
+                    updateUser(res.data.user);
+                }
             }
         }
 
@@ -816,147 +909,71 @@
             location.reload();
         }
 
-        // ================= 页面路由 =================
-        function showView(id) {
-            document.getElementById('view-auth').classList.add('hidden');
-            document.getElementById('view-app').classList.add('hidden');
-            document.getElementById('view-' + id).classList.remove('hidden');
+        // 页面逻辑
+        function showDashboard() {
+            ['dashboard', 'editor', 'reader'].forEach(p => document.getElementById('page-' + p).classList.add('hidden'));
+            document.getElementById('page-dashboard').classList.remove('hidden');
+            loadArticles();
         }
 
-        function showPage(id) {
-            ['dashboard', 'editor', 'reader', 'settings'].forEach(p => document.getElementById('page-' + p).classList.add('hidden'));
-            document.getElementById('page-' + id).classList.remove('hidden');
-            if (id === 'dashboard') loadArticles();
-        }
-
-        // ================= 设置页逻辑 =================
-        function switchSettingTab(id) {
-            // Tabs
-            document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            // Content
-            document.querySelectorAll('.setting-section').forEach(s => s.classList.remove('active'));
-            document.getElementById('set-' + id).classList.add('active');
-        }
-
-        function changeTheme(mode) {
-            localStorage.setItem('theme', mode);
-            const dark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            document.body.setAttribute('data-theme', dark ? 'dark' : 'light');
-        }
-
-        function updateReadSetting(key, val) {
-            const root = document.documentElement;
-            if (key === 'size') {
-                root.style.setProperty('--read-font-size', val + 'px');
-                document.getElementById('font-size-val').innerText = val + 'px';
-            } else if (key === 'line') {
-                root.style.setProperty('--read-line-height', val);
-            } else if (key === 'font') {
-                root.style.setProperty('--read-font-family', val === 'serif' ? 'var(--font-serif)' : 'var(--font-sans)');
-            }
-        }
-
-        async function uploadAvatar(input) {
-            const file = input.files[0];
-            if (!file) return;
-            const path = `${currentUser.id}/${Date.now()}.${file.name.split('.').pop()}`;
-            await db.storage.from('avatars').upload(path, file);
-            const { data } = db.storage.from('avatars').getPublicUrl(path);
-            await db.auth.updateUser({ data: { avatar_url: data.publicUrl } });
-            alert('头像更新成功');
-            updateUser(currentUser);
-        }
-
-        async function updatePassword() {
-            const p = prompt("新密码 (至少6位):");
-            if (p && p.length >= 6) {
-                await db.auth.updateUser({ password: p });
-                alert('密码已修改');
-            }
-        }
-
-        async function exportData() {
-            const { data: articles } = await db.from('articles').select('*');
-            const { data: notes } = await db.from('annotations').select('*');
-            const blob = new Blob([JSON.stringify({ articles, notes }, null, 2)], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'smart-reader-backup.json';
-            a.click();
-        }
-
-        // ================= 文章 & 阅读 =================
-        function handleImport(input) {
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                document.getElementById('edit-content').value = e.target.result;
-                if (!document.getElementById('edit-title').value) document.getElementById('edit-title').value = file.name.replace(/\.[^/.]+$/, "");
-                const tx = document.getElementById('edit-content'); tx.style.height = tx.scrollHeight + 'px';
-            };
-            reader.readAsText(file);
-        }
-
-        async function loadArticles() {
-            const list = document.getElementById('article-list');
-            list.innerHTML = 'Loading...';
-            const { data } = await db.from('articles').select('*').order('created_at', { ascending: false });
-            if (!data || !data.length) return list.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:#888;">暂无文章</div>';
-            list.innerHTML = data.map(a => `
-                <div class="article-card" onclick="openReader('${a.id}')">
-                    <div>
-                        <h3 style="margin-top:0">${a.title || '无标题'}</h3>
-                        <div style="font-size:13px;color:var(--text-sec);height:60px;overflow:hidden;">${a.content.slice(0, 100)}...</div>
-                    </div>
-                    <div style="font-size:12px;color:#aaa;display:flex;justify-content:space-between;">
-                        ${new Date(a.created_at).toLocaleDateString()}
-                        <i class="ph ph-trash" onclick="event.stopPropagation(); deleteArt('${a.id}')"></i>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        async function openEditor(id) {
-            showPage('editor');
-            const tx = document.getElementById('edit-content');
-            tx.style.height = '400px';
-            if (!id) {
-                currentArticleId = null; document.getElementById('edit-title').value = ''; tx.value = '';
-            }
+        function openEditor() {
+            ['dashboard', 'editor', 'reader'].forEach(p => document.getElementById('page-' + p).classList.add('hidden'));
+            document.getElementById('page-editor').classList.remove('hidden');
+            currentArticleId = null;
+            document.getElementById('edit-title').value = '';
+            document.getElementById('edit-content').value = '';
         }
 
         async function saveArticle() {
             const title = document.getElementById('edit-title').value;
             const content = document.getElementById('edit-content').value;
+            if (!title || !content) return alert('请填写完整');
+
             const payload = { title, content, user_id: currentUser.id };
             if (currentArticleId) await db.from('articles').update(payload).eq('id', currentArticleId);
             else {
                 const res = await db.from('articles').insert(payload).select();
                 if (res.data) currentArticleId = res.data[0].id;
             }
-            openReader(currentArticleId);
+            // 跳转阅读
+            document.getElementById('page-editor').classList.add('hidden');
+            document.getElementById('page-reader').classList.remove('hidden');
+            document.getElementById('read-title').innerText = title;
+            document.getElementById('read-content').innerText = content;
         }
 
-        async function deleteArt(id) {
-            if (confirm('删除?')) { await db.from('articles').delete().eq('id', id); loadArticles(); }
+        async function loadArticles() {
+            const list = document.getElementById('article-list');
+            list.innerHTML = '加载中...';
+            const { data } = await db.from('articles').select('*').order('created_at', { ascending: false });
+
+            document.getElementById('stat-count').innerText = data ? data.length : 0;
+
+            if (!data || !data.length) return list.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#94a3b8;">暂无文章</div>';
+
+            list.innerHTML = data.map(a => `
+                <div class="article-card" onclick="readArticle('${a.id}')">
+                    <div>
+                        <h3 style="margin-top:0; font-size:18px;">${a.title || '无标题'}</h3>
+                        <div style="font-size:14px; color:var(--text-sec); overflow:hidden; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical;">
+                            ${a.content.slice(0, 150)}...
+                        </div>
+                    </div>
+                    <div style="font-size:12px; color:#cbd5e1; margin-top:15px; display:flex; justify-content:space-between;">
+                        <span>${new Date(a.created_at).toLocaleDateString()}</span>
+                        <span>阅读 ></span>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        async function openReader(id) {
-            currentArticleId = id; showPage('reader');
+        async function readArticle(id) {
+            currentArticleId = id;
+            ['dashboard', 'editor', 'reader'].forEach(p => document.getElementById('page-' + p).classList.add('hidden'));
+            document.getElementById('page-reader').classList.remove('hidden');
             const { data } = await db.from('articles').select('*').eq('id', id).single();
             document.getElementById('read-title').innerText = data.title;
             document.getElementById('read-content').innerText = data.content;
-        }
-
-        function switchToEdit() {
-            if (currentArticleId) {
-                showPage('editor');
-                db.from('articles').select('*').eq('id', currentArticleId).single().then(({ data }) => {
-                    document.getElementById('edit-title').value = data.title;
-                    document.getElementById('edit-content').value = data.content;
-                });
-            }
         }
 
         init();
