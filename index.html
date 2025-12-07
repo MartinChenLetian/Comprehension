@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Reader (已配置版)</title>
+    <title>Smart Reader Pro</title>
 
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src='https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js'></script>
@@ -12,6 +12,7 @@
     <style>
         :root {
             --primary: #2563eb;
+            --danger: #ef4444;
             --bg: #f3f4f6;
             --card-bg: #ffffff;
             --text: #1f2937;
@@ -32,39 +33,31 @@
             max-width: 900px;
         }
 
-        /* 卡片通用样式 */
         .card {
             background: var(--card-bg);
             border-radius: 12px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             padding: 24px;
             margin-bottom: 20px;
-            transition: all 0.3s ease;
         }
 
         .hidden {
             display: none !important;
         }
 
-        /* 按钮样式 */
+        /* 按钮组 */
         .btn {
             background-color: var(--primary);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            font-weight: 500;
         }
 
         .btn:hover {
             opacity: 0.9;
-        }
-
-        .btn:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
         }
 
         .btn-outline {
@@ -73,7 +66,24 @@
             color: #374151;
         }
 
-        /* 输入框样式 */
+        .btn-danger {
+            background-color: var(--danger);
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+
+        .btn-link {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: underline;
+            padding: 0;
+        }
+
         input,
         textarea {
             width: 100%;
@@ -91,7 +101,7 @@
             line-height: 1.8;
         }
 
-        /* 列表项 */
+        /* 文章列表 */
         .article-item {
             display: flex;
             justify-content: space-between;
@@ -104,38 +114,43 @@
             border-bottom: none;
         }
 
-        .tag {
-            font-size: 12px;
-            padding: 2px 8px;
-            border-radius: 10px;
-            background: #e5e7eb;
-            color: #666;
+        .action-group {
+            display: flex;
+            gap: 8px;
         }
 
-        .tag.locked {
-            background: #dcfce7;
-            color: #166534;
+        /* 笔记样式 */
+        .note-item {
+            margin-bottom: 12px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
         }
 
-        /* 高亮 */
+        .note-actions {
+            display: flex;
+            gap: 5px;
+            margin-top: 4px;
+            justify-content: flex-end;
+        }
+
         .highlight {
             background-color: #fef08a;
-            cursor: help;
+            cursor: pointer;
             border-bottom: 2px solid #facc15;
         }
 
-        /* 登录页居中 */
-        .login-box {
+        /* 登录框 */
+        .auth-box {
             max-width: 400px;
             margin: 50px auto;
             text-align: center;
         }
 
         .error-msg {
-            color: #ef4444;
+            color: var(--danger);
             font-size: 14px;
-            margin-top: 5px;
             min-height: 20px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -147,65 +162,71 @@
         <div id="header" class="hidden"
             style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
             <h2 style="margin:0;">📖 Smart Reader</h2>
-            <div style="font-size:14px;">
-                <span id="user-email" style="margin-right:10px; color:#666;"></span>
-                <button class="btn btn-outline" style="padding:5px 10px;" onclick="signOut()">退出</button>
+            <div>
+                <span id="user-email" style="font-size:14px; color:#666; margin-right:10px;"></span>
+                <button class="btn btn-outline btn-sm" onclick="signOut()">退出</button>
             </div>
         </div>
 
-        <div id="auth-section" class="card login-box">
-            <h2>欢迎回来</h2>
-            <p style="color:#666; font-size:14px; margin-bottom:20px;">请登录以访问您的私人阅读库</p>
-
-            <input type="email" id="email" placeholder="电子邮箱">
-            <input type="password" id="password" placeholder="密码 (至少6位)">
-            <div class="error-msg" id="auth-msg"></div>
-
-            <div style="margin-top:20px; display:flex; gap:10px;">
-                <button class="btn" style="flex:1;" onclick="handleAuth('login')">登录</button>
-                <button class="btn btn-outline" style="flex:1;" onclick="handleAuth('signup')">注册</button>
-            </div>
+        <div id="view-login" class="card auth-box hidden">
+            <h2>登录</h2>
+            <input type="email" id="login-email" placeholder="邮箱">
+            <input type="password" id="login-password" placeholder="密码">
+            <div id="login-msg" class="error-msg"></div>
+            <button class="btn" style="width:100%" onclick="handleLogin()">登录</button>
+            <p style="margin-top:15px; font-size:14px;">
+                还没有账号？ <button class="btn-link" onclick="switchAuthView('signup')">去注册</button>
+            </p>
         </div>
 
-        <div id="dashboard" class="hidden">
+        <div id="view-signup" class="card auth-box hidden">
+            <h2>注册新账号</h2>
+            <input type="email" id="signup-email" placeholder="邮箱">
+            <input type="password" id="signup-password" placeholder="设置密码 (至少6位)">
+            <div id="signup-msg" class="error-msg"></div>
+            <button class="btn" style="width:100%" onclick="handleSignup()">立即注册</button>
+            <p style="margin-top:15px; font-size:14px;">
+                已有账号？ <button class="btn-link" onclick="switchAuthView('login')">返回登录</button>
+            </p>
+        </div>
+
+        <div id="view-dashboard" class="hidden">
             <div class="card">
                 <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                    <h3>我的文章</h3>
-                    <button class="btn" onclick="showEditor()">+ 导入新文章</button>
+                    <h3>我的文章库</h3>
+                    <button class="btn" onclick="openEditor(null)">+ 新建文章</button>
                 </div>
-                <div id="article-list">
-                    <p style="text-align:center; color:#999;">正在加载...</p>
-                </div>
+                <div id="article-list">加载中...</div>
             </div>
         </div>
 
-        <div id="editor-section" class="hidden card">
+        <div id="view-editor" class="hidden card">
             <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-                <h3>✏️ 编辑模式</h3>
-                <button class="btn btn-outline" onclick="showDashboard()">取消</button>
+                <h3>✏️ 编辑文章</h3>
+                <button class="btn btn-outline" onclick="showView('dashboard')">取消</button>
             </div>
-
             <input type="text" id="edit-title" placeholder="文章标题" style="font-weight:bold;">
 
             <div
-                style="background:#f8fafc; padding:15px; border-radius:6px; margin-bottom:15px; border:1px dashed #cbd5e1;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <span>📷 OCR 识别:</span>
-                    <input type="file" id="ocr-file" accept="image/*" style="width:auto; margin:0;" onchange="runOCR()">
-                </div>
-                <div id="ocr-status" style="font-size:12px; color:#666; margin-top:5px;"></div>
+                style="background:#f8fafc; padding:10px; border:1px dashed #cbd5e1; margin-bottom:10px; border-radius:6px;">
+                <span style="font-size:14px;">📷 OCR 识别: </span>
+                <input type="file" id="ocr-file" accept="image/*" style="width:auto; display:inline-block;"
+                    onchange="runOCR()">
+                <span id="ocr-status" style="font-size:12px; color:#666; margin-left:10px;"></span>
             </div>
 
-            <textarea id="edit-content" placeholder="在这里输入内容，或者粘贴 OCR 识别的结果..."></textarea>
+            <textarea id="edit-content" placeholder="输入内容..."></textarea>
 
-            <div style="margin-top:20px; display:flex; gap:10px; justify-content:flex-end;">
-                <button class="btn btn-outline" onclick="saveArticle(false)">存为草稿</button>
-                <button class="btn" onclick="saveArticle(true)">完成并去阅读 →</button>
+            <div style="text-align:right; margin-top:10px;">
+                <button class="btn" onclick="saveArticle()">保存文章</button>
             </div>
         </div>
 
-        <div id="reader-section" class="hidden card">
-            <button class="btn btn-outline" onclick="showDashboard()" style="margin-bottom:20px;">← 返回列表</button>
+        <div id="view-reader" class="hidden card">
+            <div style="margin-bottom:20px; display:flex; justify-content:space-between;">
+                <button class="btn btn-outline" onclick="showView('dashboard')">← 返回列表</button>
+                <button class="btn btn-outline" onclick="switchToEditFromReader()">✏️ 编辑此文</button>
+            </div>
 
             <h1 id="read-title" style="border-bottom:1px solid #eee; padding-bottom:10px;"></h1>
 
@@ -216,290 +237,262 @@
 
                 <div
                     style="flex:1; min-width:250px; background:#f9fafb; padding:15px; border-radius:8px; height:fit-content;">
-                    <h4 style="margin-top:0;">📝 读书笔记</h4>
-                    <p style="font-size:12px; color:#666;">选中文本即可添加高亮和笔记</p>
-                    <ul id="notes-ul" style="padding-left:20px; font-size:14px;"></ul>
+                    <h4 style="margin-top:0;">📝 笔记 (选中文本添加)</h4>
+                    <ul id="notes-ul" style="padding-left:0; list-style:none;"></ul>
                 </div>
             </div>
         </div>
 
     </div>
-</body>
 
-<script>
-    // ================= 配置区 =================
-    // 你的配置已填好
-    const supabaseUrl = 'https://oktgxeukllgglharkutf.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rdGd4ZXVrbGxnZ2xoYXJrdXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNzI1MTAsImV4cCI6MjA4MDY0ODUxMH0.R-XORb7qYMZPGLj4ZdPt3bIrI61TgOs7vCyxwGmnCpg'
+    <script>
+        // ================= 配置区 =================
+        const supabaseUrl = 'https://oktgxeukllgglharkutf.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rdGd4ZXVrbGxnZ2xoYXJrdXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNzI1MTAsImV4cCI6MjA4MDY0ODUxMH0.R-XORb7qYMZPGLj4ZdPt3bIrI61TgOs7vCyxwGmnCpg'
 
-    const db = supabase.createClient(supabaseUrl, supabaseKey)
+        const db = supabase.createClient(supabaseUrl, supabaseKey)
 
-    // ================= 逻辑代码 =================
-    let currentUser = null;
-    let currentArticleId = null;
+        let currentUser = null;
+        let currentArticleId = null;
 
-    // 1. 初始化检查
-    async function init() {
-        const { data: { session } } = await db.auth.getSession();
-        updateUserState(session?.user);
-
-        db.auth.onAuthStateChange((_event, session) => {
+        // ================= 初始化 =================
+        async function init() {
+            const { data: { session } } = await db.auth.getSession();
             updateUserState(session?.user);
-        });
-    }
-
-    function updateUserState(user) {
-        currentUser = user;
-        if (user) {
-            document.getElementById('auth-section').classList.add('hidden');
-            document.getElementById('header').style.display = 'flex';
-            document.getElementById('user-email').innerText = user.email;
-            showDashboard();
-        } else {
-            document.getElementById('auth-section').classList.remove('hidden');
-            document.getElementById('header').classList.add('hidden');
-            hideAllMain();
-        }
-    }
-
-    // 2. 统一处理登录/注册
-    async function handleAuth(type) {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        const msgBox = document.getElementById('auth-msg');
-
-        if (!email || !password) {
-            msgBox.innerText = '请输入邮箱和密码';
-            return;
-        }
-        msgBox.innerText = '处理中...';
-
-        let result;
-        if (type === 'signup') {
-            result = await db.auth.signUp({ email, password });
-        } else {
-            result = await db.auth.signInWithPassword({ email, password });
+            db.auth.onAuthStateChange((_event, session) => updateUserState(session?.user));
         }
 
-        if (result.error) {
-            msgBox.innerText = '❌ ' + result.error.message;
-        } else {
-            if (type === 'signup' && !result.data.session) {
-                msgBox.innerText = '✅ 注册成功！如果未自动登录，请检查邮箱验证或确认是否已关闭验证功能。';
+        function updateUserState(user) {
+            currentUser = user;
+            if (user) {
+                document.getElementById('user-email').innerText = user.email;
+                document.getElementById('header').classList.remove('hidden');
+                showView('dashboard');
             } else {
-                msgBox.innerText = '';
+                document.getElementById('header').classList.add('hidden');
+                showView('login'); // 默认显示登录
             }
         }
-    }
 
-    async function signOut() {
-        await db.auth.signOut();
-        location.reload();
-    }
+        // ================= 视图切换 =================
+        function showView(viewName) {
+            ['view-login', 'view-signup', 'view-dashboard', 'view-editor', 'view-reader'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById('view-' + viewName).classList.remove('hidden');
 
-    // 3. 路由与视图控制
-    function hideAllMain() {
-        document.getElementById('dashboard').classList.add('hidden');
-        document.getElementById('editor-section').classList.add('hidden');
-        document.getElementById('reader-section').classList.add('hidden');
-    }
-
-    function showDashboard() {
-        hideAllMain();
-        document.getElementById('dashboard').classList.remove('hidden');
-        loadArticles();
-    }
-
-    // 4. 数据操作：加载文章列表
-    async function loadArticles() {
-        const list = document.getElementById('article-list');
-        const { data, error } = await db.from('articles').select('*').order('created_at', { ascending: false });
-
-        if (error) {
-            list.innerText = '加载失败: ' + error.message;
-            return;
-        }
-        if (!data || data.length === 0) {
-            list.innerHTML = '<p style="text-align:center; padding:20px;">还没有文章，点击右上方新建！</p>';
-            return;
+            if (viewName === 'dashboard') loadArticles();
         }
 
-        list.innerHTML = data.map(a => `
-            <div class="article-item">
-                <div>
-                    <div style="font-weight:bold; font-size:16px;">${a.title || '无标题'}</div>
-                    <div style="font-size:12px; color:#888; margin-top:5px;">
-                        ${new Date(a.created_at).toLocaleDateString()} · 
-                        <span class="tag ${a.is_locked ? 'locked' : ''}">${a.is_locked ? '已完成' : '草稿'}</span>
+        function switchAuthView(type) {
+            document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('view-signup').classList.add('hidden');
+            document.getElementById('view-' + type).classList.remove('hidden');
+            // 清空错误信息
+            document.getElementById('login-msg').innerText = '';
+            document.getElementById('signup-msg').innerText = '';
+        }
+
+        // ================= 认证逻辑 =================
+        async function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const msg = document.getElementById('login-msg');
+            msg.innerText = '登录中...';
+
+            const { error } = await db.auth.signInWithPassword({ email, password });
+            if (error) msg.innerText = error.message;
+        }
+
+        async function handleSignup() {
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+            const msg = document.getElementById('signup-msg');
+            msg.innerText = '注册中...';
+
+            const { error } = await db.auth.signUp({ email, password });
+            if (error) msg.innerText = error.message;
+            else msg.innerText = '✅ 注册成功，请登录。'; // 假设你已关闭邮箱验证
+        }
+
+        async function signOut() {
+            await db.auth.signOut();
+            window.location.reload();
+        }
+
+        // ================= 文章列表逻辑 (带删除) =================
+        async function loadArticles() {
+            const list = document.getElementById('article-list');
+            const { data, error } = await db.from('articles').select('*').order('created_at', { ascending: false });
+
+            if (error) { list.innerText = '加载失败'; return; }
+            if (!data.length) { list.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">暂无文章</div>'; return; }
+
+            list.innerHTML = data.map(a => `
+                <div class="article-item">
+                    <div>
+                        <strong>${a.title || '无标题'}</strong>
+                        <div style="font-size:12px; color:#888;">${new Date(a.created_at).toLocaleDateString()}</div>
+                    </div>
+                    <div class="action-group">
+                        <button class="btn btn-outline btn-sm" onclick="openReader('${a.id}')">📖 阅读</button>
+                        <button class="btn btn-outline btn-sm" onclick="openEditor('${a.id}')">✏️ 编辑</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteArticle('${a.id}')">🗑️ 删除</button>
                     </div>
                 </div>
-                <button class="btn btn-outline" onclick="${a.is_locked ? `openReader('${a.id}')` : `openEditor('${a.id}')`}">
-                    ${a.is_locked ? '阅读' : '编辑'}
-                </button>
-            </div>
-        `).join('');
-    }
+            `).join('');
+        }
 
-    // 5. 编辑与 OCR
-    async function openEditor(id) {
-        hideAllMain();
-        document.getElementById('editor-section').classList.remove('hidden');
+        async function deleteArticle(id) {
+            if (!confirm('确定要删除这篇文章吗？相关的笔记也会被删除。')) return;
+            const { error } = await db.from('articles').delete().eq('id', id);
+            if (error) alert('删除失败: ' + error.message);
+            else loadArticles();
+        }
 
-        if (id && typeof id === 'string') {
-            const { data } = await db.from('articles').select('*').eq('id', id).single();
-            if (data) {
+        // ================= 编辑与保存逻辑 =================
+        async function openEditor(id) {
+            showView('editor');
+            if (id) {
+                // 编辑现有
+                const { data } = await db.from('articles').select('*').eq('id', id).single();
                 currentArticleId = data.id;
                 document.getElementById('edit-title').value = data.title;
                 document.getElementById('edit-content').value = data.content;
-            }
-        } else {
-            currentArticleId = null;
-            document.getElementById('edit-title').value = '';
-            document.getElementById('edit-content').value = '';
-            document.getElementById('ocr-file').value = '';
-            document.getElementById('ocr-status').innerText = '';
-        }
-    }
-
-    window.showEditor = () => openEditor(null);
-
-    function runOCR() {
-        const file = document.getElementById('ocr-file').files[0];
-        if (!file) return;
-
-        const status = document.getElementById('ocr-status');
-        status.innerText = '⏳ 正在识别文字，请稍候...';
-
-        Tesseract.recognize(file, 'eng+chi_sim', {
-            logger: m => {
-                if (m.status === 'recognizing text') {
-                    status.innerText = `⏳ 识别进度: ${(m.progress * 100).toFixed(0)}%`;
-                }
-            }
-        }).then(({ data: { text } }) => {
-            const textArea = document.getElementById('edit-content');
-            textArea.value += (textArea.value ? '\n' : '') + text;
-            status.innerText = '✅ 识别成功！已追加到文本框。';
-        }).catch(err => {
-            status.innerText = '❌ 识别失败，请重试。';
-            console.error(err);
-        });
-    }
-
-    // 【修改重点】拆分了之前复杂的 saveArticle 逻辑，防止括号报错
-    async function saveArticle(isLocked) {
-        const title = document.getElementById('edit-title').value;
-        const content = document.getElementById('edit-content').value;
-        if (!title || !content) {
-            alert('标题和内容不能为空');
-            return;
-        }
-
-        const payload = { title, content, is_locked: isLocked, user_id: currentUser.id };
-        let error;
-
-        // 执行保存或更新
-        if (currentArticleId) {
-            const res = await db.from('articles').update(payload).eq('id', currentArticleId);
-            error = res.error;
-        } else {
-            const res = await db.from('articles').insert(payload);
-            error = res.error;
-        }
-
-        if (error) {
-            alert('保存失败: ' + error.message);
-        } else {
-            if (isLocked) {
-                // 如果是锁定模式，我们需要获取刚才那一篇的ID来打开阅读器
-                let targetId = currentArticleId;
-
-                // 如果是新建的，我们查一下最新的一篇
-                if (!targetId) {
-                    const { data } = await db.from('articles')
-                        .select('id')
-                        .order('created_at', { ascending: false })
-                        .limit(1)
-                        .single();
-                    if (data) targetId = data.id;
-                }
-
-                if (targetId) openReader(targetId);
-                else showDashboard();
-
             } else {
-                showDashboard();
+                // 新建
+                currentArticleId = null;
+                document.getElementById('edit-title').value = '';
+                document.getElementById('edit-content').value = '';
+                document.getElementById('ocr-file').value = '';
+                document.getElementById('ocr-status').innerText = '';
             }
         }
-    }
 
-    // 6. 阅读与高亮核心逻辑
-    async function openReader(id) {
-        if (!id) { showDashboard(); return; }
+        function switchToEditFromReader() {
+            if (currentArticleId) openEditor(currentArticleId);
+        }
 
-        currentArticleId = id;
-        hideAllMain();
-        document.getElementById('reader-section').classList.remove('hidden');
+        async function saveArticle() {
+            const title = document.getElementById('edit-title').value;
+            const content = document.getElementById('edit-content').value;
+            if (!title || !content) return alert('请填写完整');
 
-        const { data: article } = await db.from('articles').select('*').eq('id', id).single();
-        if (article) {
-            document.getElementById('read-title').innerText = article.title;
-            document.getElementById('read-content').innerText = article.content;
+            const payload = { title, content, user_id: currentUser.id };
+            let error;
+
+            if (currentArticleId) {
+                ({ error } = await db.from('articles').update(payload).eq('id', currentArticleId));
+            } else {
+                const res = await db.from('articles').insert(payload).select();
+                if (res.data) currentArticleId = res.data[0].id; // 获取新ID以便跳转
+                error = res.error;
+            }
+
+            if (error) alert('保存失败');
+            else {
+                // 保存后直接跳转到阅读界面，符合“两个界面”的逻辑
+                openReader(currentArticleId);
+            }
+        }
+
+        function runOCR() {
+            const file = document.getElementById('ocr-file').files[0];
+            if (!file) return;
+            const status = document.getElementById('ocr-status');
+            status.innerText = '识别中...';
+
+            Tesseract.recognize(file, 'eng+chi_sim').then(({ data: { text } }) => {
+                const ta = document.getElementById('edit-content');
+                ta.value += (ta.value ? '\n' : '') + text;
+                status.innerText = '完成';
+            });
+        }
+
+        // ================= 阅读与笔记逻辑 (带编辑/删除) =================
+        async function openReader(id) {
+            if (!id) return;
+            currentArticleId = id;
+            showView('reader');
+
+            const { data } = await db.from('articles').select('*').eq('id', id).single();
+            document.getElementById('read-title').innerText = data.title;
+            document.getElementById('read-content').innerText = data.content;
+
             loadAnnotations(id);
         }
-    }
 
-    async function loadAnnotations(articleId) {
-        const { data: notes } = await db.from('annotations').select('*').eq('article_id', articleId);
-        const contentDiv = document.getElementById('read-content');
-        const notesUl = document.getElementById('notes-ul');
+        async function loadAnnotations(articleId) {
+            const { data: notes } = await db.from('annotations').select('*').eq('article_id', articleId).order('created_at', { ascending: true });
+            const contentDiv = document.getElementById('read-content');
+            const listUl = document.getElementById('notes-ul');
 
-        const originalText = contentDiv.innerText;
-        notesUl.innerHTML = '';
-        let html = originalText;
+            listUl.innerHTML = '';
+            let html = contentDiv.innerText; // 重置为纯文本
 
-        if (notes && notes.length > 0) {
-            notes.forEach(n => {
-                notesUl.innerHTML += `
-                    <li style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">
-                        <div style="font-weight:bold; color:#d97706;">"${n.highlight_text}"</div>
-                        <div style="color:#4b5563;">${n.note}</div>
-                    </li>`;
+            if (notes && notes.length) {
+                notes.forEach(n => {
+                    // 1. 渲染侧边栏列表 (带按钮)
+                    listUl.innerHTML += `
+                        <li class="note-item">
+                            <div style="font-size:14px; color:#666;">"${n.highlight_text}"</div>
+                            <div style="margin-top:4px;"><b>${n.note}</b></div>
+                            <div class="note-actions">
+                                <button class="btn btn-outline btn-sm" onclick="editNote('${n.id}', '${n.note}')">修改</button>
+                                <button class="btn btn-outline btn-sm" style="color:red; border-color:red;" onclick="deleteNote('${n.id}')">删除</button>
+                            </div>
+                        </li>
+                    `;
 
-                // 这里处理了单引号，防止 JS 报错
-                const safeNote = n.note.replace(/'/g, "\\'");
-                const highlightSpan = `<span class="highlight" title="${safeNote}" onclick="alert('笔记：${safeNote}')">${n.highlight_text}</span>`;
-                html = html.split(n.highlight_text).join(highlightSpan);
-            });
-        } else {
-            notesUl.innerHTML = '<li style="color:#999;">暂无笔记，试着选中左侧文字...</li>';
-        }
-        contentDiv.innerHTML = html;
-    }
-
-    // 监听划词事件
-    document.getElementById('read-content').addEventListener('mouseup', async () => {
-        const selection = window.getSelection();
-        const text = selection.toString().trim();
-        if (text.length === 0) return;
-
-        setTimeout(async () => {
-            const note = prompt(`高亮内容：\n"${text}"\n\n请输入你的笔记/想法：`);
-            if (note) {
-                const { error } = await db.from('annotations').insert({
-                    article_id: currentArticleId,
-                    highlight_text: text,
-                    note: note
+                    // 2. 渲染高亮 (简单替换)
+                    const safeNote = n.note.replace(/'/g, "\\'");
+                    // 为了防止多次替换导致HTML破坏，真实项目需用 range，这里做简单处理
+                    html = html.split(n.highlight_text).join(`<span class="highlight" title="${safeNote}">${n.highlight_text}</span>`);
                 });
-                if (error) alert('笔记保存失败');
-                else loadAnnotations(currentArticleId);
+            } else {
+                listUl.innerHTML = '<li style="color:#999; font-size:12px;">暂无笔记</li>';
             }
-            selection.removeAllRanges();
-        }, 10);
-    });
+            contentDiv.innerHTML = html;
+        }
 
-    // 启动应用
-    init();
-</script>
+        // 删除笔记
+        async function deleteNote(id) {
+            if (!confirm('删除这条笔记？')) return;
+            await db.from('annotations').delete().eq('id', id);
+            loadAnnotations(currentArticleId);
+        }
+
+        // 编辑笔记
+        async function editNote(id, oldText) {
+            const newText = prompt('修改笔记内容:', oldText);
+            if (newText !== null && newText !== oldText) {
+                await db.from('annotations').update({ note: newText }).eq('id', id);
+                loadAnnotations(currentArticleId);
+            }
+        }
+
+        // 添加笔记
+        document.getElementById('read-content').addEventListener('mouseup', async () => {
+            const selection = window.getSelection();
+            const text = selection.toString().trim();
+            if (!text) return;
+
+            setTimeout(async () => {
+                const note = prompt(`为 "${text}" 添加笔记:`);
+                if (note) {
+                    await db.from('annotations').insert({
+                        article_id: currentArticleId,
+                        highlight_text: text,
+                        note: note
+                    });
+                    loadAnnotations(currentArticleId);
+                }
+                selection.removeAllRanges();
+            }, 10);
+        });
+
+        init();
+    </script>
+</body>
 
 </html>
