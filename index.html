@@ -4,52 +4,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Reader Pro</title>
+    <title>Smart Reader</title>
 
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        /* ================== 变量与基础 ================== */
+        /* ================== Apple Design System ================== */
         :root {
-            --primary: #2563eb;
-            --primary-light: #eff6ff;
-            --primary-hover: #1d4ed8;
-            --danger: #ef4444;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text-main: #0f172a;
-            --text-sec: #64748b;
-            --border: #e2e8f0;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --radius: 12px;
-            --font-sans: 'Inter', system-ui, sans-serif;
-            --font-serif: 'Georgia', serif;
+            /* iOS Blue */
+            --primary: #007AFF;
+            --primary-hover: #0062cc;
+            /* System Grays */
+            --bg-body: #F2F2F7;
+            /* iOS Grouped Background */
+            --bg-card: rgba(255, 255, 255, 0.85);
+            /* Glassy White */
+            --bg-sidebar: rgba(242, 242, 247, 0.8);
+            --text-main: #1C1C1E;
+            --text-sec: #8E8E93;
+            --separator: rgba(60, 60, 67, 0.16);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+            /* Typography (San Francisco approximation) */
+            --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+            --radius-l: 18px;
+            --radius-m: 12px;
+            --radius-s: 8px;
         }
 
         [data-theme="dark"] {
-            --primary: #3b82f6;
-            --primary-light: #1e293b;
-            --bg: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f1f5f9;
-            --text-sec: #94a3b8;
-            --border: #334155;
-            --shadow-sm: none;
-            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --bg-body: #000000;
+            --bg-card: rgba(28, 28, 30, 0.85);
+            --bg-sidebar: rgba(28, 28, 30, 0.8);
+            --text-main: #FFFFFF;
+            --text-sec: #98989D;
+            --separator: rgba(84, 84, 88, 0.35);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
         }
 
         body {
-            font-family: var(--font-sans);
-            background: var(--bg);
+            font-family: var(--font-stack);
+            background-color: var(--bg-body);
             color: var(--text-main);
             margin: 0;
             padding: 0;
             height: 100vh;
-            overflow-x: hidden;
+            overflow: hidden;
             transition: background 0.3s;
         }
 
@@ -57,420 +64,405 @@
             display: none !important;
         }
 
+        /* 按钮风格 (iOS Button) */
         .btn {
-            cursor: pointer;
-            transition: all 0.2s;
             border: none;
             outline: none;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.2s;
+            font-weight: 500;
         }
 
         .btn:active {
-            transform: scale(0.98);
+            transform: scale(0.96);
+            opacity: 0.8;
         }
 
-        /* ================== 1. 登录页 (Image Buffer System) ================== */
-        .auth-wrapper {
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border-radius: 40px;
+            padding: 10px 24px;
+            font-size: 15px;
+        }
+
+        .btn-icon {
+            background: transparent;
+            color: var(--primary);
+            font-size: 22px;
+            padding: 8px;
+            border-radius: 50%;
+        }
+
+        .btn-icon:hover {
+            background: rgba(0, 122, 255, 0.1);
+        }
+
+        /* 输入框风格 (iOS TextField) */
+        .input-apple {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(118, 118, 128, 0.12);
+            border: none;
+            border-radius: 10px;
+            color: var(--text-main);
+            font-size: 16px;
+            transition: 0.2s;
+        }
+
+        .input-apple:focus {
+            background: rgba(118, 118, 128, 0.18);
+            outline: none;
+        }
+
+        .input-apple::placeholder {
+            color: var(--text-sec);
+        }
+
+        /* 毛玻璃卡片 */
+        .glass-panel {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--separator);
+            border-radius: var(--radius-l);
+        }
+
+        /* ================== 1. 登录页 (Split View) ================== */
+        .auth-container {
             display: flex;
             height: 100vh;
             width: 100vw;
-            background: var(--card-bg);
         }
 
-        /* 风景区 */
+        /* 左侧风景 (Immersive) */
         .auth-banner {
-            flex: 1.6;
+            flex: 1.8;
             position: relative;
             overflow: hidden;
             background: #000;
             cursor: pointer;
-            /* 提示可点击 */
         }
 
-        /* 图片层 */
-        .banner-img-layer {
+        .banner-layer {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background-size: cover;
             background-position: center;
             opacity: 0;
-            transition: opacity 1.2s ease-in-out;
+            transition: opacity 1.5s ease;
         }
 
-        .banner-img-layer.active {
+        .banner-layer.active {
             opacity: 1;
+            transform: scale(1.02);
+            transition: opacity 1.5s ease, transform 10s linear;
         }
 
-        /* 首次引导蒙版 */
-        .banner-hint-overlay {
+        /* 引导提示 */
+        .tap-hint {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            font-weight: 300;
-            letter-spacing: 2px;
-            z-index: 20;
-            backdrop-filter: blur(5px);
-            opacity: 1;
-            transition: opacity 0.5s;
-            pointer-events: none;
-            /* 让点击穿透到 banner */
-        }
-
-        .banner-hint-overlay i {
-            margin-right: 10px;
-            animation: bounce 2s infinite;
-        }
-
-        /* 加载动画 */
-        .loader-spinner {
-            position: absolute;
-            top: 50%;
+            bottom: 50px;
             left: 50%;
-            transform: translate(-50%, -50%);
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            z-index: 5;
-            display: none;
-            /* 默认隐藏，加载慢时显示 */
+            transform: translateX(-50%);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            letter-spacing: 1px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
         }
 
-        /* 登录框 */
-        .auth-side {
+        .tap-hint.show {
+            opacity: 1;
+        }
+
+        /* 右侧登录 */
+        .auth-form-container {
             flex: 1;
-            max-width: 480px;
+            max-width: 500px;
             padding: 60px;
+            background: var(--bg-body);
             display: flex;
             flex-direction: column;
             justify-content: center;
-            box-shadow: -10px 0 40px rgba(0, 0, 0, 0.05);
-            z-index: 30;
-            background: var(--card-bg);
+            box-shadow: -20px 0 50px rgba(0, 0, 0, 0.05);
+            z-index: 10;
         }
 
-        .form-input {
-            width: 100%;
-            height: 50px;
-            padding: 0 16px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            background: var(--bg);
+        .auth-header {
+            margin-bottom: 40px;
+        }
+
+        .auth-title {
+            font-size: 34px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .auth-sub {
+            color: var(--text-sec);
+            font-size: 17px;
+        }
+
+        /* ================== 2. 主应用 (macOS Sidebar Layout) ================== */
+        .app-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--separator);
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            margin-bottom: 30px;
+            border-radius: var(--radius-m);
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .user-profile:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .user-email {
+            font-size: 12px;
+            color: var(--text-sec);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            margin-bottom: 4px;
+            border-radius: 8px;
             color: var(--text-main);
-            font-size: 16px;
-            box-sizing: border-box;
+            text-decoration: none;
+            font-size: 15px;
+            cursor: pointer;
             transition: 0.2s;
         }
 
-        .form-input:focus {
-            border-color: var(--primary);
-            background: var(--card-bg);
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        .nav-item:hover {
+            background: rgba(0, 0, 0, 0.05);
         }
 
-        .btn-primary {
-            height: 50px;
-            width: 100%;
-            border-radius: 10px;
+        .nav-item.active {
             background: var(--primary);
             color: white;
-            font-weight: 600;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
         }
 
-        .btn-primary:hover {
-            background: var(--primary-hover);
+        .nav-item.active i {
+            color: white;
         }
 
-        @media (max-width: 900px) {
-            .auth-banner {
-                display: none;
-            }
-
-            .auth-side {
-                max-width: 100%;
-                padding: 30px;
-            }
+        .nav-item i {
+            font-size: 20px;
+            color: var(--primary);
         }
 
-        /* ================== 2. Dashboard 2.0 (Rich UI) ================== */
-        .app-layout {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        /* 内容区 */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 40px;
+            position: relative;
         }
 
-        .navbar {
+        .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--card-bg);
-            padding: 15px 30px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
             margin-bottom: 30px;
-            position: relative;
-            z-index: 50;
-            /* For tutorial */
         }
 
-        /* 统计看板 */
-        .stats-row {
+        .page-title {
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: -0.8px;
+        }
+
+        /* 文章网格 (Apple Files Style) */
+        .grid-layout {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transition: transform 0.2s;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-3px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: var(--primary-light);
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
-        /* 快捷操作区 */
-        .quick-actions {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            overflow-x: auto;
-            padding-bottom: 5px;
-        }
-
-        .action-chip {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            padding: 10px 20px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-sec);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .action-chip:hover {
-            border-color: var(--primary);
-            color: var(--primary);
-            background: var(--primary-light);
-        }
-
-        .action-chip.active {
-            background: var(--primary);
-            color: white;
-            border-color: var(--primary);
-        }
-
-        /* 文章列表 */
-        .article-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 24px;
         }
 
-        .article-card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            padding: 24px;
-            height: 240px;
+        .doc-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-l);
+            padding: 20px;
+            height: 200px;
+            position: relative;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 1px solid var(--separator);
+            cursor: pointer;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
         }
 
-        .article-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
-            border-color: var(--primary);
+        .doc-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
 
-        .article-card::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: var(--primary);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.3s;
-        }
-
-        .article-card:hover::after {
-            transform: scaleX(1);
-        }
-
-        /* ================== 3. 新手引导系统 (Onboarding) ================== */
-        .tour-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 9000;
-            display: none;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .tour-overlay.active {
-            display: block;
-            opacity: 1;
-        }
-
-        /* 高亮元素的替身 */
-        .tour-highlight {
-            position: absolute;
-            background: transparent;
-            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.7), 0 0 0 4px var(--primary);
-            border-radius: 12px;
-            z-index: 9001;
-            pointer-events: none;
-            transition: all 0.4s ease;
-        }
-
-        .tour-tooltip {
-            position: absolute;
-            background: white;
-            padding: 24px;
-            border-radius: 16px;
-            width: 300px;
-            z-index: 9002;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            transition: all 0.4s ease;
-            opacity: 0;
-            transform: translateY(10px);
-        }
-
-        .tour-tooltip.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .tour-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .tour-title {
-            font-weight: 800;
+        .doc-title {
             font-size: 18px;
-            color: #0f172a;
-        }
-
-        .tour-step {
-            font-size: 12px;
-            color: #94a3b8;
             font-weight: 600;
-            text-transform: uppercase;
+            margin-bottom: 8px;
+            line-height: 1.3;
         }
 
-        .tour-body {
-            color: #475569;
-            font-size: 15px;
-            line-height: 1.6;
-            margin-bottom: 20px;
+        .doc-preview {
+            font-size: 14px;
+            color: var(--text-sec);
+            flex: 1;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
         }
 
-        .tour-footer {
+        .doc-meta {
+            font-size: 12px;
+            color: var(--text-sec);
+            margin-top: 15px;
             display: flex;
-            justify-content: flex-end;
-            gap: 10px;
+            justify-content: space-between;
         }
 
-        /* 其他页面样式保持精简 */
-        #page-editor,
-        #page-reader,
-        #page-settings {
-            background: var(--card-bg);
-            border-radius: 16px;
-            border: 1px solid var(--border);
+        /* 编辑器/阅读器 覆盖层 */
+        .overlay-page {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-body);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+        }
+
+        .overlay-header {
+            height: 60px;
+            border-bottom: 1px solid var(--separator);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+        }
+
+        .editor-body {
+            flex: 1;
             padding: 40px;
-            margin-top: 20px;
-            box-shadow: var(--shadow-md);
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+            overflow-y: auto;
         }
 
         textarea {
             width: 100%;
             border: none;
-            outline: none;
-            resize: none;
             background: transparent;
-            font-family: var(--font-serif);
+            resize: none;
+            outline: none;
             font-size: 18px;
-            line-height: 1.8;
+            line-height: 1.6;
             color: var(--text-main);
+            font-family: var(--font-stack);
         }
 
-        /* 动画 */
+        .title-input {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            height: auto;
+        }
+
+        /* 设置列表 (iOS Settings Style) */
+        .settings-list {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .settings-group {
+            background: var(--bg-card);
+            border-radius: var(--radius-l);
+            overflow: hidden;
+            margin-bottom: 24px;
+            border: 1px solid var(--separator);
+        }
+
+        .setting-item {
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--separator);
+            font-size: 16px;
+        }
+
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+
+        .setting-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Loading */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(0, 122, 255, 0.3);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
+
         @keyframes spin {
-            100% {
-                transform: translate(-50%, -50%) rotate(360deg);
-            }
-        }
-
-        @keyframes bounce {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            50% {
-                transform: translateX(5px);
+            to {
+                transform: rotate(360deg);
             }
         }
     </style>
@@ -478,502 +470,417 @@
 
 <body>
 
-    <div id="tour-overlay" class="tour-overlay">
-        <div id="tour-highlight" class="tour-highlight"></div>
-        <div id="tour-tooltip" class="tour-tooltip">
-            <div class="tour-header">
-                <div class="tour-title" id="tour-title">Title</div>
-                <div class="tour-step" id="tour-step">Step 1/3</div>
-            </div>
-            <div class="tour-body" id="tour-text">Content goes here.</div>
-            <div class="tour-footer">
-                <button class="btn" style="color:#94a3b8; background:none;" onclick="tour.skip()">跳过</button>
-                <button class="btn" style="background:var(--primary); color:white; padding:8px 16px; border-radius:8px;"
-                    onclick="tour.next()">下一步</button>
-            </div>
-        </div>
-    </div>
+    <div id="view-auth" class="auth-container">
+        <div class="auth-banner" id="banner-area">
+            <div class="banner-layer active" id="layer-1"></div>
+            <div class="banner-layer" id="layer-2"></div>
 
-    <div id="view-auth" class="auth-wrapper">
-        <div class="auth-banner" id="smart-banner" onclick="imgBuffer.next(true)">
-            <div class="banner-img-layer active" id="layer-1"></div>
-            <div class="banner-img-layer" id="layer-2"></div>
-
-            <div class="banner-hint-overlay" id="banner-hint">
-                <i class="ph ph-hand-tap"></i> 点击图片切换风景
-            </div>
-
-            <div class="loader-spinner" id="banner-loader"></div>
+            <div class="tap-hint" id="tap-hint">点击图片切换下一张</div>
         </div>
 
-        <div class="auth-side">
-            <h1 id="auth-title" style="margin-bottom:10px;">Smart Reader</h1>
-            <p style="color:var(--text-sec); margin-bottom:40px;">极致体验的沉浸式阅读管理工具。</p>
-
-            <input type="email" id="auth-email" class="form-input" placeholder="电子邮箱">
-            <input type="password" id="auth-password" class="form-input" placeholder="密码">
-
-            <div style="display:flex; gap:10px; margin-bottom:20px;">
-                <input type="text" id="captcha-input" class="form-input" style="margin:0;" placeholder="验证码">
-                <canvas id="captcha-canvas" width="120" height="50"
-                    style="border-radius:10px; cursor:pointer; border:1px solid var(--border);"
-                    onclick="drawCaptcha()"></canvas>
+        <div class="auth-form-container">
+            <div class="auth-header">
+                <div class="auth-title">Smart Reader</div>
+                <div class="auth-sub">你的私人阅读空间</div>
             </div>
 
-            <div
-                style="display:flex; justify-content:space-between; margin-bottom:30px; font-size:14px; color:var(--text-sec);">
-                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                    <input type="checkbox" id="remember-me"> 14天免登录
+            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
+                <input type="email" id="email" class="input-apple" placeholder="Apple ID (邮箱)">
+                <input type="password" id="password" class="input-apple" placeholder="密码">
+
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="captcha-in" class="input-apple" placeholder="验证码">
+                    <canvas id="captcha-canvas" width="100" height="46" style="border-radius:10px; cursor:pointer;"
+                        onclick="drawCaptcha()"></canvas>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 30px;">
+                <label style="font-size:14px; color:var(--text-sec); display:flex; gap:6px; cursor:pointer;">
+                    <input type="checkbox" id="remember"> 14天内免登录
                 </label>
-                <span onclick="toggleAuth()" style="color:var(--primary); cursor:pointer;">注册新账号</span>
+                <a onclick="toggleMode()"
+                    style="font-size:14px; color:var(--primary); cursor:pointer; font-weight:500;">注册新账号</a>
             </div>
 
-            <button class="btn btn-primary" onclick="handleAuth()" id="auth-btn">登录</button>
-            <div id="auth-msg" style="color:var(--danger); text-align:center; margin-top:15px; font-size:14px;"></div>
+            <button class="btn btn-primary" style="width:100%; height:50px; font-size:17px;" onclick="handleAuth()">
+                <span id="btn-text">登录</span>
+                <div class="spinner" id="btn-spin"></div>
+            </button>
+            <div id="auth-msg" style="color:var(--primary); text-align:center; margin-top:16px; font-size:14px;"></div>
         </div>
     </div>
 
-    <div id="view-app" class="hidden app-layout">
-
-        <div class="navbar">
-            <div
-                style="font-weight:800; font-size:20px; color:var(--primary); display:flex; align-items:center; gap:10px;">
-                <i class="ph ph-read-cv-logo"></i> Smart Reader
+    <div id="view-app" class="app-container hidden">
+        <nav class="sidebar">
+            <div class="user-profile" onclick="showPage('settings')">
+                <img id="sidebar-avatar" class="avatar" src="">
+                <div>
+                    <div class="user-name" id="sidebar-name">User</div>
+                    <div class="user-email" id="sidebar-email">...</div>
+                </div>
             </div>
-            <div style="display:flex; gap:15px; align-items:center;">
-                <img id="nav-avatar" src=""
-                    style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--border);">
-                <button class="btn" onclick="signOut()" title="退出"
-                    style="background:var(--bg); padding:8px; border-radius:50%;"><i class="ph ph-sign-out"
-                        style="font-size:20px;"></i></button>
-            </div>
-        </div>
 
-        <div id="page-dashboard" class="hidden">
-            <div class="stats-row" id="tour-step-1">
-                <div class="stat-card">
-                    <div class="stat-icon"><i class="ph ph-books"></i></div>
-                    <div>
+            <div style="flex:1;">
+                <a class="nav-item active" onclick="showPage('dashboard')" id="nav-dash">
+                    <i class="ph ph-squares-four"></i> 文库
+                </a>
+                <a class="nav-item" onclick="showPage('settings')" id="nav-set">
+                    <i class="ph ph-gear"></i> 设置
+                </a>
+            </div>
+
+            <a class="nav-item" onclick="signOut()" style="color:var(--text-sec); margin-top:auto;">
+                <i class="ph ph-sign-out" style="color:var(--text-sec)"></i> 退出登录
+            </a>
+        </nav>
+
+        <main class="main-content">
+            <div id="page-dashboard">
+                <div class="page-header">
+                    <div class="page-title">文库</div>
+                    <button class="btn-icon" onclick="openEditor()"
+                        style="background:var(--bg-card); box-shadow:0 2px 8px rgba(0,0,0,0.1);"><i
+                            class="ph ph-plus"></i></button>
+                </div>
+
+                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-bottom:30px;">
+                    <div class="glass-panel" style="padding:16px;">
+                        <div style="font-size:13px; color:var(--text-sec); margin-bottom:4px;">TOTAL DOCS</div>
                         <div style="font-size:24px; font-weight:700;" id="stat-count">0</div>
-                        <div style="font-size:13px; color:var(--text-sec);">总文章数</div>
+                    </div>
+                    <div class="glass-panel" style="padding:16px;">
+                        <div style="font-size:13px; color:var(--text-sec); margin-bottom:4px;">READING TIME</div>
+                        <div style="font-size:24px; font-weight:700;">2h 14m</div>
+                    </div>
+                    <div class="glass-panel" style="padding:16px;">
+                        <div style="font-size:13px; color:var(--text-sec); margin-bottom:4px;">STREAK</div>
+                        <div style="font-size:24px; font-weight:700;">3 Days</div>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="color:#10b981; background:#d1fae5;"><i class="ph ph-clock"></i></div>
-                    <div>
-                        <div style="font-size:24px; font-weight:700;">12h</div>
-                        <div style="font-size:13px; color:var(--text-sec);">累计阅读</div>
-                    </div>
+
+                <div id="doc-grid" class="grid-layout">加载中...</div>
+            </div>
+
+            <div id="page-settings" class="hidden">
+                <div class="page-header">
+                    <div class="page-title">设置</div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="color:#f59e0b; background:#fef3c7;"><i class="ph ph-fire"></i></div>
-                    <div>
-                        <div style="font-size:24px; font-weight:700;">5天</div>
-                        <div style="font-size:13px; color:var(--text-sec);">连续打卡</div>
+
+                <div class="settings-list">
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <div class="setting-label"><i class="ph ph-moon"></i> 深色模式</div>
+                            <select class="btn" style="background:transparent; color:var(--text-sec);"
+                                onchange="setTheme(this.value)">
+                                <option value="system">跟随系统</option>
+                                <option value="light">浅色</option>
+                                <option value="dark">深色</option>
+                            </select>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label"><i class="ph ph-image"></i> 更换头像</div>
+                            <input type="file" id="avatar-input" hidden onchange="uploadAvatar(this)">
+                            <button class="btn" style="color:var(--primary);"
+                                onclick="document.getElementById('avatar-input').click()">选择图片</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="setting-item">
+                            <div class="setting-label"><i class="ph ph-export"></i> 导出数据</div>
+                            <button class="btn" style="color:var(--primary);" onclick="exportData()">下载 JSON</button>
+                        </div>
+                        <div class="setting-item">
+                            <div class="setting-label" style="color:var(--danger);"><i class="ph ph-lock-key"></i> 修改密码
+                            </div>
+                            <button class="btn" style="color:var(--danger);" onclick="changePwd()">重置</button>
+                        </div>
                     </div>
                 </div>
             </div>
+        </main>
+    </div>
 
-            <div class="quick-actions">
-                <div class="action-chip active"><i class="ph ph-squares-four"></i> 全部</div>
-                <div class="action-chip"><i class="ph ph-star"></i> 收藏</div>
-                <div class="action-chip"><i class="ph ph-archive"></i> 归档</div>
-                <div class="action-chip" onclick="showSettings()"><i class="ph ph-gear"></i> 设置</div>
-            </div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 style="margin:0;">最近阅读</h2>
-                <button class="btn btn-primary" style="width:auto; padding:0 24px;" onclick="openEditor()"
-                    id="tour-step-2">
-                    <i class="ph ph-plus-circle" style="font-size:20px;"></i> 新建
-                </button>
-            </div>
-
-            <div id="article-list" class="article-grid"></div>
+    <div id="view-editor" class="overlay-page hidden">
+        <div class="overlay-header">
+            <button class="btn" onclick="closeEditor()" style="color:var(--primary);">取消</button>
+            <div style="font-weight:600;" id="editor-mode-title">编辑文章</div>
+            <button class="btn" onclick="saveDoc()" style="color:var(--primary); font-weight:700;">完成</button>
         </div>
-
-        <div id="page-editor" class="hidden">
-            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                <h3>编辑文章</h3>
-                <button class="btn" onclick="showDashboard()"><i class="ph ph-x" style="font-size:24px;"></i></button>
-            </div>
-            <input type="text" id="edit-title" class="form-input"
-                style="font-size:24px; font-weight:bold; height:60px; border:none; padding:0;" placeholder="输入标题...">
-            <div style="border-top:1px solid var(--border); margin:20px 0;"></div>
-            <textarea id="edit-content" placeholder="输入正文或拖入 .txt 文件..." style="min-height:500px;"></textarea>
-            <div style="text-align:right;">
-                <button class="btn btn-primary" style="width:auto; padding:0 30px;" onclick="saveArticle()">保存</button>
-            </div>
-        </div>
-
-        <div id="page-reader" class="hidden">
-            <div style="margin-bottom:30px;">
-                <button class="btn" onclick="showDashboard()"
-                    style="background:var(--bg); padding:8px 16px; border-radius:20px; font-size:14px;"><i
-                        class="ph ph-arrow-left"></i> 返回</button>
-            </div>
-            <h1 id="read-title" style="font-size:32px; margin-bottom:40px;"></h1>
-            <div id="read-content"
-                style="font-family:var(--font-serif); font-size:20px; line-height:1.8; white-space:pre-wrap;"></div>
+        <div class="editor-body">
+            <input type="text" id="doc-title" class="input-apple title-input" placeholder="大标题">
+            <textarea id="doc-content" placeholder="在此输入正文... (支持拖入 .txt 文件)" style="min-height: 80vh;"></textarea>
         </div>
     </div>
 
     <script>
-        // ================= 配置 =================
+        // ================= 配置 (保留你的Supabase) =================
         const supabaseUrl = 'https://oktgxeukllgglharkutf.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rdGd4ZXVrbGxnZ2xoYXJrdXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNzI1MTAsImV4cCI6MjA4MDY0ODUxMH0.R-XORb7qYMZPGLj4ZdPt3bIrI61TgOs7vCyxwGmnCpg';
         const db = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // ================= 1. 智能无限缓冲图片系统 (Smart Image Buffer) =================
-        const imgBuffer = {
-            queue: [], // 存放图片URL的队列
-            currentIndex: -1,
+        // ================= 1. 稳定的图片系统 (Static Reliable URLs) =================
+        const stableImages = [
+            'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2000', // Mountains
+            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2000', // Forest
+            'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=2000', // Coast
+            'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2000', // Fog
+            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000', // Canyon
+            'https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=2000', // Forest Dark
+            'https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=2000', // Bridge
+            'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?q=80&w=2000', // Stars
+            'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?q=80&w=2000', // Lake
+            'https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=2000'  // Tree
+        ];
+
+        const imgEngine = {
+            queue: [],
+            idx: 0,
             activeLayer: 1,
             timer: null,
-            isPreloading: false,
 
-            // 初始化：加载前10张
             init() {
-                // 检查新手引导状态
-                if (localStorage.getItem('seen_hint')) {
-                    document.getElementById('banner-hint').style.display = 'none';
-                } else {
-                    // 点击蒙版事件 (第一次)
-                    document.getElementById('smart-banner').addEventListener('click', () => {
-                        document.getElementById('banner-hint').style.opacity = '0';
-                        setTimeout(() => document.getElementById('banner-hint').style.display = 'none', 500);
-                        localStorage.setItem('seen_hint', 'true');
-                    }, { once: true });
-                }
+                // 初始化队列
+                this.queue = [...stableImages];
+                this.loadNext(false); // 立即加载第一张
 
-                this.fetchImages(10).then(() => {
-                    this.next(false);
-                    // 开启 5分钟 定时器
-                    this.timer = setInterval(() => this.next(false), 5 * 60 * 1000);
-                });
-            },
-
-            // 核心预缓存逻辑
-            async fetchImages(count) {
-                this.isPreloading = true;
-                const newImages = [];
-                // 使用 Unsplash Nature Collection，加随机参防止缓存
-                for (let i = 0; i < count; i++) {
-                    newImages.push(`https://source.unsplash.com/1920x1080/?nature,landscape&sig=${Date.now() + i}`);
-                }
-
-                // 模拟预加载（浏览器缓存）
-                const promises = newImages.map(url => {
-                    return new Promise((resolve) => {
-                        const img = new Image();
-                        img.src = url;
-                        img.onload = resolve;
-                        img.onerror = resolve; // 即使失败也resolve，防卡死
-                    });
+                // 点击事件
+                document.getElementById('banner-area').addEventListener('click', () => {
+                    this.loadNext(true);
+                    this.hideHint();
                 });
 
-                await Promise.all(promises);
-                this.queue.push(...newImages);
-                this.isPreloading = false;
-                console.log(`[Buffer] Added ${count} images. Total: ${this.queue.length}`);
+                // 首次提示
+                if (!localStorage.getItem('seen_hint')) {
+                    document.getElementById('tap-hint').classList.add('show');
+                }
+
+                // 5分钟定时
+                this.timer = setInterval(() => this.loadNext(false), 300000);
             },
 
-            // 切换下一张
-            next(isManual) {
-                if (isManual && this.timer) {
-                    clearInterval(this.timer); // 手动点击重置定时器
-                    this.timer = setInterval(() => this.next(false), 5 * 60 * 1000);
-                }
+            loadNext(manual) {
+                if (manual) { clearInterval(this.timer); this.timer = setInterval(() => this.loadNext(false), 300000); }
 
-                this.currentIndex++;
+                // 无限循环逻辑
+                const url = this.queue[this.idx % this.queue.length];
+                this.idx++;
 
-                // 【核心算法】如果播放到当前已缓存队列的倒数第5张，触发后台加载下10张
-                // 比如 current=4 (第5张), queue=10. current=14, queue=20.
-                if (this.queue.length - this.currentIndex <= 5 && !this.isPreloading) {
-                    this.fetchImages(10);
-                }
+                // 预加载下一张 (Buffer)
+                const nextUrl = this.queue[this.idx % this.queue.length];
+                new Image().src = nextUrl;
 
-                // 兜底：如果点太快超过了队列
-                if (this.currentIndex >= this.queue.length) {
-                    this.currentIndex = 0; // 循环或等待（这里简单循环）
-                }
+                // 切换图层
+                const nextLayer = this.activeLayer === 1 ? 2 : 1;
+                const currEl = document.getElementById(`layer-${this.activeLayer}`);
+                const nextEl = document.getElementById(`layer-${nextLayer}`);
 
-                const url = this.queue[this.currentIndex];
-                const loader = document.getElementById('banner-loader');
+                nextEl.style.backgroundImage = `url('${url}')`;
+                nextEl.classList.add('active');
+                currEl.classList.remove('active');
+                this.activeLayer = nextLayer;
+            },
 
-                // 显示转圈（虽然已预缓存，但网络波动时仍需UI反馈）
-                loader.style.display = 'block';
-
-                const img = new Image();
-                img.src = url;
-                img.onload = () => {
-                    loader.style.display = 'none';
-                    // 双层淡入淡出切换
-                    const nextLayer = this.activeLayer === 1 ? 2 : 1;
-                    const currEl = document.getElementById(`layer-${this.activeLayer}`);
-                    const nextEl = document.getElementById(`layer-${nextLayer}`);
-
-                    nextEl.style.backgroundImage = `url('${url}')`;
-                    nextEl.classList.add('active');
-                    currEl.classList.remove('active');
-
-                    this.activeLayer = nextLayer;
-                }
+            hideHint() {
+                document.getElementById('tap-hint').classList.remove('show');
+                localStorage.setItem('seen_hint', 'true');
             }
         };
 
-        // ================= 2. 新手引导系统 (Tour System) =================
-        const tour = {
-            steps: [
-                {
-                    target: 'tour-step-1',
-                    title: '数据看板',
-                    text: '这里会显示你的阅读统计、累计时长和连续打卡天数。让阅读成就可视化！'
-                },
-                {
-                    target: 'tour-step-2',
-                    title: '开始创作',
-                    text: '点击“新建”按钮，你可以直接书写，或者拖入本地的 .txt 文件进行智能导入。'
-                },
-                {
-                    target: 'nav-avatar',
-                    title: '个人中心',
-                    text: '在这里管理你的头像、密码和导出数据备份。'
-                }
-            ],
-            currentStep: 0,
-
-            start() {
-                if (localStorage.getItem('tour_finished')) return;
-                // 延迟一点启动，等界面加载
-                setTimeout(() => {
-                    document.getElementById('tour-overlay').classList.add('active');
-                    this.showStep(0);
-                }, 1000);
-            },
-
-            showStep(index) {
-                this.currentStep = index;
-                const step = this.steps[index];
-                const targetEl = document.getElementById(step.target);
-                const rect = targetEl.getBoundingClientRect();
-
-                // 移动高亮框
-                const hl = document.getElementById('tour-highlight');
-                hl.style.width = rect.width + 10 + 'px';
-                hl.style.height = rect.height + 10 + 'px';
-                hl.style.top = rect.top - 5 + 'px';
-                hl.style.left = rect.left - 5 + 'px';
-
-                // 移动提示框
-                const tt = document.getElementById('tour-tooltip');
-                tt.style.top = rect.bottom + 15 + 'px';
-                tt.style.left = rect.left + 'px';
-
-                // 边界处理（如果靠右，往左移）
-                if (rect.left + 300 > window.innerWidth) {
-                    tt.style.left = (window.innerWidth - 320) + 'px';
-                }
-
-                // 更新内容
-                document.getElementById('tour-title').innerText = step.title;
-                document.getElementById('tour-text').innerText = step.text;
-                document.getElementById('tour-step').innerText = `Step ${index + 1}/${this.steps.length}`;
-
-                tt.classList.add('visible');
-            },
-
-            next() {
-                if (this.currentStep < this.steps.length - 1) {
-                    this.showStep(this.currentStep + 1);
-                } else {
-                    this.finish();
-                }
-            },
-
-            skip() {
-                this.finish();
-            },
-
-            finish() {
-                document.getElementById('tour-overlay').classList.remove('active');
-                localStorage.setItem('tour_finished', 'true');
-                // 撒花庆祝
-                confetti({
-                    particleCount: 100,
-                    spread: 70,
-                    origin: { y: 0.6 }
-                });
-            }
-        };
-
-        // ================= 3. 核心业务逻辑 =================
+        // ================= 2. 应用逻辑 =================
         let currentUser = null;
         let isSignup = false;
-        let captchaCode = '';
-        let currentArticleId = null;
+        let captchaVal = '';
+        let currentDocId = null;
 
         async function init() {
-            imgBuffer.init(); // 启动图片系统
+            imgEngine.init();
             drawCaptcha();
 
-            // 检查登录
+            // 自动登录检查
             const { data: { session } } = await db.auth.getSession();
-            const remember = localStorage.getItem('remember_me');
+            const remember = localStorage.getItem('apple_remember');
 
             if (session) {
-                // 如果没有勾选记住我，且是新会话，则登出 (简单模拟)
                 if (!remember && !sessionStorage.getItem('active')) {
                     await db.auth.signOut();
-                    showView('auth');
                 } else {
                     sessionStorage.setItem('active', 'true');
                     updateUser(session.user);
                 }
-            } else {
-                showView('auth');
             }
+
+            // 文件拖拽导入
+            const dropZone = document.getElementById('doc-content');
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const file = e.dataTransfer.files[0];
+                if (file && (file.name.endsWith('.txt') || file.name.endsWith('.md'))) {
+                    const reader = new FileReader();
+                    reader.onload = (ev) => dropZone.value = ev.target.result;
+                    reader.readAsText(file);
+                    if (!document.getElementById('doc-title').value) document.getElementById('doc-title').value = file.name.replace(/\.[^/.]+$/, "");
+                }
+            });
         }
 
-        function showView(id) {
-            document.getElementById('view-auth').classList.add('hidden');
-            document.getElementById('view-app').classList.add('hidden');
-            document.getElementById('view-' + id).classList.remove('hidden');
-        }
-
-        function updateUser(user) {
-            currentUser = user;
-            if (user) {
-                showView('app');
-                showDashboard();
-                const avatar = user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/identicon/svg?seed=${user.id}`;
-                document.getElementById('nav-avatar').src = avatar;
-
-                // 启动新手引导
-                tour.start();
-            }
-        }
-
-        // 认证逻辑
         function drawCaptcha() {
             const ctx = document.getElementById('captcha-canvas').getContext('2d');
-            ctx.fillStyle = '#f8fafc'; ctx.fillRect(0, 0, 120, 50);
-            ctx.font = 'bold 24px Arial'; ctx.fillStyle = '#334155';
-            captchaCode = Math.random().toString(36).substring(2, 6).toUpperCase();
-            ctx.fillText(captchaCode, 30, 34);
-            // 干扰线
-            for (let i = 0; i < 5; i++) {
-                ctx.strokeStyle = '#cbd5e1'; ctx.beginPath();
-                ctx.moveTo(Math.random() * 120, Math.random() * 50);
-                ctx.lineTo(Math.random() * 120, Math.random() * 50); ctx.stroke();
-            }
-        }
-
-        function toggleAuth() {
-            isSignup = !isSignup;
-            document.getElementById('auth-title').innerText = isSignup ? '加入我们' : 'Smart Reader';
-            document.getElementById('auth-btn').innerText = isSignup ? '注册' : '登录';
+            ctx.fillStyle = '#f2f2f7'; ctx.fillRect(0, 0, 100, 46);
+            ctx.font = 'bold 24px Arial'; ctx.fillStyle = '#1c1c1e';
+            captchaVal = Math.random().toString(36).substring(2, 6).toUpperCase();
+            ctx.fillText(captchaVal, 20, 32);
         }
 
         async function handleAuth() {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-password').value;
-            const code = document.getElementById('captcha-input').value.toUpperCase();
-            const remember = document.getElementById('remember-me').checked;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const code = document.getElementById('captcha-in').value.toUpperCase();
+            const remember = document.getElementById('remember').checked;
+            const btn = document.getElementById('btn-spin');
             const msg = document.getElementById('auth-msg');
 
-            if (code !== captchaCode) { drawCaptcha(); return msg.innerText = "验证码错误"; }
+            if (code !== captchaVal) { drawCaptcha(); return msg.innerText = "验证码错误"; }
 
-            msg.innerText = "处理中...";
+            btn.style.display = 'block'; document.getElementById('btn-text').style.display = 'none';
+
             let res;
-            if (isSignup) res = await db.auth.signUp({ email, password: pass });
-            else res = await db.auth.signInWithPassword({ email, password: pass });
+            if (isSignup) res = await db.auth.signUp({ email, password });
+            else res = await db.auth.signInWithPassword({ email, password });
 
-            if (res.error) msg.innerText = res.error.message;
-            else {
+            if (res.error) {
+                msg.innerText = res.error.message;
+                btn.style.display = 'none'; document.getElementById('btn-text').style.display = 'block';
+            } else {
                 if (isSignup && !res.data.session) {
-                    msg.innerText = "注册成功，请登录"; toggleAuth();
+                    msg.innerText = "注册成功，请登录"; isSignup = false; drawCaptcha();
                 } else {
-                    if (remember) localStorage.setItem('remember_me', 'true');
-                    else localStorage.removeItem('remember_me');
+                    if (remember) localStorage.setItem('apple_remember', 'true');
+                    else localStorage.removeItem('apple_remember');
                     sessionStorage.setItem('active', 'true');
                     updateUser(res.data.user);
                 }
             }
         }
 
-        async function signOut() {
-            await db.auth.signOut();
-            localStorage.removeItem('remember_me');
-            sessionStorage.removeItem('active');
-            location.reload();
-        }
+        function updateUser(user) {
+            currentUser = user;
+            if (user) {
+                document.getElementById('view-auth').classList.add('hidden');
+                document.getElementById('view-app').classList.remove('hidden');
 
-        // 页面逻辑
-        function showDashboard() {
-            ['dashboard', 'editor', 'reader'].forEach(p => document.getElementById('page-' + p).classList.add('hidden'));
-            document.getElementById('page-dashboard').classList.remove('hidden');
-            loadArticles();
-        }
+                const name = user.email.split('@')[0];
+                const avatar = user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/notionists/svg?seed=${user.id}`;
 
-        function openEditor() {
-            ['dashboard', 'editor', 'reader'].forEach(p => document.getElementById('page-' + p).classList.add('hidden'));
-            document.getElementById('page-editor').classList.remove('hidden');
-            currentArticleId = null;
-            document.getElementById('edit-title').value = '';
-            document.getElementById('edit-content').value = '';
-        }
+                document.getElementById('sidebar-name').innerText = name;
+                document.getElementById('sidebar-email').innerText = user.email;
+                document.getElementById('sidebar-avatar').src = avatar;
 
-        async function saveArticle() {
-            const title = document.getElementById('edit-title').value;
-            const content = document.getElementById('edit-content').value;
-            if (!title || !content) return alert('请填写完整');
-
-            const payload = { title, content, user_id: currentUser.id };
-            if (currentArticleId) await db.from('articles').update(payload).eq('id', currentArticleId);
-            else {
-                const res = await db.from('articles').insert(payload).select();
-                if (res.data) currentArticleId = res.data[0].id;
+                showPage('dashboard');
             }
-            // 跳转阅读
-            document.getElementById('page-editor').classList.add('hidden');
-            document.getElementById('page-reader').classList.remove('hidden');
-            document.getElementById('read-title').innerText = title;
-            document.getElementById('read-content').innerText = content;
         }
 
-        async function loadArticles() {
-            const list = document.getElementById('article-list');
-            list.innerHTML = '加载中...';
+        // 路由与功能
+        function showPage(id) {
+            document.getElementById('page-dashboard').classList.add('hidden');
+            document.getElementById('page-settings').classList.add('hidden');
+            document.getElementById('page-' + id).classList.remove('hidden');
+
+            document.getElementById('nav-dash').classList.remove('active');
+            document.getElementById('nav-set').classList.remove('active');
+            document.getElementById('nav-' + (id === 'dashboard' ? 'dash' : 'set')).classList.add('active');
+
+            if (id === 'dashboard') loadDocs();
+        }
+
+        function toggleMode() {
+            isSignup = !isSignup;
+            document.querySelector('.auth-title').innerText = isSignup ? '创建账号' : 'Smart Reader';
+            document.querySelector('.auth-sub').innerText = isSignup ? '加入我们' : '你的私人阅读空间';
+            document.getElementById('btn-text').innerText = isSignup ? '注册' : '登录';
+        }
+
+        async function loadDocs() {
+            const grid = document.getElementById('doc-grid');
+            grid.innerHTML = '加载中...';
             const { data } = await db.from('articles').select('*').order('created_at', { ascending: false });
 
             document.getElementById('stat-count').innerText = data ? data.length : 0;
 
-            if (!data || !data.length) return list.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#94a3b8;">暂无文章</div>';
+            if (!data || !data.length) {
+                grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:50px; color:var(--text-sec);">暂无文档，点击右上角 + 新建</div>`;
+                return;
+            }
 
-            list.innerHTML = data.map(a => `
-                <div class="article-card" onclick="readArticle('${a.id}')">
-                    <div>
-                        <h3 style="margin-top:0; font-size:18px;">${a.title || '无标题'}</h3>
-                        <div style="font-size:14px; color:var(--text-sec); overflow:hidden; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical;">
-                            ${a.content.slice(0, 150)}...
-                        </div>
-                    </div>
-                    <div style="font-size:12px; color:#cbd5e1; margin-top:15px; display:flex; justify-content:space-between;">
-                        <span>${new Date(a.created_at).toLocaleDateString()}</span>
-                        <span>阅读 ></span>
+            grid.innerHTML = data.map(d => `
+                <div class="doc-card" onclick="openEditor('${d.id}')">
+                    <div class="doc-title">${d.title || '无标题'}</div>
+                    <div class="doc-preview">${d.content}</div>
+                    <div class="doc-meta">
+                        <span>${new Date(d.created_at).toLocaleDateString()}</span>
+                        <i class="ph ph-pencil-simple"></i>
                     </div>
                 </div>
             `).join('');
         }
 
-        async function readArticle(id) {
-            currentArticleId = id;
-            ['dashboard', 'editor', 'reader'].forEach(p => document.getElementById('page-' + p).classList.add('hidden'));
-            document.getElementById('page-reader').classList.remove('hidden');
-            const { data } = await db.from('articles').select('*').eq('id', id).single();
-            document.getElementById('read-title').innerText = data.title;
-            document.getElementById('read-content').innerText = data.content;
+        async function openEditor(id = null) {
+            currentDocId = id;
+            document.getElementById('view-editor').classList.remove('hidden');
+            document.getElementById('doc-title').value = '';
+            document.getElementById('doc-content').value = '';
+
+            if (id) {
+                document.getElementById('editor-mode-title').innerText = "编辑文章";
+                const { data } = await db.from('articles').select('*').eq('id', id).single();
+                document.getElementById('doc-title').value = data.title;
+                document.getElementById('doc-content').value = data.content;
+            } else {
+                document.getElementById('editor-mode-title').innerText = "新建文章";
+            }
+        }
+
+        function closeEditor() {
+            document.getElementById('view-editor').classList.add('hidden');
+        }
+
+        async function saveDoc() {
+            const title = document.getElementById('doc-title').value;
+            const content = document.getElementById('doc-content').value;
+            if (!title && !content) return closeEditor();
+
+            const payload = { title, content, user_id: currentUser.id };
+
+            if (currentDocId) {
+                await db.from('articles').update(payload).eq('id', currentDocId);
+            } else {
+                await db.from('articles').insert(payload);
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
+            closeEditor();
+            loadDocs();
+        }
+
+        // 设置功能
+        function setTheme(val) {
+            const dark = val === 'dark' || (val === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.body.setAttribute('data-theme', dark ? 'dark' : 'light');
+        }
+
+        async function uploadAvatar(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const path = `${currentUser.id}/${Date.now()}`;
+            await db.storage.from('avatars').upload(path, file);
+            const { data } = db.storage.from('avatars').getPublicUrl(path);
+            await db.auth.updateUser({ data: { avatar_url: data.publicUrl } });
+            document.getElementById('sidebar-avatar').src = data.publicUrl;
+        }
+
+        async function signOut() {
+            await db.auth.signOut();
+            location.reload();
         }
 
         init();
