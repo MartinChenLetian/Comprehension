@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>我的 Supabase 网站</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <h1>留言板</h1>
+    <input type="text" id="msgInput" placeholder="输入留言...">
+    <button onclick="addMessage()">发送</button>
+    <ul id="msgList"></ul>
+
+    <script>
+        // 2. 初始化 Supabase
+        // 把下面换成你第一步里记下的 URL 和 Key
+        const supabaseUrl = 'https://oktgxeukllgglharkutf.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rdGd4ZXVrbGxnZ2xoYXJrdXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNzI1MTAsImV4cCI6MjA4MDY0ODUxMH0.R-XORb7qYMZPGLj4ZdPt3bIrI61TgOs7vCyxwGmnCpg'
+        const supabase_db = supabase.createClient(supabaseUrl, supabaseKey)
+
+        // 3. 读取数据 (Read)
+        async function getMessages() {
+            // 语法翻译：去 'messages' 表，把所有列 (*) 都查出来，按创建时间倒序排
+            const { data, error } = await supabase_db
+                .from('messages')
+                .select('*')
+                .order('created_at', { ascending: false })
+
+            if (error) console.log('出错啦:', error)
+            else {
+                // 把数据显示在页面上
+                const list = document.getElementById('msgList');
+                list.innerHTML = data.map(msg => `<li>${msg.content}</li>`).join('');
+            }
+        }
+
+        // 4. 写入数据 (Create)
+        async function addMessage() {
+            const input = document.getElementById('msgInput');
+            const text = input.value;
+
+            // 语法翻译：去 'messages' 表，插入一行数据
+            const { error } = await supabase_db
+                .from('messages')
+                .insert({ content: text })
+
+            if (error) alert('发送失败')
+            else {
+                input.value = ''; // 清空输入框
+                getMessages();    // 刷新列表
+            }
+        }
+
+        // 页面加载完立刻读取一次数据
+        getMessages();
+    </script>
+</body>
+
+</html>
