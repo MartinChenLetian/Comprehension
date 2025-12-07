@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html>
 
 <head>
@@ -17,43 +17,340 @@
         // 把下面换成你第一步里记下的 URL 和 Key
         const supabaseUrl = 'https://oktgxeukllgglharkutf.supabase.co'
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rdGd4ZXVrbGxnZ2xoYXJrdXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNzI1MTAsImV4cCI6MjA4MDY0ODUxMH0.R-XORb7qYMZPGLj4ZdPt3bIrI61TgOs7vCyxwGmnCpg'
-        const supabase_db = supabase.createClient(supabaseUrl, supabaseKey)
+        const supabase_db = supabase.createClient(supabaseUrl, supabaseKey) -->
+<!DOCTYPE html>
+<html lang="zh-CN">
 
-        // 3. 读取数据 (Read)
-        async function getMessages() {
-            // 语法翻译：去 'messages' 表，把所有列 (*) 都查出来，按创建时间倒序排
-            const { data, error } = await supabase_db
-                .from('messages')
-                .select('*')
-                .order('created_at', { ascending: false })
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Smart Reader</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src='https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js'></script>
 
-            if (error) console.log('出错啦:', error)
-            else {
-                // 把数据显示在页面上
-                const list = document.getElementById('msgList');
-                list.innerHTML = data.map(msg => `<li>${msg.content}</li>`).join('');
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            cursor: pointer;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+
+        .btn:hover {
+            background: #555;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid #333;
+            color: #333;
+        }
+
+        /* 布局 */
+        #auth-section,
+        #dashboard,
+        #editor-section,
+        #reader-section {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        /* 列表样式 */
+        .article-card {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* 高亮样式 */
+        .highlight {
+            background-color: #ffeb3b;
+            cursor: pointer;
+            border-bottom: 2px solid #fbc02d;
+        }
+
+        /* OCR 加载条 */
+        #ocr-status {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>📚 My Smart Reader</h1>
+
+    <div id="auth-section">
+        <h3>请先登录</h3>
+        <input type="email" id="email" placeholder="邮箱" style="padding: 8px;">
+        <input type="password" id="password" placeholder="密码" style="padding: 8px;">
+        <br><br>
+        <button class="btn" onclick="signUp()">注册</button>
+        <button class="btn btn-outline" onclick="signIn()">登录</button>
+        <p id="auth-msg" style="color: red;"></p>
+    </div>
+
+    <div id="dashboard" class="hidden">
+        <div style="display:flex; justify-content:space-between;">
+            <h3>我的文章库</h3>
+            <button class="btn" onclick="showEditor()">+ 新建导入</button>
+        </div>
+        <div id="article-list">加载中...</div>
+        <br>
+        <button class="btn btn-outline" onclick="signOut()">退出登录</button>
+    </div>
+
+    <div id="editor-section" class="hidden">
+        <h3>✏️ 编辑/导入文章</h3>
+        <input type="text" id="edit-title" placeholder="文章标题" style="width: 100%; margin-bottom: 10px; padding: 5px;">
+
+        <div style="background: #f9f9f9; padding: 10px; margin-bottom: 10px;">
+            <label>📷 图片转文字 (OCR): </label>
+            <input type="file" id="ocr-file" accept="image/*" onchange="runOCR()">
+            <div id="ocr-status"></div>
+        </div>
+
+        <textarea id="edit-content" rows="15" style="width: 100%; padding: 10px;" placeholder="在此输入或粘贴内容..."></textarea>
+        <br><br>
+        <button class="btn" onclick="saveArticle(false)">保存草稿</button>
+        <button class="btn" style="background: green;" onclick="saveArticle(true)">完成并锁定 (去阅读)</button>
+        <button class="btn btn-outline" onclick="showDashboard()">取消</button>
+    </div>
+
+    <div id="reader-section" class="hidden">
+        <button class="btn btn-outline" onclick="showDashboard()">← 返回列表</button>
+        <h2 id="read-title"></h2>
+        <p style="color: #666; font-size: 0.8em;">💡 选中文字即可添加笔记</p>
+        <div id="read-content" style="white-space: pre-wrap;"></div>
+
+        <div id="annotations-list" style="margin-top: 30px; border-top: 2px dashed #ddd; padding-top: 10px;">
+            <h4>📝 笔记列表</h4>
+            <ul id="notes-ul"></ul>
+        </div>
+    </div>
+
+    <script>
+        // ================= 配置区 =================
+        const supabaseUrl = 'https://oktgxeukllgglharkutf.supabase.co'
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rdGd4ZXVrbGxnZ2xoYXJrdXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNzI1MTAsImV4cCI6MjA4MDY0ODUxMH0.R-XORb7qYMZPGLj4ZdPt3bIrI61TgOs7vCyxwGmnCpg'
+        const db = supabase.createClient(supabaseUrl, supabaseKey)
+
+        let currentUser = null;
+        let currentArticleId = null;
+
+        // ================= 身份验证逻辑 =================
+        async function checkUser() {
+            const { data: { user } } = await db.auth.getUser()
+            currentUser = user;
+            if (user) {
+                document.getElementById('auth-section').classList.add('hidden');
+                showDashboard();
+            } else {
+                document.getElementById('auth-section').classList.remove('hidden');
+                document.getElementById('dashboard').classList.add('hidden');
             }
         }
 
-        // 4. 写入数据 (Create)
-        async function addMessage() {
-            const input = document.getElementById('msgInput');
-            const text = input.value;
+        async function signUp() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { error } = await db.auth.signUp({ email, password });
+            if (error) alert(error.message);
+            else alert('注册成功！请检查邮箱验证或直接登录（视Supabase设置而定）');
+        }
 
-            // 语法翻译：去 'messages' 表，插入一行数据
-            const { error } = await supabase_db
-                .from('messages')
-                .insert({ content: text })
+        async function signIn() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const { error } = await db.auth.signInWithPassword({ email, password });
+            if (error) alert(error.message);
+            else checkUser();
+        }
 
-            if (error) alert('发送失败')
-            else {
-                input.value = ''; // 清空输入框
-                getMessages();    // 刷新列表
+        async function signOut() {
+            await db.auth.signOut();
+            location.reload();
+        }
+
+        // ================= 页面切换逻辑 =================
+        function hideAll() {
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('editor-section').classList.add('hidden');
+            document.getElementById('reader-section').classList.add('hidden');
+        }
+
+        function showDashboard() {
+            hideAll();
+            document.getElementById('dashboard').classList.remove('hidden');
+            loadArticles();
+        }
+
+        function showEditor(article = null) {
+            hideAll();
+            document.getElementById('editor-section').classList.remove('hidden');
+            if (article) {
+                currentArticleId = article.id;
+                document.getElementById('edit-title').value = article.title;
+                document.getElementById('edit-content').value = article.content;
+            } else {
+                currentArticleId = null;
+                document.getElementById('edit-title').value = '';
+                document.getElementById('edit-content').value = '';
             }
         }
 
-        // 页面加载完立刻读取一次数据
-        getMessages();
+        // ================= 核心功能：OCR =================
+        function runOCR() {
+            const file = document.getElementById('ocr-file').files[0];
+            if (!file) return;
+
+            const status = document.getElementById('ocr-status');
+            status.innerText = '正在识别中，请稍后...';
+
+            Tesseract.recognize(
+                file,
+                'eng+chi_sim', // 支持英文和简体中文
+                { logger: m => status.innerText = `进度: ${(m.progress * 100).toFixed(0)}% (${m.status})` }
+            ).then(({ data: { text } }) => {
+                const textArea = document.getElementById('edit-content');
+                textArea.value += '\n' + text; // 追加到编辑器
+                status.innerText = '✅ 识别完成！';
+            });
+        }
+
+        // ================= 核心功能：数据库操作 =================
+        async function loadArticles() {
+            const list = document.getElementById('article-list');
+            list.innerHTML = '加载中...';
+            const { data, error } = await db.from('articles').select('*').order('created_at', { ascending: false });
+
+            if (error) { list.innerText = '加载失败'; return; }
+
+            list.innerHTML = data.map(a => `
+                <div class="article-card">
+                    <div>
+                        <strong>${a.title || '无标题'}</strong> 
+                        <span style="font-size:0.8em; color:#888;">${a.is_locked ? '🔒 仅读' : '✏️ 草稿'}</span>
+                    </div>
+                    <button class="btn btn-outline" style="font-size:0.8em" 
+                        onclick="${a.is_locked ? `openReader('${a.id}')` : `openEditor('${a.id}')`}">
+                        ${a.is_locked ? '阅读' : '编辑'}
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function openEditor(id) {
+            const { data } = await db.from('articles').select('*').eq('id', id).single();
+            showEditor(data);
+        }
+
+        async function saveArticle(lock) {
+            const title = document.getElementById('edit-title').value;
+            const content = document.getElementById('edit-content').value;
+
+            const payload = { title, content, is_locked: lock, user_id: currentUser.id };
+
+            let error;
+            if (currentArticleId) {
+                // 更新
+                ({ error } = await db.from('articles').update(payload).eq('id', currentArticleId));
+            } else {
+                // 新建
+                ({ error } = await db.from('articles').insert(payload));
+            }
+
+            if (error) alert('保存失败');
+            else if (lock) showDashboard(); // 如果锁定了，回列表
+            else alert('草稿已保存');
+        }
+
+        // ================= 核心功能：阅读器与高亮 =================
+        async function openReader(id) {
+            currentArticleId = id;
+            hideAll();
+            document.getElementById('reader-section').classList.remove('hidden');
+
+            // 1. 获取文章内容
+            const { data: article } = await db.from('articles').select('*').eq('id', id).single();
+            document.getElementById('read-title').innerText = article.title;
+            const contentDiv = document.getElementById('read-content');
+            contentDiv.innerText = article.content; // 重置内容
+
+            // 2. 获取笔记并渲染高亮
+            loadAnnotations(id);
+        }
+
+        async function loadAnnotations(articleId) {
+            const { data: notes } = await db.from('annotations').select('*').eq('article_id', articleId);
+            const contentDiv = document.getElementById('read-content');
+            const originalText = contentDiv.innerText; // 这里的逻辑比较简单，用于演示
+            const notesUl = document.getElementById('notes-ul');
+
+            notesUl.innerHTML = '';
+
+            // 简单的“查找替换”高亮逻辑 (实际生产中应该用 range index)
+            // 这里为了演示方便，使用了 replace，这有缺陷（如果文中多次出现相同句子会只高亮第一个）
+            // 生产环境建议使用 mark.js 库
+
+            if (notes && notes.length > 0) {
+                let html = originalText;
+                notes.forEach(n => {
+                    // 添加列表
+                    notesUl.innerHTML += `<li><b>"${n.highlight_text}"</b>: ${n.note}</li>`;
+
+                    // 高亮文本 (简单替换法)
+                    html = html.replace(n.highlight_text, `<span class="highlight" title="${n.note}" onclick="alert('笔记: ${n.note}')">${n.highlight_text}</span>`);
+                });
+                contentDiv.innerHTML = html;
+            }
+        }
+
+        // 监听选中文本事件
+        document.getElementById('read-content').addEventListener('mouseup', async () => {
+            const selection = window.getSelection();
+            const text = selection.toString().trim();
+
+            if (text.length > 0) {
+                const note = prompt(`你要高亮 "${text}"。\n添加一点备注吗？`);
+                if (note !== null) { // 如果点击了取消则不保存
+                    const { error } = await db.from('annotations').insert({
+                        article_id: currentArticleId,
+                        highlight_text: text,
+                        note: note || '' // 允许空备注
+                    });
+
+                    if (error) alert('保存笔记失败');
+                    else {
+                        loadAnnotations(currentArticleId); // 重新加载高亮
+                    }
+                }
+                selection.removeAllRanges(); // 清除选中状态
+            }
+        });
+
+        // 初始化
+        checkUser();
     </script>
 </body>
 
