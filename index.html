@@ -1,357 +1,505 @@
-<!-- <!DOCTYPE html>
-<html>
-
-<head>
-    <title>我的 Supabase 网站</title>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-</head>
-
-<body>
-    <h1>留言板</h1>
-    <input type="text" id="msgInput" placeholder="输入留言...">
-    <button onclick="addMessage()">发送</button>
-    <ul id="msgList"></ul>
-
-    <script>
-        // 2. 初始化 Supabase
-        // 把下面换成你第一步里记下的 URL 和 Key
-        const supabaseUrl = 'https://oktgxeukllgglharkutf.supabase.co'
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rdGd4ZXVrbGxnZ2xoYXJrdXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNzI1MTAsImV4cCI6MjA4MDY0ODUxMH0.R-XORb7qYMZPGLj4ZdPt3bIrI61TgOs7vCyxwGmnCpg'
-        const supabase_db = supabase.createClient(supabaseUrl, supabaseKey) -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Smart Reader</title>
+    <title>Smart Reader (已配置版)</title>
+
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src='https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js'></script>
 
     <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text: #1f2937;
+        }
+
         body {
-            font-family: sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
             padding: 20px;
-            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* 卡片通用样式 */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
         }
 
         .hidden {
-            display: none;
+            display: none !important;
         }
 
+        /* 按钮样式 */
         .btn {
-            padding: 8px 16px;
-            cursor: pointer;
-            background: #333;
+            background-color: var(--primary);
             color: white;
             border: none;
-            border-radius: 4px;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
         }
 
         .btn:hover {
-            background: #555;
+            opacity: 0.9;
+        }
+
+        .btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
 
         .btn-outline {
             background: transparent;
-            border: 1px solid #333;
-            color: #333;
+            border: 1px solid #d1d5db;
+            color: #374151;
         }
 
-        /* 布局 */
-        #auth-section,
-        #dashboard,
-        #editor-section,
-        #reader-section {
-            margin-top: 20px;
-            border: 1px solid #ddd;
-            padding: 20px;
-            border-radius: 8px;
+        /* 输入框样式 */
+        input,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
         }
 
-        /* 列表样式 */
-        .article-card {
-            border-bottom: 1px solid #eee;
-            padding: 10px 0;
+        textarea {
+            resize: vertical;
+            min-height: 200px;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        /* 列表项 */
+        .article-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #f3f4f6;
         }
 
-        /* 高亮样式 */
-        .highlight {
-            background-color: #ffeb3b;
-            cursor: pointer;
-            border-bottom: 2px solid #fbc02d;
+        .article-item:last-child {
+            border-bottom: none;
         }
 
-        /* OCR 加载条 */
-        #ocr-status {
-            font-size: 0.9em;
+        .tag {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #e5e7eb;
             color: #666;
+        }
+
+        .tag.locked {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        /* 高亮 */
+        .highlight {
+            background-color: #fef08a;
+            cursor: help;
+            border-bottom: 2px solid #facc15;
+        }
+
+        /* 登录页居中 */
+        .login-box {
+            max-width: 400px;
+            margin: 50px auto;
+            text-align: center;
+        }
+
+        .error-msg {
+            color: #ef4444;
+            font-size: 14px;
             margin-top: 5px;
+            min-height: 20px;
         }
     </style>
 </head>
 
 <body>
 
-    <h1>📚 My Smart Reader</h1>
+    <div class="container">
 
-    <div id="auth-section">
-        <h3>请先登录</h3>
-        <input type="email" id="email" placeholder="邮箱" style="padding: 8px;">
-        <input type="password" id="password" placeholder="密码" style="padding: 8px;">
-        <br><br>
-        <button class="btn" onclick="signUp()">注册</button>
-        <button class="btn btn-outline" onclick="signIn()">登录</button>
-        <p id="auth-msg" style="color: red;"></p>
-    </div>
-
-    <div id="dashboard" class="hidden">
-        <div style="display:flex; justify-content:space-between;">
-            <h3>我的文章库</h3>
-            <button class="btn" onclick="showEditor()">+ 新建导入</button>
-        </div>
-        <div id="article-list">加载中...</div>
-        <br>
-        <button class="btn btn-outline" onclick="signOut()">退出登录</button>
-    </div>
-
-    <div id="editor-section" class="hidden">
-        <h3>✏️ 编辑/导入文章</h3>
-        <input type="text" id="edit-title" placeholder="文章标题" style="width: 100%; margin-bottom: 10px; padding: 5px;">
-
-        <div style="background: #f9f9f9; padding: 10px; margin-bottom: 10px;">
-            <label>📷 图片转文字 (OCR): </label>
-            <input type="file" id="ocr-file" accept="image/*" onchange="runOCR()">
-            <div id="ocr-status"></div>
+        <div id="header" class="hidden"
+            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <h2 style="margin:0;">📖 Smart Reader</h2>
+            <div style="font-size:14px;">
+                <span id="user-email" style="margin-right:10px; color:#666;"></span>
+                <button class="btn btn-outline" style="padding:5px 10px;" onclick="signOut()">退出</button>
+            </div>
         </div>
 
-        <textarea id="edit-content" rows="15" style="width: 100%; padding: 10px;" placeholder="在此输入或粘贴内容..."></textarea>
-        <br><br>
-        <button class="btn" onclick="saveArticle(false)">保存草稿</button>
-        <button class="btn" style="background: green;" onclick="saveArticle(true)">完成并锁定 (去阅读)</button>
-        <button class="btn btn-outline" onclick="showDashboard()">取消</button>
-    </div>
+        <div id="auth-section" class="card login-box">
+            <h2>欢迎回来</h2>
+            <p style="color:#666; font-size:14px; margin-bottom:20px;">请登录以访问您的私人阅读库</p>
 
-    <div id="reader-section" class="hidden">
-        <button class="btn btn-outline" onclick="showDashboard()">← 返回列表</button>
-        <h2 id="read-title"></h2>
-        <p style="color: #666; font-size: 0.8em;">💡 选中文字即可添加笔记</p>
-        <div id="read-content" style="white-space: pre-wrap;"></div>
+            <input type="email" id="email" placeholder="电子邮箱">
+            <input type="password" id="password" placeholder="密码 (至少6位)">
+            <div class="error-msg" id="auth-msg"></div>
 
-        <div id="annotations-list" style="margin-top: 30px; border-top: 2px dashed #ddd; padding-top: 10px;">
-            <h4>📝 笔记列表</h4>
-            <ul id="notes-ul"></ul>
+            <div style="margin-top:20px; display:flex; gap:10px;">
+                <button class="btn" style="flex:1;" onclick="handleAuth('login')">登录</button>
+                <button class="btn btn-outline" style="flex:1;" onclick="handleAuth('signup')">注册</button>
+            </div>
         </div>
-    </div>
 
-    <script>
-        // ================= 配置区 =================
-        const supabaseUrl = 'https://oktgxeukllgglharkutf.supabase.co'
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rdGd4ZXVrbGxnZ2xoYXJrdXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNzI1MTAsImV4cCI6MjA4MDY0ODUxMH0.R-XORb7qYMZPGLj4ZdPt3bIrI61TgOs7vCyxwGmnCpg'
-        const db = supabase.createClient(supabaseUrl, supabaseKey)
-
-        let currentUser = null;
-        let currentArticleId = null;
-
-        // ================= 身份验证逻辑 =================
-        async function checkUser() {
-            const { data: { user } } = await db.auth.getUser()
-            currentUser = user;
-            if (user) {
-                document.getElementById('auth-section').classList.add('hidden');
-                showDashboard();
-            } else {
-                document.getElementById('auth-section').classList.remove('hidden');
-                document.getElementById('dashboard').classList.add('hidden');
-            }
-        }
-
-        async function signUp() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const { error } = await db.auth.signUp({ email, password });
-            if (error) alert(error.message);
-            else alert('注册成功！请检查邮箱验证或直接登录（视Supabase设置而定）');
-        }
-
-        async function signIn() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const { error } = await db.auth.signInWithPassword({ email, password });
-            if (error) alert(error.message);
-            else checkUser();
-        }
-
-        async function signOut() {
-            await db.auth.signOut();
-            location.reload();
-        }
-
-        // ================= 页面切换逻辑 =================
-        function hideAll() {
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('editor-section').classList.add('hidden');
-            document.getElementById('reader-section').classList.add('hidden');
-        }
-
-        function showDashboard() {
-            hideAll();
-            document.getElementById('dashboard').classList.remove('hidden');
-            loadArticles();
-        }
-
-        function showEditor(article = null) {
-            hideAll();
-            document.getElementById('editor-section').classList.remove('hidden');
-            if (article) {
-                currentArticleId = article.id;
-                document.getElementById('edit-title').value = article.title;
-                document.getElementById('edit-content').value = article.content;
-            } else {
-                currentArticleId = null;
-                document.getElementById('edit-title').value = '';
-                document.getElementById('edit-content').value = '';
-            }
-        }
-
-        // ================= 核心功能：OCR =================
-        function runOCR() {
-            const file = document.getElementById('ocr-file').files[0];
-            if (!file) return;
-
-            const status = document.getElementById('ocr-status');
-            status.innerText = '正在识别中，请稍后...';
-
-            Tesseract.recognize(
-                file,
-                'eng+chi_sim', // 支持英文和简体中文
-                { logger: m => status.innerText = `进度: ${(m.progress * 100).toFixed(0)}% (${m.status})` }
-            ).then(({ data: { text } }) => {
-                const textArea = document.getElementById('edit-content');
-                textArea.value += '\n' + text; // 追加到编辑器
-                status.innerText = '✅ 识别完成！';
-            });
-        }
-
-        // ================= 核心功能：数据库操作 =================
-        async function loadArticles() {
-            const list = document.getElementById('article-list');
-            list.innerHTML = '加载中...';
-            const { data, error } = await db.from('articles').select('*').order('created_at', { ascending: false });
-
-            if (error) { list.innerText = '加载失败'; return; }
-
-            list.innerHTML = data.map(a => `
-                <div class="article-card">
-                    <div>
-                        <strong>${a.title || '无标题'}</strong> 
-                        <span style="font-size:0.8em; color:#888;">${a.is_locked ? '🔒 仅读' : '✏️ 草稿'}</span>
-                    </div>
-                    <button class="btn btn-outline" style="font-size:0.8em" 
-                        onclick="${a.is_locked ? `openReader('${a.id}')` : `openEditor('${a.id}')`}">
-                        ${a.is_locked ? '阅读' : '编辑'}
-                    </button>
+        <div id="dashboard" class="hidden">
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                    <h3>我的文章</h3>
+                    <button class="btn" onclick="showEditor()">+ 导入新文章</button>
                 </div>
-            `).join('');
+                <div id="article-list">
+                    <p style="text-align:center; color:#999;">正在加载...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="editor-section" class="hidden card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+                <h3>✏️ 编辑模式</h3>
+                <button class="btn btn-outline" onclick="showDashboard()">取消</button>
+            </div>
+
+            <input type="text" id="edit-title" placeholder="文章标题" style="font-weight:bold;">
+
+            <div
+                style="background:#f8fafc; padding:15px; border-radius:6px; margin-bottom:15px; border:1px dashed #cbd5e1;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span>📷 OCR 识别:</span>
+                    <input type="file" id="ocr-file" accept="image/*" style="width:auto; margin:0;" onchange="runOCR()">
+                </div>
+                <div id="ocr-status" style="font-size:12px; color:#666; margin-top:5px;"></div>
+            </div>
+
+            <textarea id="edit-content" placeholder="在这里输入内容，或者粘贴 OCR 识别的结果..."></textarea>
+
+            <div style="margin-top:20px; display:flex; gap:10px; justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="saveArticle(false)">存为草稿</button>
+                <button class="btn" onclick="saveArticle(true)">完成并去阅读 →</button>
+            </div>
+        </div>
+
+        <div id="reader-section" class="hidden card">
+            <button class="btn btn-outline" onclick="showDashboard()" style="margin-bottom:20px;">← 返回列表</button>
+
+            <h1 id="read-title" style="border-bottom:1px solid #eee; padding-bottom:10px;"></h1>
+
+            <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                <div style="flex:2; min-width:300px;">
+                    <div id="read-content" style="font-size:18px; line-height:1.8; white-space: pre-wrap;"></div>
+                </div>
+
+                <div
+                    style="flex:1; min-width:250px; background:#f9fafb; padding:15px; border-radius:8px; height:fit-content;">
+                    <h4 style="margin-top:0;">📝 读书笔记</h4>
+                    <p style="font-size:12px; color:#666;">选中文本即可添加高亮和笔记</p>
+                    <ul id="notes-ul" style="padding-left:20px; font-size:14px;"></ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+<script>
+    // ================= 配置区 =================
+    // 你的配置已填好
+    const supabaseUrl = 'https://oktgxeukllgglharkutf.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rdGd4ZXVrbGxnZ2xoYXJrdXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNzI1MTAsImV4cCI6MjA4MDY0ODUxMH0.R-XORb7qYMZPGLj4ZdPt3bIrI61TgOs7vCyxwGmnCpg'
+
+    const db = supabase.createClient(supabaseUrl, supabaseKey)
+
+    // ================= 逻辑代码 =================
+    let currentUser = null;
+    let currentArticleId = null;
+
+    // 1. 初始化检查
+    async function init() {
+        const { data: { session } } = await db.auth.getSession();
+        updateUserState(session?.user);
+
+        db.auth.onAuthStateChange((_event, session) => {
+            updateUserState(session?.user);
+        });
+    }
+
+    function updateUserState(user) {
+        currentUser = user;
+        if (user) {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('header').style.display = 'flex';
+            document.getElementById('user-email').innerText = user.email;
+            showDashboard();
+        } else {
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('header').classList.add('hidden');
+            hideAllMain();
+        }
+    }
+
+    // 2. 统一处理登录/注册
+    async function handleAuth(type) {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const msgBox = document.getElementById('auth-msg');
+
+        if (!email || !password) {
+            msgBox.innerText = '请输入邮箱和密码';
+            return;
+        }
+        msgBox.innerText = '处理中...';
+
+        let result;
+        if (type === 'signup') {
+            result = await db.auth.signUp({ email, password });
+        } else {
+            result = await db.auth.signInWithPassword({ email, password });
         }
 
-        async function openEditor(id) {
-            const { data } = await db.from('articles').select('*').eq('id', id).single();
-            showEditor(data);
-        }
-
-        async function saveArticle(lock) {
-            const title = document.getElementById('edit-title').value;
-            const content = document.getElementById('edit-content').value;
-
-            const payload = { title, content, is_locked: lock, user_id: currentUser.id };
-
-            let error;
-            if (currentArticleId) {
-                // 更新
-                ({ error } = await db.from('articles').update(payload).eq('id', currentArticleId));
+        if (result.error) {
+            msgBox.innerText = '❌ ' + result.error.message;
+        } else {
+            if (type === 'signup' && !result.data.session) {
+                msgBox.innerText = '✅ 注册成功！如果未自动登录，请检查邮箱验证或确认是否已关闭验证功能。';
             } else {
-                // 新建
-                ({ error } = await db.from('articles').insert(payload));
+                msgBox.innerText = '';
             }
+        }
+    }
 
-            if (error) alert('保存失败');
-            else if (lock) showDashboard(); // 如果锁定了，回列表
-            else alert('草稿已保存');
+    async function signOut() {
+        await db.auth.signOut();
+        location.reload();
+    }
+
+    // 3. 路由与视图控制
+    function hideAllMain() {
+        document.getElementById('dashboard').classList.add('hidden');
+        document.getElementById('editor-section').classList.add('hidden');
+        document.getElementById('reader-section').classList.add('hidden');
+    }
+
+    function showDashboard() {
+        hideAllMain();
+        document.getElementById('dashboard').classList.remove('hidden');
+        loadArticles();
+    }
+
+    // 4. 数据操作：加载文章列表
+    async function loadArticles() {
+        const list = document.getElementById('article-list');
+        const { data, error } = await db.from('articles').select('*').order('created_at', { ascending: false });
+
+        if (error) {
+            list.innerText = '加载失败: ' + error.message;
+            return;
+        }
+        if (!data || data.length === 0) {
+            list.innerHTML = '<p style="text-align:center; padding:20px;">还没有文章，点击右上方新建！</p>';
+            return;
         }
 
-        // ================= 核心功能：阅读器与高亮 =================
-        async function openReader(id) {
-            currentArticleId = id;
-            hideAll();
-            document.getElementById('reader-section').classList.remove('hidden');
+        list.innerHTML = data.map(a => `
+            <div class="article-item">
+                <div>
+                    <div style="font-weight:bold; font-size:16px;">${a.title || '无标题'}</div>
+                    <div style="font-size:12px; color:#888; margin-top:5px;">
+                        ${new Date(a.created_at).toLocaleDateString()} · 
+                        <span class="tag ${a.is_locked ? 'locked' : ''}">${a.is_locked ? '已完成' : '草稿'}</span>
+                    </div>
+                </div>
+                <button class="btn btn-outline" onclick="${a.is_locked ? `openReader('${a.id}')` : `openEditor('${a.id}')`}">
+                    ${a.is_locked ? '阅读' : '编辑'}
+                </button>
+            </div>
+        `).join('');
+    }
 
-            // 1. 获取文章内容
-            const { data: article } = await db.from('articles').select('*').eq('id', id).single();
+    // 5. 编辑与 OCR
+    async function openEditor(id) {
+        hideAllMain();
+        document.getElementById('editor-section').classList.remove('hidden');
+
+        if (id && typeof id === 'string') {
+            const { data } = await db.from('articles').select('*').eq('id', id).single();
+            if (data) {
+                currentArticleId = data.id;
+                document.getElementById('edit-title').value = data.title;
+                document.getElementById('edit-content').value = data.content;
+            }
+        } else {
+            currentArticleId = null;
+            document.getElementById('edit-title').value = '';
+            document.getElementById('edit-content').value = '';
+            document.getElementById('ocr-file').value = '';
+            document.getElementById('ocr-status').innerText = '';
+        }
+    }
+
+    window.showEditor = () => openEditor(null);
+
+    function runOCR() {
+        const file = document.getElementById('ocr-file').files[0];
+        if (!file) return;
+
+        const status = document.getElementById('ocr-status');
+        status.innerText = '⏳ 正在识别文字，请稍候...';
+
+        Tesseract.recognize(file, 'eng+chi_sim', {
+            logger: m => {
+                if (m.status === 'recognizing text') {
+                    status.innerText = `⏳ 识别进度: ${(m.progress * 100).toFixed(0)}%`;
+                }
+            }
+        }).then(({ data: { text } }) => {
+            const textArea = document.getElementById('edit-content');
+            textArea.value += (textArea.value ? '\n' : '') + text;
+            status.innerText = '✅ 识别成功！已追加到文本框。';
+        }).catch(err => {
+            status.innerText = '❌ 识别失败，请重试。';
+            console.error(err);
+        });
+    }
+
+    // 【修改重点】拆分了之前复杂的 saveArticle 逻辑，防止括号报错
+    async function saveArticle(isLocked) {
+        const title = document.getElementById('edit-title').value;
+        const content = document.getElementById('edit-content').value;
+        if (!title || !content) {
+            alert('标题和内容不能为空');
+            return;
+        }
+
+        const payload = { title, content, is_locked: isLocked, user_id: currentUser.id };
+        let error;
+
+        // 执行保存或更新
+        if (currentArticleId) {
+            const res = await db.from('articles').update(payload).eq('id', currentArticleId);
+            error = res.error;
+        } else {
+            const res = await db.from('articles').insert(payload);
+            error = res.error;
+        }
+
+        if (error) {
+            alert('保存失败: ' + error.message);
+        } else {
+            if (isLocked) {
+                // 如果是锁定模式，我们需要获取刚才那一篇的ID来打开阅读器
+                let targetId = currentArticleId;
+
+                // 如果是新建的，我们查一下最新的一篇
+                if (!targetId) {
+                    const { data } = await db.from('articles')
+                        .select('id')
+                        .order('created_at', { ascending: false })
+                        .limit(1)
+                        .single();
+                    if (data) targetId = data.id;
+                }
+
+                if (targetId) openReader(targetId);
+                else showDashboard();
+
+            } else {
+                showDashboard();
+            }
+        }
+    }
+
+    // 6. 阅读与高亮核心逻辑
+    async function openReader(id) {
+        if (!id) { showDashboard(); return; }
+
+        currentArticleId = id;
+        hideAllMain();
+        document.getElementById('reader-section').classList.remove('hidden');
+
+        const { data: article } = await db.from('articles').select('*').eq('id', id).single();
+        if (article) {
             document.getElementById('read-title').innerText = article.title;
-            const contentDiv = document.getElementById('read-content');
-            contentDiv.innerText = article.content; // 重置内容
-
-            // 2. 获取笔记并渲染高亮
+            document.getElementById('read-content').innerText = article.content;
             loadAnnotations(id);
         }
+    }
 
-        async function loadAnnotations(articleId) {
-            const { data: notes } = await db.from('annotations').select('*').eq('article_id', articleId);
-            const contentDiv = document.getElementById('read-content');
-            const originalText = contentDiv.innerText; // 这里的逻辑比较简单，用于演示
-            const notesUl = document.getElementById('notes-ul');
+    async function loadAnnotations(articleId) {
+        const { data: notes } = await db.from('annotations').select('*').eq('article_id', articleId);
+        const contentDiv = document.getElementById('read-content');
+        const notesUl = document.getElementById('notes-ul');
 
-            notesUl.innerHTML = '';
+        const originalText = contentDiv.innerText;
+        notesUl.innerHTML = '';
+        let html = originalText;
 
-            // 简单的“查找替换”高亮逻辑 (实际生产中应该用 range index)
-            // 这里为了演示方便，使用了 replace，这有缺陷（如果文中多次出现相同句子会只高亮第一个）
-            // 生产环境建议使用 mark.js 库
+        if (notes && notes.length > 0) {
+            notes.forEach(n => {
+                notesUl.innerHTML += `
+                    <li style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px;">
+                        <div style="font-weight:bold; color:#d97706;">"${n.highlight_text}"</div>
+                        <div style="color:#4b5563;">${n.note}</div>
+                    </li>`;
 
-            if (notes && notes.length > 0) {
-                let html = originalText;
-                notes.forEach(n => {
-                    // 添加列表
-                    notesUl.innerHTML += `<li><b>"${n.highlight_text}"</b>: ${n.note}</li>`;
-
-                    // 高亮文本 (简单替换法)
-                    html = html.replace(n.highlight_text, `<span class="highlight" title="${n.note}" onclick="alert('笔记: ${n.note}')">${n.highlight_text}</span>`);
-                });
-                contentDiv.innerHTML = html;
-            }
+                // 这里处理了单引号，防止 JS 报错
+                const safeNote = n.note.replace(/'/g, "\\'");
+                const highlightSpan = `<span class="highlight" title="${safeNote}" onclick="alert('笔记：${safeNote}')">${n.highlight_text}</span>`;
+                html = html.split(n.highlight_text).join(highlightSpan);
+            });
+        } else {
+            notesUl.innerHTML = '<li style="color:#999;">暂无笔记，试着选中左侧文字...</li>';
         }
+        contentDiv.innerHTML = html;
+    }
 
-        // 监听选中文本事件
-        document.getElementById('read-content').addEventListener('mouseup', async () => {
-            const selection = window.getSelection();
-            const text = selection.toString().trim();
+    // 监听划词事件
+    document.getElementById('read-content').addEventListener('mouseup', async () => {
+        const selection = window.getSelection();
+        const text = selection.toString().trim();
+        if (text.length === 0) return;
 
-            if (text.length > 0) {
-                const note = prompt(`你要高亮 "${text}"。\n添加一点备注吗？`);
-                if (note !== null) { // 如果点击了取消则不保存
-                    const { error } = await db.from('annotations').insert({
-                        article_id: currentArticleId,
-                        highlight_text: text,
-                        note: note || '' // 允许空备注
-                    });
-
-                    if (error) alert('保存笔记失败');
-                    else {
-                        loadAnnotations(currentArticleId); // 重新加载高亮
-                    }
-                }
-                selection.removeAllRanges(); // 清除选中状态
+        setTimeout(async () => {
+            const note = prompt(`高亮内容：\n"${text}"\n\n请输入你的笔记/想法：`);
+            if (note) {
+                const { error } = await db.from('annotations').insert({
+                    article_id: currentArticleId,
+                    highlight_text: text,
+                    note: note
+                });
+                if (error) alert('笔记保存失败');
+                else loadAnnotations(currentArticleId);
             }
-        });
+            selection.removeAllRanges();
+        }, 10);
+    });
 
-        // 初始化
-        checkUser();
-    </script>
-</body>
+    // 启动应用
+    init();
+</script>
 
 </html>
