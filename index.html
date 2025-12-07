@@ -9,237 +9,506 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src='https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js'></script>
 
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
     <style>
+        /* ================== CSS 变量与主题系统 ================== */
         :root {
             --primary: #2563eb;
+            --primary-hover: #1d4ed8;
             --danger: #ef4444;
-            --bg: #f3f4f6;
+            --bg: #f8fafc;
             --card-bg: #ffffff;
-            --text: #1f2937;
+            --text-main: #0f172a;
+            --text-sec: #64748b;
+            --border: #e2e8f0;
+            --input-bg: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-serif: 'Georgia', 'Times New Roman', serif;
         }
 
+        /* 暗黑模式变量覆盖 */
+        [data-theme="dark"] {
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-sec: #94a3b8;
+            --border: #334155;
+            --input-bg: #0f172a;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ================== 全局重置 ================== */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: var(--font-sans);
             background-color: var(--bg);
-            color: var(--text);
+            color: var(--text-main);
             margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+            line-height: 1.5;
         }
 
+        /* 布局容器 */
         .container {
             width: 100%;
-            max-width: 900px;
+            max-width: 1000px;
+            /* 更宽的容器 */
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            padding: 24px;
-            margin-bottom: 20px;
-        }
-
+        /* 隐藏类 */
         .hidden {
             display: none !important;
         }
 
-        /* 按钮组 */
+        /* 卡片样式 */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            padding: 24px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* 表单控件 */
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            background: var(--input-bg);
+            color: var(--text-main);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            box-sizing: border-box;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            border-color: var(--primary);
+        }
+
+        /* 按钮系统 */
         .btn {
             background-color: var(--primary);
             color: white;
             border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
+            padding: 10px 18px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.2s;
         }
 
         .btn:hover {
-            opacity: 0.9;
+            background-color: var(--primary-hover);
         }
 
         .btn-outline {
             background: transparent;
-            border: 1px solid #d1d5db;
-            color: #374151;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--text-sec);
         }
 
         .btn-danger {
             background-color: var(--danger);
         }
 
-        .btn-sm {
-            padding: 4px 8px;
-            font-size: 12px;
-        }
-
-        .btn-link {
+        .btn-text {
             background: none;
-            border: none;
             color: var(--primary);
-            cursor: pointer;
-            text-decoration: underline;
             padding: 0;
         }
 
-        input,
-        textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            box-sizing: border-box;
+        .btn-icon {
+            padding: 6px;
+            border-radius: 4px;
+            color: var(--text-sec);
+            background: transparent;
+            border: none;
+            cursor: pointer;
         }
 
-        textarea {
-            resize: vertical;
-            min-height: 200px;
-            font-size: 16px;
-            line-height: 1.8;
+        .btn-icon:hover {
+            background: var(--border);
+            color: var(--text-main);
         }
 
-        /* 文章列表 */
-        .article-item {
+        /* ================== 顶部导航栏 ================== */
+        .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px;
-            border-bottom: 1px solid #f3f4f6;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
         }
 
-        .article-item:last-child {
-            border-bottom: none;
-        }
-
-        .action-group {
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
             display: flex;
+            align-items: center;
             gap: 8px;
         }
 
-        /* 笔记样式 */
+        .user-menu {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .avatar {
+            width: 32px;
+            height: 32px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* ================== 登录/注册页 (精美版) ================== */
+        .auth-container {
+            min-height: 80vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            padding: 40px 30px;
+        }
+
+        .auth-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .auth-sub {
+            color: var(--text-sec);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        /* ================== 文章列表 ================== */
+        .article-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .article-card {
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100%;
+        }
+
+        .article-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .article-meta {
+            font-size: 12px;
+            color: var(--text-sec);
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* ================== 阅读器布局 (响应式) ================== */
+        .reader-layout {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            /* 关键：允许换行，实现手机端上下堆叠 */
+        }
+
+        .reader-main {
+            flex: 2;
+            min-width: 300px;
+            /* 最小宽度 */
+        }
+
+        .reader-sidebar {
+            flex: 1;
+            min-width: 280px;
+            background: var(--bg);
+            /* 侧边栏融入背景 */
+            border-left: 1px solid var(--border);
+            padding-left: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .reader-sidebar {
+                border-left: none;
+                padding-left: 0;
+                border-top: 1px solid var(--border);
+                padding-top: 20px;
+            }
+
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .user-menu {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        /* 阅读内容排版 */
+        #read-content {
+            font-family: var(--font-serif);
+            font-size: 19px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            color: var(--text-main);
+        }
+
+        .highlight {
+            background-color: rgba(253, 224, 71, 0.5);
+            border-bottom: 2px solid #facc15;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .highlight:hover {
+            background-color: rgba(253, 224, 71, 0.8);
+        }
+
+        /* 笔记列表 */
+        .note-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
         .note-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
             margin-bottom: 12px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 8px;
+        }
+
+        .note-quote {
+            font-size: 13px;
+            color: var(--text-sec);
+            border-left: 3px solid var(--primary);
+            padding-left: 8px;
+            margin-bottom: 6px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .note-text {
+            font-size: 15px;
+            font-weight: 500;
         }
 
         .note-actions {
             display: flex;
-            gap: 5px;
-            margin-top: 4px;
             justify-content: flex-end;
+            gap: 8px;
+            margin-top: 8px;
         }
 
-        .highlight {
-            background-color: #fef08a;
-            cursor: pointer;
-            border-bottom: 2px solid #facc15;
+        /* 设置页 */
+        .settings-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border);
         }
 
-        /* 登录框 */
-        .auth-box {
-            max-width: 400px;
-            margin: 50px auto;
-            text-align: center;
+        .settings-section:last-child {
+            border-bottom: none;
         }
 
-        .error-msg {
-            color: var(--danger);
-            font-size: 14px;
-            min-height: 20px;
-            margin-bottom: 10px;
+        .settings-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
+    <div id="auth-container" class="auth-container">
+        <div id="view-login" class="card auth-card">
+            <div class="auth-title">欢迎回来</div>
+            <div class="auth-sub">登录 Smart Reader 继续您的阅读之旅</div>
 
-        <div id="header" class="hidden"
-            style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h2 style="margin:0;">📖 Smart Reader</h2>
-            <div>
-                <span id="user-email" style="font-size:14px; color:#666; margin-right:10px;"></span>
-                <button class="btn btn-outline btn-sm" onclick="signOut()">退出</button>
+            <input type="email" id="login-email" placeholder="name@example.com">
+            <input type="password" id="login-password" placeholder="请输入密码">
+
+            <button class="btn" style="width:100%; justify-content:center;" onclick="handleLogin()">登录</button>
+            <div id="login-msg" style="color:var(--danger); font-size:13px; margin-top:10px; min-height:18px;"></div>
+
+            <div style="margin-top:20px; font-size:14px;">
+                还没有账号？ <button class="btn btn-text" onclick="switchAuthView('signup')">立即注册</button>
             </div>
         </div>
 
-        <div id="view-login" class="card auth-box hidden">
-            <h2>登录</h2>
-            <input type="email" id="login-email" placeholder="邮箱">
-            <input type="password" id="login-password" placeholder="密码">
-            <div id="login-msg" class="error-msg"></div>
-            <button class="btn" style="width:100%" onclick="handleLogin()">登录</button>
-            <p style="margin-top:15px; font-size:14px;">
-                还没有账号？ <button class="btn-link" onclick="switchAuthView('signup')">去注册</button>
-            </p>
-        </div>
+        <div id="view-signup" class="card auth-card hidden">
+            <div class="auth-title">创建账号</div>
+            <div class="auth-sub">注册一个新账号以开始使用</div>
 
-        <div id="view-signup" class="card auth-box hidden">
-            <h2>注册新账号</h2>
-            <input type="email" id="signup-email" placeholder="邮箱">
+            <input type="email" id="signup-email" placeholder="name@example.com">
             <input type="password" id="signup-password" placeholder="设置密码 (至少6位)">
-            <div id="signup-msg" class="error-msg"></div>
-            <button class="btn" style="width:100%" onclick="handleSignup()">立即注册</button>
-            <p style="margin-top:15px; font-size:14px;">
-                已有账号？ <button class="btn-link" onclick="switchAuthView('login')">返回登录</button>
-            </p>
+
+            <button class="btn" style="width:100%; justify-content:center;" onclick="handleSignup()">注册</button>
+            <div id="signup-msg" style="color:var(--danger); font-size:13px; margin-top:10px; min-height:18px;"></div>
+
+            <div style="margin-top:20px; font-size:14px;">
+                已有账号？ <button class="btn btn-text" onclick="switchAuthView('login')">返回登录</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-container" class="container hidden">
+
+        <div class="navbar">
+            <div class="logo">
+                <i class="ph ph-book-open-text"></i> Smart Reader
+            </div>
+            <div class="user-menu">
+                <div class="avatar" id="nav-avatar">U</div>
+                <span id="nav-username" style="font-weight:500;">User</span>
+
+                <div style="display:flex; gap:5px;">
+                    <button class="btn-icon" title="首页" onclick="showView('dashboard')"><i class="ph ph-house"
+                            style="font-size:20px;"></i></button>
+                    <button class="btn-icon" title="设置" onclick="showView('settings')"><i class="ph ph-gear"
+                            style="font-size:20px;"></i></button>
+                    <button class="btn-icon" title="退出" onclick="signOut()"><i class="ph ph-sign-out"
+                            style="font-size:20px;"></i></button>
+                </div>
+            </div>
         </div>
 
         <div id="view-dashboard" class="hidden">
-            <div class="card">
-                <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
-                    <h3>我的文章库</h3>
-                    <button class="btn" onclick="openEditor(null)">+ 新建文章</button>
-                </div>
-                <div id="article-list">加载中...</div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="margin:0;">我的文库</h2>
+                <button class="btn" onclick="openEditor(null)"><i class="ph ph-plus"></i> 新建/导入</button>
             </div>
+            <div id="article-list" class="article-grid">加载中...</div>
         </div>
 
         <div id="view-editor" class="hidden card">
-            <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-                <h3>✏️ 编辑文章</h3>
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px;">
+                <h3><i class="ph ph-pencil-simple"></i> 编辑文章</h3>
                 <button class="btn btn-outline" onclick="showView('dashboard')">取消</button>
             </div>
-            <input type="text" id="edit-title" placeholder="文章标题" style="font-weight:bold;">
+
+            <input type="text" id="edit-title" placeholder="文章标题" style="font-size:18px; font-weight:bold;">
 
             <div
-                style="background:#f8fafc; padding:10px; border:1px dashed #cbd5e1; margin-bottom:10px; border-radius:6px;">
-                <span style="font-size:14px;">📷 OCR 识别: </span>
-                <input type="file" id="ocr-file" accept="image/*" style="width:auto; display:inline-block;"
+                style="background:var(--bg); padding:15px; border-radius:8px; margin-bottom:15px; border:1px dashed var(--border); display:flex; flex-wrap:wrap; align-items:center; gap:10px;">
+                <span style="font-size:14px; font-weight:600;"><i class="ph ph-camera"></i> 图片转文字 (OCR):</span>
+                <input type="file" id="ocr-file" accept="image/*" style="width:auto; margin:0; font-size:13px;"
                     onchange="runOCR()">
-                <span id="ocr-status" style="font-size:12px; color:#666; margin-left:10px;"></span>
+                <span id="ocr-status" style="font-size:13px; color:var(--primary);"></span>
             </div>
 
-            <textarea id="edit-content" placeholder="输入内容..."></textarea>
+            <textarea id="edit-content" style="min-height:400px; font-family:var(--font-serif);"
+                placeholder="在此输入内容..."></textarea>
 
-            <div style="text-align:right; margin-top:10px;">
-                <button class="btn" onclick="saveArticle()">保存文章</button>
+            <div style="text-align:right;">
+                <button class="btn" onclick="saveArticle()"><i class="ph ph-floppy-disk"></i> 保存并阅读</button>
             </div>
         </div>
 
         <div id="view-reader" class="hidden card">
-            <div style="margin-bottom:20px; display:flex; justify-content:space-between;">
-                <button class="btn btn-outline" onclick="showView('dashboard')">← 返回列表</button>
-                <button class="btn btn-outline" onclick="switchToEditFromReader()">✏️ 编辑此文</button>
+            <div
+                style="margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); padding-bottom:15px;">
+                <button class="btn btn-outline btn-sm" onclick="showView('dashboard')"><i class="ph ph-arrow-left"></i>
+                    返回</button>
+                <button class="btn btn-outline btn-sm" onclick="switchToEditFromReader()"><i
+                        class="ph ph-pencil-simple"></i> 编辑原文</button>
             </div>
 
-            <h1 id="read-title" style="border-bottom:1px solid #eee; padding-bottom:10px;"></h1>
+            <h1 id="read-title" style="margin-bottom:30px; font-size:28px;"></h1>
 
-            <div style="display:flex; gap:20px; flex-wrap:wrap;">
-                <div style="flex:2; min-width:300px;">
-                    <div id="read-content" style="font-size:18px; line-height:1.8; white-space: pre-wrap;"></div>
+            <div class="reader-layout">
+                <div class="reader-main">
+                    <div id="read-content"></div>
                 </div>
 
-                <div
-                    style="flex:1; min-width:250px; background:#f9fafb; padding:15px; border-radius:8px; height:fit-content;">
-                    <h4 style="margin-top:0;">📝 笔记 (选中文本添加)</h4>
-                    <ul id="notes-ul" style="padding-left:0; list-style:none;"></ul>
+                <div class="reader-sidebar">
+                    <h4 style="margin-top:0; display:flex; align-items:center; gap:8px;">
+                        <i class="ph ph-highlighter"></i> 读书笔记
+                    </h4>
+                    <p style="font-size:13px; color:var(--text-sec); margin-bottom:20px;">
+                        选中左侧文字即可添加高亮和笔记。
+                    </p>
+                    <ul id="notes-ul" class="note-list"></ul>
                 </div>
+            </div>
+        </div>
+
+        <div id="view-settings" class="hidden card" style="max-width:600px; margin:0 auto;">
+            <h2 style="border-bottom:1px solid var(--border); padding-bottom:15px; margin-bottom:20px;">设置</h2>
+
+            <div class="settings-section">
+                <div class="settings-title">🎨 外观显示</div>
+                <label style="font-size:14px; display:block; margin-bottom:10px;">颜色模式</label>
+                <select id="theme-select" onchange="changeTheme(this.value)">
+                    <option value="system">🖥️ 跟随系统</option>
+                    <option value="light">☀️ 浅色模式</option>
+                    <option value="dark">🌙 深色模式</option>
+                </select>
+            </div>
+
+            <div class="settings-section">
+                <div class="settings-title">👤 个人资料</div>
+                <label style="font-size:14px;">昵称</label>
+                <input type="text" id="set-username" placeholder="设置一个昵称">
+                <button class="btn btn-outline" onclick="updateProfile()">更新资料</button>
+            </div>
+
+            <div class="settings-section">
+                <div class="settings-title">🔒 安全 (修改密码)</div>
+                <input type="password" id="set-new-password" placeholder="新密码 (至少6位)">
+                <button class="btn btn-danger" onclick="updatePassword()">修改密码</button>
             </div>
         </div>
 
@@ -255,40 +524,69 @@
         let currentUser = null;
         let currentArticleId = null;
 
-        // ================= 初始化 =================
+        // ================= 启动逻辑 & 主题 =================
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'system';
+            document.getElementById('theme-select').value = savedTheme;
+            changeTheme(savedTheme);
+        }
+
+        function changeTheme(mode) {
+            localStorage.setItem('theme', mode);
+            const isDark = mode === 'dark' || (mode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+            if (isDark) document.body.setAttribute('data-theme', 'dark');
+            else document.body.removeAttribute('data-theme');
+        }
+
         async function init() {
+            initTheme();
             const { data: { session } } = await db.auth.getSession();
             updateUserState(session?.user);
+
             db.auth.onAuthStateChange((_event, session) => updateUserState(session?.user));
         }
 
         function updateUserState(user) {
             currentUser = user;
             if (user) {
-                document.getElementById('user-email').innerText = user.email;
-                document.getElementById('header').classList.remove('hidden');
-                showView('dashboard');
+                document.getElementById('auth-container').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('hidden');
+
+                // 更新导航栏信息
+                const name = user.user_metadata?.display_name || user.email.split('@')[0];
+                document.getElementById('nav-username').innerText = name;
+                document.getElementById('nav-avatar').innerText = name.charAt(0).toUpperCase();
+
+                // 填充设置页
+                document.getElementById('set-username').value = user.user_metadata?.display_name || '';
+
+                if (!document.getElementById('view-editor').classList.contains('hidden') && !document.getElementById('view-reader').classList.contains('hidden')) {
+                    showView('dashboard');
+                } else if (document.querySelectorAll('.hidden').length >= 4) {
+                    showView('dashboard'); // 默认进首页
+                }
             } else {
-                document.getElementById('header').classList.add('hidden');
-                showView('login'); // 默认显示登录
+                document.getElementById('app-container').classList.add('hidden');
+                document.getElementById('auth-container').classList.remove('hidden');
+                switchAuthView('login');
             }
         }
 
-        // ================= 视图切换 =================
-        function showView(viewName) {
-            ['view-login', 'view-signup', 'view-dashboard', 'view-editor', 'view-reader'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
+        // ================= 视图控制 =================
+        function showView(name) {
+            ['dashboard', 'editor', 'reader', 'settings'].forEach(v => {
+                document.getElementById('view-' + v).classList.add('hidden');
             });
-            document.getElementById('view-' + viewName).classList.remove('hidden');
+            document.getElementById('view-' + name).classList.remove('hidden');
 
-            if (viewName === 'dashboard') loadArticles();
+            if (name === 'dashboard') loadArticles();
         }
 
         function switchAuthView(type) {
             document.getElementById('view-login').classList.add('hidden');
             document.getElementById('view-signup').classList.add('hidden');
             document.getElementById('view-' + type).classList.remove('hidden');
-            // 清空错误信息
             document.getElementById('login-msg').innerText = '';
             document.getElementById('signup-msg').innerText = '';
         }
@@ -298,7 +596,7 @@
             const email = document.getElementById('login-email').value;
             const password = document.getElementById('login-password').value;
             const msg = document.getElementById('login-msg');
-            msg.innerText = '登录中...';
+            msg.innerText = '正在登录...';
 
             const { error } = await db.auth.signInWithPassword({ email, password });
             if (error) msg.innerText = error.message;
@@ -308,59 +606,85 @@
             const email = document.getElementById('signup-email').value;
             const password = document.getElementById('signup-password').value;
             const msg = document.getElementById('signup-msg');
-            msg.innerText = '注册中...';
+            msg.innerText = '正在注册...';
 
             const { error } = await db.auth.signUp({ email, password });
             if (error) msg.innerText = error.message;
-            else msg.innerText = '✅ 注册成功，请登录。'; // 假设你已关闭邮箱验证
+            else msg.innerText = '✅ 注册成功，请登录。';
         }
 
         async function signOut() {
             await db.auth.signOut();
-            window.location.reload();
+            location.reload();
         }
 
-        // ================= 文章列表逻辑 (带删除) =================
+        // ================= 设置逻辑 (新功能) =================
+        async function updateProfile() {
+            const name = document.getElementById('set-username').value;
+            const { error } = await db.auth.updateUser({
+                data: { display_name: name }
+            });
+            if (error) alert('更新失败: ' + error.message);
+            else {
+                alert('资料已更新');
+                updateUserState(currentUser); // 刷新界面
+            }
+        }
+
+        async function updatePassword() {
+            const password = document.getElementById('set-new-password').value;
+            if (password.length < 6) return alert('密码太短');
+            const { error } = await db.auth.updateUser({ password: password });
+            if (error) alert('修改失败: ' + error.message);
+            else {
+                alert('密码修改成功');
+                document.getElementById('set-new-password').value = '';
+            }
+        }
+
+        // ================= 文章管理 =================
         async function loadArticles() {
             const list = document.getElementById('article-list');
+            list.innerHTML = '<p style="color:var(--text-sec)">加载中...</p>';
             const { data, error } = await db.from('articles').select('*').order('created_at', { ascending: false });
 
-            if (error) { list.innerText = '加载失败'; return; }
-            if (!data.length) { list.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">暂无文章</div>'; return; }
+            if (error) return list.innerText = 'Error';
+            if (!data.length) return list.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:var(--text-sec);">空空如也，点击右上角新建文章</div>';
 
             list.innerHTML = data.map(a => `
-                <div class="article-item">
+                <div class="card article-card" onclick="openReader('${a.id}')">
                     <div>
-                        <strong>${a.title || '无标题'}</strong>
-                        <div style="font-size:12px; color:#888;">${new Date(a.created_at).toLocaleDateString()}</div>
+                        <h3 style="margin:0 0 10px 0; font-size:18px;">${a.title || '无标题'}</h3>
+                        <div style="font-size:14px; color:var(--text-sec); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                            ${a.content.slice(0, 100)}...
+                        </div>
                     </div>
-                    <div class="action-group">
-                        <button class="btn btn-outline btn-sm" onclick="openReader('${a.id}')">📖 阅读</button>
-                        <button class="btn btn-outline btn-sm" onclick="openEditor('${a.id}')">✏️ 编辑</button>
-                        <button class="btn btn-danger btn-sm" onclick="deleteArticle('${a.id}')">🗑️ 删除</button>
+                    <div class="article-meta">
+                        <span>${new Date(a.created_at).toLocaleDateString()}</span>
+                        <div onclick="event.stopPropagation()">
+                            <button class="btn-icon" title="编辑" onclick="openEditor('${a.id}')"><i class="ph ph-pencil-simple"></i></button>
+                            <button class="btn-icon" title="删除" style="color:var(--danger)" onclick="deleteArticle('${a.id}')"><i class="ph ph-trash"></i></button>
+                        </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        async function deleteArticle(id) {
-            if (!confirm('确定要删除这篇文章吗？相关的笔记也会被删除。')) return;
-            const { error } = await db.from('articles').delete().eq('id', id);
-            if (error) alert('删除失败: ' + error.message);
-            else loadArticles();
+        // 挂载到 window 确保 onclick 能找到 (修复 bug)
+        window.deleteArticle = async function (id) {
+            if (!confirm('确定删除吗？')) return;
+            await db.from('articles').delete().eq('id', id);
+            loadArticles();
         }
 
-        // ================= 编辑与保存逻辑 =================
-        async function openEditor(id) {
+        window.openEditor = async function (id) {
             showView('editor');
             if (id) {
-                // 编辑现有
                 const { data } = await db.from('articles').select('*').eq('id', id).single();
                 currentArticleId = data.id;
                 document.getElementById('edit-title').value = data.title;
                 document.getElementById('edit-content').value = data.content;
             } else {
-                // 新建
                 currentArticleId = null;
                 document.getElementById('edit-title').value = '';
                 document.getElementById('edit-content').value = '';
@@ -369,114 +693,107 @@
             }
         }
 
-        function switchToEditFromReader() {
+        window.switchToEditFromReader = function () {
             if (currentArticleId) openEditor(currentArticleId);
         }
 
-        async function saveArticle() {
+        window.saveArticle = async function () {
             const title = document.getElementById('edit-title').value;
             const content = document.getElementById('edit-content').value;
             if (!title || !content) return alert('请填写完整');
 
             const payload = { title, content, user_id: currentUser.id };
-            let error;
 
             if (currentArticleId) {
-                ({ error } = await db.from('articles').update(payload).eq('id', currentArticleId));
+                await db.from('articles').update(payload).eq('id', currentArticleId);
             } else {
                 const res = await db.from('articles').insert(payload).select();
-                if (res.data) currentArticleId = res.data[0].id; // 获取新ID以便跳转
-                error = res.error;
+                if (res.data) currentArticleId = res.data[0].id;
             }
-
-            if (error) alert('保存失败');
-            else {
-                // 保存后直接跳转到阅读界面，符合“两个界面”的逻辑
-                openReader(currentArticleId);
-            }
+            openReader(currentArticleId);
         }
 
-        function runOCR() {
+        window.runOCR = function () {
             const file = document.getElementById('ocr-file').files[0];
             if (!file) return;
             const status = document.getElementById('ocr-status');
-            status.innerText = '识别中...';
+            status.innerText = '正在识别...';
 
             Tesseract.recognize(file, 'eng+chi_sim').then(({ data: { text } }) => {
                 const ta = document.getElementById('edit-content');
                 ta.value += (ta.value ? '\n' : '') + text;
-                status.innerText = '完成';
+                status.innerText = '识别完成';
             });
         }
 
-        // ================= 阅读与笔记逻辑 (带编辑/删除) =================
-        async function openReader(id) {
-            if (!id) return;
+        // ================= 阅读与笔记核心 (修复 Bug) =================
+        window.openReader = async function (id) {
             currentArticleId = id;
             showView('reader');
-
             const { data } = await db.from('articles').select('*').eq('id', id).single();
             document.getElementById('read-title').innerText = data.title;
-            document.getElementById('read-content').innerText = data.content;
-
+            // 存储纯文本以便后续渲染
+            document.getElementById('read-content').dataset.raw = data.content;
             loadAnnotations(id);
         }
 
         async function loadAnnotations(articleId) {
             const { data: notes } = await db.from('annotations').select('*').eq('article_id', articleId).order('created_at', { ascending: true });
+
             const contentDiv = document.getElementById('read-content');
             const listUl = document.getElementById('notes-ul');
-
             listUl.innerHTML = '';
-            let html = contentDiv.innerText; // 重置为纯文本
+
+            // 每次重新渲染都基于原始纯文本
+            let html = contentDiv.dataset.raw;
 
             if (notes && notes.length) {
                 notes.forEach(n => {
-                    // 1. 渲染侧边栏列表 (带按钮)
+                    // 1. 生成侧边栏列表
                     listUl.innerHTML += `
                         <li class="note-item">
-                            <div style="font-size:14px; color:#666;">"${n.highlight_text}"</div>
-                            <div style="margin-top:4px;"><b>${n.note}</b></div>
+                            <div class="note-quote">"${n.highlight_text}"</div>
+                            <div class="note-text">${n.note}</div>
                             <div class="note-actions">
-                                <button class="btn btn-outline btn-sm" onclick="editNote('${n.id}', '${n.note}')">修改</button>
-                                <button class="btn btn-outline btn-sm" style="color:red; border-color:red;" onclick="deleteNote('${n.id}')">删除</button>
+                                <button class="btn-icon" title="修改" onclick="editNote('${n.id}', '${n.note.replace(/'/g, "\\'")}')"><i class="ph ph-pencil-simple"></i></button>
+                                <button class="btn-icon" title="删除" style="color:var(--danger)" onclick="deleteNote('${n.id}')"><i class="ph ph-trash"></i></button>
                             </div>
                         </li>
                     `;
 
-                    // 2. 渲染高亮 (简单替换)
-                    const safeNote = n.note.replace(/'/g, "\\'");
-                    // 为了防止多次替换导致HTML破坏，真实项目需用 range，这里做简单处理
+                    // 2. 生成正文高亮
+                    const safeNote = n.note.replace(/"/g, "&quot;");
+                    // 简单高亮替换 (生产环境建议用 mark.js)
                     html = html.split(n.highlight_text).join(`<span class="highlight" title="${safeNote}">${n.highlight_text}</span>`);
                 });
             } else {
-                listUl.innerHTML = '<li style="color:#999; font-size:12px;">暂无笔记</li>';
+                listUl.innerHTML = '<li style="text-align:center; color:var(--text-sec); padding:20px;">暂无笔记，快去选中文字试试！</li>';
             }
             contentDiv.innerHTML = html;
         }
 
-        // 删除笔记
-        async function deleteNote(id) {
-            if (!confirm('删除这条笔记？')) return;
+        // 修复：将方法挂载到 window，确保 onclick 能调用
+        window.deleteNote = async function (id) {
+            if (!confirm('确定删除这条笔记？')) return;
             await db.from('annotations').delete().eq('id', id);
             loadAnnotations(currentArticleId);
         }
 
-        // 编辑笔记
-        async function editNote(id, oldText) {
-            const newText = prompt('修改笔记内容:', oldText);
-            if (newText !== null && newText !== oldText) {
+        window.editNote = async function (id, oldText) {
+            const newText = prompt('修改笔记:', oldText);
+            if (newText && newText !== oldText) {
                 await db.from('annotations').update({ note: newText }).eq('id', id);
                 loadAnnotations(currentArticleId);
             }
         }
 
-        // 添加笔记
+        // 划词监听
         document.getElementById('read-content').addEventListener('mouseup', async () => {
             const selection = window.getSelection();
             const text = selection.toString().trim();
             if (!text) return;
 
+            // 简单的防抖
             setTimeout(async () => {
                 const note = prompt(`为 "${text}" 添加笔记:`);
                 if (note) {
@@ -491,6 +808,7 @@
             }, 10);
         });
 
+        // 启动
         init();
     </script>
 </body>
