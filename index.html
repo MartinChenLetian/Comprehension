@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Reader</title>
+    <title>Smart Reader Pro</title>
 
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -37,7 +37,7 @@
             --bg-sidebar: rgba(28, 28, 30, 0.95);
             --text-main: #F5F5F7;
             --text-sec: #86868B;
-            --separator: rgba(255, 255, 255, 0.1);
+            --separator: rgba(255, 255, 255, 0.15);
             --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.3);
             --shadow-float: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
@@ -164,7 +164,6 @@
             -moz-appearance: textfield;
         }
 
-        /* 隐藏数字小箭头 */
         input[type=number]::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
@@ -412,24 +411,26 @@
             padding: 24px;
             background: var(--bg-body);
             overflow-y: auto;
-            min-width: 320px;
+            min-width: 300px;
         }
 
+        /* 关键修复：确保文章内容换行 */
         .reader-content {
             white-space: pre-wrap;
             color: var(--text-main);
+            line-height: 1.8;
         }
 
         .highlight {
-            background-color: rgba(255, 214, 10, 0.3);
+            background-color: rgba(255, 214, 10, 0.4);
             border-bottom: 2px solid #FFD60A;
             cursor: pointer;
             transition: 0.2s;
-            border-radius: 4px;
+            border-radius: 2px;
         }
 
         .highlight:hover {
-            background-color: rgba(255, 214, 10, 0.5);
+            background-color: rgba(255, 214, 10, 0.6);
         }
 
         .note-card {
@@ -448,6 +449,7 @@
             color: var(--text-sec);
             font-size: 12px;
             margin-bottom: 6px;
+            font-weight: 600;
         }
 
         /* Auth */
@@ -683,7 +685,8 @@
 
         const bgImages = [
             'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000',
-            'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2000'
+            'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2000',
+            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2000'
         ];
 
         // ================= 逻辑 =================
@@ -725,7 +728,7 @@
             tx.addEventListener("input", function () { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; });
         }
 
-        // --- 字体同步核心 ---
+        // --- 字体同步 ---
         function syncFont() {
             const font = document.getElementById('editor-font').value;
             const size = document.getElementById('editor-size').value;
@@ -742,7 +745,6 @@
             localStorage.setItem('pref_font', font);
             localStorage.setItem('pref_size', size);
 
-            // 同步所有输入框
             document.getElementById('editor-font').value = font;
             document.getElementById('editor-size').value = size;
             document.getElementById('reader-font-select').value = font;
@@ -846,7 +848,6 @@
             `).join('');
         }
 
-        // --- 昵称修改 ---
         async function updateName() {
             const name = document.getElementById('set-name').value;
             if (!name) return;
@@ -919,8 +920,10 @@
             const contentDiv = document.getElementById('reader-body');
             document.getElementById('reader-title').innerText = data.title;
             document.getElementById('reader-top-title').innerText = data.title;
-            contentDiv.innerText = data.content; // 先显示纯文本
-            contentDiv.dataset.raw = data.content; // 存起来给高亮用
+
+            // 必须先赋值 innerText
+            contentDiv.innerText = data.content;
+            contentDiv.dataset.raw = data.content; // 存原始内容
 
             // 3. 异步加载高亮
             loadAnnotations(id);
@@ -938,6 +941,7 @@
             if (notes && notes.length > 0) {
                 notes.forEach(n => {
                     const safeNote = n.note.replace(/"/g, "&quot;");
+                    // 渲染高亮
                     html = html.split(n.highlight_text).join(`<span class="highlight" title="${safeNote}">${n.highlight_text}</span>`);
 
                     listDiv.innerHTML += `
