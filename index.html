@@ -14,15 +14,16 @@
         /* ================== Design System ================== */
         :root {
             --primary: #007AFF;
+            --primary-bg: rgba(0, 122, 255, 0.12);
+            /* 选中态背景 */
             --bg-body: #F5F5F7;
             --bg-card: #FFFFFF;
             --bg-sidebar: rgba(250, 250, 250, 0.95);
             --text-main: #1D1D1F;
             --text-sec: #86868B;
-            --separator: rgba(0, 0, 0, 0.1);
-            --radius: 14px;
+            --separator: rgba(0, 0, 0, 0.08);
+            --radius: 12px;
             --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-            --safe-bottom: env(safe-area-inset-bottom);
         }
 
         [data-theme="dark"] {
@@ -31,7 +32,8 @@
             --bg-sidebar: rgba(28, 28, 30, 0.95);
             --text-main: #F5F5F7;
             --text-sec: #86868B;
-            --separator: rgba(255, 255, 255, 0.15);
+            --separator: rgba(255, 255, 255, 0.12);
+            --primary-bg: rgba(10, 132, 255, 0.2);
         }
 
         * {
@@ -47,6 +49,7 @@
             padding: 0;
             height: 100vh;
             overflow: hidden;
+            transition: background 0.3s;
         }
 
         .hidden {
@@ -64,12 +67,12 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            transition: 0.2s;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         .btn:active {
-            opacity: 0.7;
-            transform: scale(0.98);
+            transform: scale(0.96);
+            opacity: 0.8;
         }
 
         .btn-primary {
@@ -78,6 +81,7 @@
             border-radius: 8px;
             padding: 8px 20px;
             font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .btn-text {
@@ -100,14 +104,27 @@
             border-radius: 8px;
         }
 
+        .btn-back:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-main);
+        }
+
+        /* 修复后的圆形按钮 */
         .btn-circle {
             width: 44px;
             height: 44px;
             border-radius: 50%;
             background: var(--primary);
             color: white;
-            font-size: 22px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            flex-shrink: 0;
+            /* 关键：防止被挤压 */
+        }
+
+        .btn-circle:hover {
+            transform: scale(1.08);
+            box-shadow: 0 6px 16px rgba(0, 122, 255, 0.4);
         }
 
         .input-clean {
@@ -118,12 +135,14 @@
             border-radius: 10px;
             color: var(--text-main);
             font-size: 16px;
+            transition: 0.2s;
         }
 
         .input-clean:focus {
             background: var(--bg-card);
             border-color: var(--primary);
             outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
         }
 
         /* Layout */
@@ -133,7 +152,6 @@
             width: 100vw;
         }
 
-        /* 侧边栏防挤压 */
         .sidebar {
             width: 260px;
             background: var(--bg-sidebar);
@@ -142,6 +160,7 @@
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
+            backdrop-filter: blur(20px);
         }
 
         .main-content {
@@ -151,7 +170,36 @@
             position: relative;
         }
 
-        /* Sidebar Components */
+        /* Sidebar Navigation Fix (修复侧边栏交互) */
+        .nav-item {
+            padding: 12px 16px;
+            border-radius: 10px;
+            color: var(--text-sec);
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 4px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: var(--text-main);
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-bg);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .nav-item.active i {
+            color: var(--primary);
+        }
+
         .user-card {
             display: flex;
             align-items: center;
@@ -159,7 +207,8 @@
             padding: 12px;
             border-radius: 12px;
             cursor: pointer;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            transition: 0.2s;
         }
 
         .user-card:hover {
@@ -172,32 +221,29 @@
             border-radius: 50%;
             object-fit: cover;
             background: #eee;
+            border: 1px solid var(--separator);
         }
 
-        .nav-item {
-            padding: 10px 12px;
-            border-radius: 8px;
-            color: var(--text-sec);
-            font-size: 15px;
-            cursor: pointer;
+        /* Dashboard Header Fix (修复按钮位置) */
+        .page-header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 4px;
+            /* 确保垂直居中 */
+            margin-bottom: 30px;
+            height: 50px;
         }
 
-        .nav-item.active {
-            background: rgba(0, 0, 0, 0.05);
-            color: var(--text-main);
-            font-weight: 600;
+        .page-title {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin: 0;
         }
 
-        /* === Dashboard Layout Fix (主页布局修复) === */
-
-        /* 1. 统计卡片：PC端3列，宽度不够自动换行 */
         .stats-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 16px;
             margin-bottom: 40px;
         }
@@ -209,24 +255,31 @@
             border: 1px solid var(--separator);
         }
 
-        .stat-value {
-            font-size: 24px;
-            font-weight: 700;
+        .stat-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-sec);
+            text-transform: uppercase;
+            margin-bottom: 6px;
         }
 
-        /* 2. 文档列表：自适应 Grid */
+        .stat-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
         .doc-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 20px;
             padding-bottom: 100px;
         }
 
         .doc-item {
             background: var(--bg-card);
-            padding: 20px;
+            padding: 24px;
             border-radius: var(--radius);
-            /* 高度改为 auto，防止内容溢出 */
             height: auto;
             min-height: 160px;
             display: flex;
@@ -239,11 +292,10 @@
 
         .doc-item:hover {
             border-color: var(--primary);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
         }
 
-        /* 限制预览文字行数 */
         .doc-preview {
             font-size: 14px;
             color: var(--text-sec);
@@ -256,7 +308,7 @@
             margin-bottom: 20px;
         }
 
-        /* Overlay Pages */
+        /* Overlays */
         .overlay {
             position: fixed;
             inset: 0;
@@ -296,6 +348,10 @@
             color: var(--text-main);
         }
 
+        #doc-title:focus {
+            outline: none;
+        }
+
         #doc-body {
             width: 100%;
             min-height: 60vh;
@@ -306,7 +362,6 @@
             color: var(--text-main);
         }
 
-        /* Reader Mode */
         .reader-layout {
             display: flex;
             height: calc(100vh - 60px);
@@ -334,7 +389,6 @@
             line-height: 1.8;
         }
 
-        /* Highlighting */
         .highlight {
             background-color: rgba(255, 214, 10, 0.4);
             border-bottom: 2px solid #FFD60A;
@@ -425,7 +479,6 @@
             padding: 60px;
         }
 
-        /* Mobile Responsive */
         .mobile-tab-bar {
             display: none;
         }
@@ -473,18 +526,12 @@
                 gap: 4px;
             }
 
+            .tab-item.active {
+                color: var(--primary);
+            }
+
             .main-content {
                 padding: 20px 16px 100px 16px;
-            }
-
-            /* 手机端布局强制单列 */
-            .stats-container {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .doc-list {
-                grid-template-columns: 1fr;
             }
 
             .reader-layout {
@@ -503,6 +550,11 @@
                 min-width: 100%;
                 border-top: 1px solid var(--separator);
                 padding-bottom: 100px;
+            }
+
+            .stats-container,
+            .doc-list {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -553,20 +605,20 @@
         <main class="main-content">
             <div id="page-dashboard">
                 <div class="page-header">
-                    <div class="page-title">文库</div><button class="btn btn-circle" onclick="openEditor(null)"><i
-                            class="ph ph-plus"></i></button>
+                    <div class="page-title">我的文库</div>
+                    <button class="btn btn-circle" onclick="openEditor(null)"><i class="ph ph-plus"></i></button>
                 </div>
                 <div class="stats-container">
                     <div class="stat-card">
-                        <div style="font-size:12px; color:var(--text-sec); margin-bottom:4px;">ARTICLES</div>
+                        <div class="stat-label">ARTICLES</div>
                         <div class="stat-value" id="stat-count">0</div>
                     </div>
                     <div class="stat-card">
-                        <div style="font-size:12px; color:var(--text-sec); margin-bottom:4px;">WORDS</div>
+                        <div class="stat-label">WORDS</div>
                         <div class="stat-value" id="stat-words">0</div>
                     </div>
                     <div class="stat-card">
-                        <div style="font-size:12px; color:var(--text-sec); margin-bottom:4px;">TIME</div>
+                        <div class="stat-label">TIME</div>
                         <div class="stat-value" id="stat-time">0m</div>
                     </div>
                 </div>
@@ -611,9 +663,8 @@
                             </select>
                         </div>
                     </div>
-                    <div class="settings-group"
-                        style="border:none; background:transparent; margin-top:20px; display:none;" id="mobile-logout">
-                        <button class="btn-primary" style="width:100%; background:#FF3B30;"
+                    <div style="margin-top:30px; display:none;" id="mobile-logout">
+                        <button class="btn-primary" style="width:100%; background:#FF3B30; color:white;"
                             onclick="signOut()">退出登录</button>
                     </div>
                 </div>
@@ -621,12 +672,12 @@
         </main>
 
         <div class="mobile-tab-bar">
-            <div class="tab-item" onclick="showPage('dashboard')"><i class="ph ph-squares-four"
+            <div class="tab-item active" onclick="showPage('dashboard')" id="tab-dash-mb"><i class="ph ph-squares-four"
                     style="font-size:24px;"></i><span style="font-size:10px;">文库</span></div>
             <div class="tab-item" onclick="openEditor(null)"><i class="ph ph-plus-circle"
                     style="font-size:28px; color:var(--primary);"></i></div>
-            <div class="tab-item" onclick="showPage('settings')"><i class="ph ph-gear" style="font-size:24px;"></i><span
-                    style="font-size:10px;">设置</span></div>
+            <div class="tab-item" onclick="showPage('settings')" id="tab-set-mb"><i class="ph ph-gear"
+                    style="font-size:24px;"></i><span style="font-size:10px;">设置</span></div>
         </div>
     </div>
 
@@ -711,7 +762,6 @@
             if (window.innerWidth < 768) document.getElementById('mobile-logout').style.display = 'block';
         }
 
-        // Font Logic
         function validateFontSize(input) {
             let val = parseInt(input.value); if (isNaN(val) || val < 16) val = 16; if (val > 42) val = 42; input.value = val;
             input.id === 'editor-size' ? syncFont() : syncReaderFont();
@@ -727,12 +777,9 @@
         function applyFontStyle(f, s) {
             const fonts = { 'system': '-apple-system, sans-serif', 'serif': 'Georgia, serif', 'mono': 'Menlo, monospace' };
             const cssF = fonts[f], cssS = s + 'px';
-            ['doc-body', 'reader-body'].forEach(id => {
-                const el = document.getElementById(id); if (el) { el.style.fontFamily = cssF; el.style.fontSize = cssS; }
-            });
+            ['doc-body', 'reader-body'].forEach(id => { const el = document.getElementById(id); if (el) { el.style.fontFamily = cssF; el.style.fontSize = cssS; } });
         }
 
-        // Auth
         async function handleAuth() {
             const email = document.getElementById('email').value, password = document.getElementById('password').value;
             const btn = document.getElementById('auth-btn'), msg = document.getElementById('auth-msg');
@@ -760,7 +807,6 @@
             showPage('dashboard');
         }
 
-        // Data & Logic
         function countWords(s) { return s ? s.trim().split(/\s+/).length : 0; }
         async function loadDocs() {
             const list = document.getElementById('doc-list'); list.innerHTML = 'Loading...';
@@ -789,26 +835,18 @@
             let html = div.dataset.raw;
             if (data && data.length) {
                 data.forEach(n => {
-                    if (html.includes(n.highlight_text)) {
-                        // 交互高亮：防重复点击逻辑封装
-                        html = html.split(n.highlight_text).join(`<span class="highlight" onclick="showNoteAction('${n.id}', '${n.note.replace(/'/g, "\\'")}'); event.stopPropagation();">${n.highlight_text}</span>`);
-                    }
-                    // 修复原文显示 Bug：正确显示 n.note
+                    if (html.includes(n.highlight_text)) html = html.split(n.highlight_text).join(`<span class="highlight" onclick="showNoteAction('${n.id}', '${n.note.replace(/'/g, "\\'")}'); event.stopPropagation();">${n.highlight_text}</span>`);
                     list.innerHTML += `<div class="note-card"><div class="note-quote">"${n.highlight_text}"</div><div class="note-text">${n.note}</div><div style="text-align:right;margin-top:8px;"><button class="btn-text danger" style="padding:0;font-size:12px;" onclick="deleteNote('${n.id}')">删除</button></div></div>`;
                 });
                 div.innerHTML = html;
             } else list.innerHTML = '<div style="color:var(--text-sec);text-align:center;">暂无笔记</div>';
         }
 
-        // Interaction Fixes
-        window.showNoteAction = (id, text) => {
-            if (confirm(`笔记内容：\n${text}\n\n是否删除此条笔记？`)) deleteNote(id);
-        };
+        window.showNoteAction = (id, text) => { if (confirm(`笔记：\n${text}\n\n是否删除？`)) deleteNote(id); };
         async function deleteNote(id) { await db.from('annotations').delete().eq('id', id); loadAnnotations(currentDocId); }
 
-        // Highlight Listener with Duplicate Check
         document.getElementById('reader-body').addEventListener('mouseup', (e) => {
-            if (e.target.classList.contains('highlight')) return; // Ignore click on existing highlight
+            if (e.target.classList.contains('highlight')) return; // Fix: Prevent duplicate
             const sel = window.getSelection(), txt = sel.toString().trim();
             if (!txt) return;
             setTimeout(async () => {
@@ -818,7 +856,6 @@
             }, 10);
         });
 
-        // Editor
         async function openEditor(id) {
             currentDocId = id; document.getElementById('view-editor').classList.remove('hidden');
             document.getElementById('doc-title').value = ''; document.getElementById('doc-body').value = '';
@@ -837,7 +874,6 @@
             document.getElementById('save-status').innerText = "已保存"; if (close) { closeEditor(); loadDocs(); }
         }
 
-        // Settings
         async function updateName() {
             const n = document.getElementById('set-name').value;
             if (n) { await db.auth.updateUser({ data: { full_name: n } }); document.getElementById('nav-name').innerText = n; alert("已更新"); }
@@ -860,7 +896,15 @@
         function showPage(id) {
             ['dashboard', 'settings'].forEach(p => document.getElementById('page-' + p).classList.add('hidden'));
             document.getElementById('page-' + id).classList.remove('hidden');
-            if (id === 'dashboard') loadDocs();
+
+            // Toggle active tabs
+            const isDash = id === 'dashboard';
+            document.getElementById('tab-dash-pc').classList.toggle('active', isDash);
+            document.getElementById('tab-set-pc').classList.toggle('active', !isDash);
+            document.getElementById('tab-dash-mb').classList.toggle('active', isDash);
+            document.getElementById('tab-set-mb').classList.toggle('active', !isDash);
+
+            if (isDash) loadDocs();
         }
         function closeReader() { document.getElementById('view-reader').classList.add('hidden'); }
         function switchToEdit() { closeReader(); openEditor(currentDocId); }
