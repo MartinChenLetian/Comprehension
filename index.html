@@ -20,10 +20,9 @@
             --text-main: #1D1D1F;
             --text-sec: #86868B;
             --separator: rgba(0, 0, 0, 0.1);
-            --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.05);
-            --shadow-float: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --radius: 12px;
+            --radius: 14px;
             --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            --safe-bottom: env(safe-area-inset-bottom);
         }
 
         [data-theme="dark"] {
@@ -33,8 +32,6 @@
             --text-main: #F5F5F7;
             --text-sec: #86868B;
             --separator: rgba(255, 255, 255, 0.15);
-            --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.3);
-            --shadow-float: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
 
         * {
@@ -104,12 +101,12 @@
         }
 
         .btn-circle {
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             background: var(--primary);
             color: white;
-            font-size: 24px;
+            font-size: 22px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
@@ -136,6 +133,7 @@
             width: 100vw;
         }
 
+        /* 侧边栏防挤压 */
         .sidebar {
             width: 260px;
             background: var(--bg-sidebar);
@@ -143,6 +141,7 @@
             padding: 24px 16px;
             display: flex;
             flex-direction: column;
+            flex-shrink: 0;
         }
 
         .main-content {
@@ -193,10 +192,12 @@
             font-weight: 600;
         }
 
-        /* Dashboard */
+        /* === Dashboard Layout Fix (主页布局修复) === */
+
+        /* 1. 统计卡片：PC端3列，宽度不够自动换行 */
         .stats-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 16px;
             margin-bottom: 40px;
         }
@@ -213,18 +214,21 @@
             font-weight: 700;
         }
 
+        /* 2. 文档列表：自适应 Grid */
         .doc-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 20px;
             padding-bottom: 100px;
         }
 
         .doc-item {
             background: var(--bg-card);
-            padding: 24px;
+            padding: 20px;
             border-radius: var(--radius);
-            height: 180px;
+            /* 高度改为 auto，防止内容溢出 */
+            height: auto;
+            min-height: 160px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -237,6 +241,19 @@
             border-color: var(--primary);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 限制预览文字行数 */
+        .doc-preview {
+            font-size: 14px;
+            color: var(--text-sec);
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            line-height: 1.6;
+            margin-top: 10px;
+            margin-bottom: 20px;
         }
 
         /* Overlay Pages */
@@ -317,7 +334,7 @@
             line-height: 1.8;
         }
 
-        /* Highlighting - 交互样式 */
+        /* Highlighting */
         .highlight {
             background-color: rgba(255, 214, 10, 0.4);
             border-bottom: 2px solid #FFD60A;
@@ -339,7 +356,6 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
         }
 
-        /* 引用样式优化 */
         .note-quote {
             border-left: 3px solid #FFD60A;
             padding-left: 8px;
@@ -353,12 +369,10 @@
             overflow: hidden;
         }
 
-        /* 笔记正文样式 */
         .note-text {
             font-size: 14px;
             color: var(--text-main);
             line-height: 1.5;
-            font-weight: 400;
         }
 
         .toolbar-control {
@@ -411,7 +425,7 @@
             padding: 60px;
         }
 
-        /* Mobile */
+        /* Mobile Responsive */
         .mobile-tab-bar {
             display: none;
         }
@@ -463,6 +477,16 @@
                 padding: 20px 16px 100px 16px;
             }
 
+            /* 手机端布局强制单列 */
+            .stats-container {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .doc-list {
+                grid-template-columns: 1fr;
+            }
+
             .reader-layout {
                 flex-direction: column;
             }
@@ -479,11 +503,6 @@
                 min-width: 100%;
                 border-top: 1px solid var(--separator);
                 padding-bottom: 100px;
-            }
-
-            .stats-container,
-            .doc-list {
-                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -692,6 +711,7 @@
             if (window.innerWidth < 768) document.getElementById('mobile-logout').style.display = 'block';
         }
 
+        // Font Logic
         function validateFontSize(input) {
             let val = parseInt(input.value); if (isNaN(val) || val < 16) val = 16; if (val > 42) val = 42; input.value = val;
             input.id === 'editor-size' ? syncFont() : syncReaderFont();
@@ -712,6 +732,7 @@
             });
         }
 
+        // Auth
         async function handleAuth() {
             const email = document.getElementById('email').value, password = document.getElementById('password').value;
             const btn = document.getElementById('auth-btn'), msg = document.getElementById('auth-msg');
@@ -739,6 +760,7 @@
             showPage('dashboard');
         }
 
+        // Data & Logic
         function countWords(s) { return s ? s.trim().split(/\s+/).length : 0; }
         async function loadDocs() {
             const list = document.getElementById('doc-list'); list.innerHTML = 'Loading...';
@@ -768,10 +790,10 @@
             if (data && data.length) {
                 data.forEach(n => {
                     if (html.includes(n.highlight_text)) {
-                        // 交互式高亮：点击触发 showNoteAction
+                        // 交互高亮：防重复点击逻辑封装
                         html = html.split(n.highlight_text).join(`<span class="highlight" onclick="showNoteAction('${n.id}', '${n.note.replace(/'/g, "\\'")}'); event.stopPropagation();">${n.highlight_text}</span>`);
                     }
-                    // 修复：显示 n.note 而不是 n.highlight_text
+                    // 修复原文显示 Bug：正确显示 n.note
                     list.innerHTML += `<div class="note-card"><div class="note-quote">"${n.highlight_text}"</div><div class="note-text">${n.note}</div><div style="text-align:right;margin-top:8px;"><button class="btn-text danger" style="padding:0;font-size:12px;" onclick="deleteNote('${n.id}')">删除</button></div></div>`;
                 });
                 div.innerHTML = html;
@@ -780,30 +802,23 @@
 
         // Interaction Fixes
         window.showNoteAction = (id, text) => {
-            // 点击高亮时，询问查看或删除
             if (confirm(`笔记内容：\n${text}\n\n是否删除此条笔记？`)) deleteNote(id);
         };
-
         async function deleteNote(id) { await db.from('annotations').delete().eq('id', id); loadAnnotations(currentDocId); }
 
-        // Highlight Listener with Duplicate Check (Fix)
+        // Highlight Listener with Duplicate Check
         document.getElementById('reader-body').addEventListener('mouseup', (e) => {
-            // 核心修复：如果点击的是已有的高亮 span，直接退出，防止新建
-            if (e.target.classList.contains('highlight')) return;
-
+            if (e.target.classList.contains('highlight')) return; // Ignore click on existing highlight
             const sel = window.getSelection(), txt = sel.toString().trim();
             if (!txt) return;
-
             setTimeout(async () => {
                 const note = prompt("添加笔记:");
-                if (note) {
-                    await db.from('annotations').insert({ article_id: currentDocId, highlight_text: txt, note: note });
-                    loadAnnotations(currentDocId);
-                }
+                if (note) { await db.from('annotations').insert({ article_id: currentDocId, highlight_text: txt, note: note }); loadAnnotations(currentDocId); }
                 sel.removeAllRanges();
             }, 10);
         });
 
+        // Editor
         async function openEditor(id) {
             currentDocId = id; document.getElementById('view-editor').classList.remove('hidden');
             document.getElementById('doc-title').value = ''; document.getElementById('doc-body').value = '';
@@ -822,15 +837,13 @@
             document.getElementById('save-status').innerText = "已保存"; if (close) { closeEditor(); loadDocs(); }
         }
 
+        // Settings
         async function updateName() {
             const n = document.getElementById('set-name').value;
             if (n) { await db.auth.updateUser({ data: { full_name: n } }); document.getElementById('nav-name').innerText = n; alert("已更新"); }
         }
         async function sendPasswordReset() {
-            if (currentUser) {
-                const { error } = await db.auth.resetPasswordForEmail(currentUser.email, { redirectTo: window.location.href });
-                alert(error ? error.message : "邮件已发送 (请确保在Supabase后台配置了Site URL)");
-            }
+            if (currentUser) { const { error } = await db.auth.resetPasswordForEmail(currentUser.email, { redirectTo: window.location.href }); alert(error ? error.message : "邮件已发送"); }
         }
         async function uploadAvatar(inp) {
             const f = inp.files[0]; if (!f) return;
