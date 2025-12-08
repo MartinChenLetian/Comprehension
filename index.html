@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Smart Reader</title>
-
+    
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -13,16 +12,16 @@
     <style>
         /* ================== Apple Design System ================== */
         :root {
-            --primary: #007AFF;
+            --primary: #007AFF; 
             --bg-body: #F2F2F7;
             --bg-card: #FFFFFF;
             --bg-sidebar: rgba(242, 242, 247, 0.85);
             --text-main: #1C1C1E;
             --text-sec: #8E8E93;
             --separator: rgba(60, 60, 67, 0.15);
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow: 0 2px 8px rgba(0,0,0,0.04);
             --radius: 14px;
-
+            
             /* 动态字体变量 */
             --user-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
             --user-size: 18px;
@@ -37,365 +36,148 @@
             --separator: rgba(84, 84, 88, 0.4);
         }
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            background-color: var(--bg-body); color: var(--text-main);
+            margin: 0; padding: 0; height: 100vh; overflow: hidden;
+            display: flex; flex-direction: column;
         }
 
-        .hidden {
-            display: none !important;
-        }
+        .hidden { display: none !important; }
 
         /* --- 通用组件 --- */
-        .btn {
-            border: none;
-            background: none;
-            cursor: pointer;
-            color: var(--primary);
-            font-size: 16px;
-            font-weight: 500;
-        }
-
+        .btn { border: none; background: none; cursor: pointer; color: var(--primary); font-size: 16px; font-weight: 500; }
         .btn-circle {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: var(--bg-card);
-            color: var(--primary);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--bg-card); color: var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex; align-items: center; justify-content: center; font-size: 24px;
         }
-
-        .btn-circle:active {
-            transform: scale(0.9);
-        }
+        .btn-circle:active { transform: scale(0.9); }
 
         .input-box {
-            width: 100%;
-            padding: 12px;
-            border-radius: 10px;
-            border: none;
-            background: rgba(118, 118, 128, 0.12);
-            font-size: 16px;
-            color: var(--text-main);
+            width: 100%; padding: 12px; border-radius: 10px; border: none;
+            background: rgba(118, 118, 128, 0.12); font-size: 16px; color: var(--text-main);
         }
-
-        .input-box:focus {
-            outline: none;
-            background: rgba(118, 118, 128, 0.18);
-        }
+        .input-box:focus { outline: none; background: rgba(118, 118, 128, 0.18); }
 
         /* --- 布局容器 --- */
-        .app-container {
-            display: flex;
-            height: 100%;
-            width: 100%;
-        }
-
+        .app-container { display: flex; height: 100%; width: 100%; }
+        
         /* 侧边栏 (PC端) */
         .sidebar {
-            width: 260px;
-            background: var(--bg-sidebar);
-            border-right: 1px solid var(--separator);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
+            width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--separator);
+            padding: 20px; display: flex; flex-direction: column;
         }
-
+        
         /* 底部导航 (手机端) */
         .bottom-nav {
-            display: none;
-            /* 默认隐藏 */
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 83px;
-            /* iPhone X height */
-            background: var(--bg-card);
-            border-top: 1px solid var(--separator);
-            justify-content: space-around;
-            padding-top: 10px;
-            padding-bottom: 20px;
-            z-index: 900;
-            backdrop-filter: blur(20px);
+            display: none; /* 默认隐藏 */
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 83px; /* iPhone X height */
+            background: var(--bg-card); border-top: 1px solid var(--separator);
+            justify-content: space-around; padding-top: 10px; padding-bottom: 20px;
+            z-index: 900; backdrop-filter: blur(20px);
         }
-
-        .tab-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--text-sec);
-            font-size: 10px;
-            gap: 4px;
-        }
-
-        .tab-item.active {
-            color: var(--primary);
-        }
-
-        .tab-item i {
-            font-size: 24px;
-        }
+        .tab-item { display: flex; flex-direction: column; align-items: center; color: var(--text-sec); font-size: 10px; gap: 4px; }
+        .tab-item.active { color: var(--primary); }
+        .tab-item i { font-size: 24px; }
 
         /* 主内容区 */
-        .main-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 40px;
-            position: relative;
-            -webkit-overflow-scrolling: touch;
-            /* iOS顺滑滚动 */
+        .main-content { 
+            flex: 1; overflow-y: auto; padding: 40px; position: relative; 
+            -webkit-overflow-scrolling: touch; /* iOS顺滑滚动 */
         }
 
         /* 文档卡片 */
-        .doc-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            padding-bottom: 100px;
-        }
-
+        .doc-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding-bottom: 100px; }
         .doc-item {
-            background: var(--bg-card);
-            padding: 20px;
-            border-radius: 12px;
-            height: 160px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-shadow: var(--shadow);
-            cursor: pointer;
+            background: var(--bg-card); padding: 20px; border-radius: 12px;
+            height: 160px; display: flex; flex-direction: column; justify-content: space-between;
+            box-shadow: var(--shadow); cursor: pointer;
         }
-
-        .doc-preview {
-            font-size: 14px;
-            color: var(--text-sec);
-            overflow: hidden;
-            display: -webkit-box;
-            -webkit-line-clamp: 4;
-            -webkit-box-orient: vertical;
-            line-height: 1.5;
-        }
+        .doc-preview { font-size: 14px; color: var(--text-sec); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; line-height: 1.5; }
 
         /* --- 覆盖层 (Editor/Reader) --- */
-        .overlay {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-body);
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
+        .overlay { 
+            position: fixed; inset: 0; background: var(--bg-body); z-index: 1000; 
+            display: flex; flex-direction: column; 
         }
-
         .toolbar {
-            height: 60px;
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--separator);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
+            height: 60px; background: var(--bg-card); border-bottom: 1px solid var(--separator);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
             flex-shrink: 0;
         }
-
+        
         /* 编辑器 */
-        .editor-area {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            max-width: 800px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        #doc-title {
-            font-size: 24px;
-            font-weight: 700;
-            border: none;
-            background: transparent;
-            width: 100%;
-            margin-bottom: 20px;
-            outline: none;
-            color: var(--text-main);
-        }
-
-        #doc-body {
-            width: 100%;
-            min-height: 60vh;
-            border: none;
-            background: transparent;
-            resize: none;
-            outline: none;
-            font-family: var(--user-font);
-            font-size: var(--user-size);
-            line-height: 1.6;
-            color: var(--text-main);
+        .editor-area { flex: 1; padding: 20px; overflow-y: auto; max-width: 800px; margin: 0 auto; width: 100%; }
+        #doc-title { font-size: 24px; font-weight: 700; border: none; background: transparent; width: 100%; margin-bottom: 20px; outline: none; color: var(--text-main); }
+        #doc-body { 
+            width: 100%; min-height: 60vh; border: none; background: transparent; resize: none; outline: none; 
+            font-family: var(--user-font); font-size: var(--user-size); line-height: 1.6; color: var(--text-main); 
         }
 
         /* 阅读器 (修复版) */
-        .reader-layout {
-            display: flex;
-            height: 100%;
-            overflow: hidden;
+        .reader-layout { display: flex; height: 100%; overflow: hidden; }
+        .reader-text-area { 
+            flex: 2; padding: 40px; overflow-y: auto; 
+            border-right: 1px solid var(--separator); background: var(--bg-card); 
         }
-
-        .reader-text-area {
-            flex: 2;
-            padding: 40px;
-            overflow-y: auto;
-            border-right: 1px solid var(--separator);
-            background: var(--bg-card);
+        .reader-notes-area { 
+            flex: 1; padding: 20px; background: var(--bg-body); 
+            overflow-y: auto; min-width: 300px; 
         }
-
-        .reader-notes-area {
-            flex: 1;
-            padding: 20px;
-            background: var(--bg-body);
-            overflow-y: auto;
-            min-width: 300px;
-        }
-
+        
         /* 强制确保内容可见 */
-        #reader-body {
-            font-family: var(--user-font);
-            font-size: var(--user-size);
-            line-height: 1.8;
-            white-space: pre-wrap;
+        #reader-body { 
+            font-family: var(--user-font); 
+            font-size: var(--user-size); 
+            line-height: 1.8; 
+            white-space: pre-wrap; 
             color: var(--text-main);
             min-height: 200px;
-            display: block;
-            /* 防止被隐藏 */
+            display: block; /* 防止被隐藏 */
         }
 
-        .highlight {
-            background-color: rgba(255, 214, 10, 0.3);
-            border-bottom: 2px solid #FFD60A;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        .note-card {
-            background: var(--bg-card);
-            padding: 12px;
-            border-radius: 10px;
-            margin-bottom: 12px;
-            font-size: 14px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
+        .highlight { background-color: rgba(255, 214, 10, 0.3); border-bottom: 2px solid #FFD60A; cursor: pointer; border-radius: 4px; }
+        .note-card { background: var(--bg-card); padding: 12px; border-radius: 10px; margin-bottom: 12px; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 
         /* Auth */
-        .auth-container {
-            display: flex;
-            height: 100%;
-        }
-
-        .auth-banner {
-            flex: 1.5;
-            background: #000;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .auth-banner img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            opacity: 0.8;
-        }
-
-        .auth-form {
-            flex: 1;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            background: var(--bg-body);
-        }
+        .auth-container { display: flex; height: 100%; }
+        .auth-banner { flex: 1.5; background: #000; position: relative; overflow: hidden; }
+        .auth-banner img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+        .auth-form { flex: 1; padding: 40px; display: flex; flex-direction: column; justify-content: center; background: var(--bg-body); }
 
         /* ================== 移动端适配 (Media Queries) ================== */
         @media (max-width: 768px) {
-
             /* 1. 隐藏侧边栏，显示底部导航 */
-            .sidebar {
-                display: none;
-            }
-
-            .bottom-nav {
-                display: flex;
-            }
-
+            .sidebar { display: none; }
+            .bottom-nav { display: flex; }
+            
             /* 2. 调整主内容区 */
-            .main-content {
-                padding: 20px 16px 100px 16px;
-            }
-
-            /* 底部留白给导航 */
-            .doc-list {
-                grid-template-columns: 1fr;
-            }
-
-            /* 单列显示 */
-
+            .main-content { padding: 20px 16px 100px 16px; } /* 底部留白给导航 */
+            .doc-list { grid-template-columns: 1fr; } /* 单列显示 */
+            
             /* 3. 登录页变化 */
-            .auth-banner {
-                display: none;
-            }
-
-            /* 隐藏图片 */
-            .auth-form {
-                width: 100%;
-                flex: none;
-                height: 100%;
-            }
-
+            .auth-banner { display: none; } /* 隐藏图片 */
+            .auth-form { width: 100%; flex: none; height: 100%; }
+            
             /* 4. 阅读器变为上下结构 */
-            .reader-layout {
-                flex-direction: column;
+            .reader-layout { flex-direction: column; }
+            .reader-text-area { 
+                flex: none; height: 65%; border-right: none; border-bottom: 1px solid var(--separator); padding: 20px; 
             }
-
-            .reader-text-area {
-                flex: none;
-                height: 65%;
-                border-right: none;
-                border-bottom: 1px solid var(--separator);
-                padding: 20px;
+            .reader-notes-area { 
+                flex: none; height: 35%; padding: 15px; background: var(--bg-body); 
             }
-
-            .reader-notes-area {
-                flex: none;
-                height: 35%;
-                padding: 15px;
-                background: var(--bg-body);
-            }
-
+            
             /* 5. 编辑器 */
-            .editor-area {
-                padding: 20px;
-            }
-
-            #doc-title {
-                font-size: 22px;
-            }
+            .editor-area { padding: 20px; }
+            #doc-title { font-size: 22px; }
         }
     </style>
 </head>
-
 <body>
 
     <div id="view-auth" class="auth-container">
@@ -405,13 +187,11 @@
         <div class="auth-form">
             <h1 style="margin-bottom:10px;">Smart Reader</h1>
             <p style="color:var(--text-sec); margin-bottom:30px;">随时随地阅读</p>
-
+            
             <input type="email" id="email" class="input-box" placeholder="邮箱" style="margin-bottom:15px;">
             <input type="password" id="password" class="input-box" placeholder="密码" style="margin-bottom:25px;">
-
-            <button class="btn"
-                style="background:var(--primary); color:white; padding:12px; border-radius:10px; font-size:16px;"
-                onclick="handleAuth()">登录 / 注册</button>
+            
+            <button class="btn" style="background:var(--primary); color:white; padding:12px; border-radius:10px; font-size:16px;" onclick="handleAuth()">登录 / 注册</button>
             <div id="auth-msg" style="color:red; text-align:center; margin-top:15px; font-size:14px;"></div>
         </div>
     </div>
@@ -421,8 +201,7 @@
             <div style="font-weight:700; font-size:20px; margin-bottom:30px; color:var(--primary);">Smart Reader</div>
             <div class="nav-item active" onclick="showPage('dashboard')"><i class="ph ph-squares-four"></i> 文库</div>
             <div class="nav-item" onclick="showPage('settings')"><i class="ph ph-gear"></i> 设置</div>
-            <div class="nav-item" onclick="signOut()" style="margin-top:auto; color:red;"><i class="ph ph-sign-out"></i>
-                退出</div>
+            <div class="nav-item" onclick="signOut()" style="margin-top:auto; color:red;"><i class="ph ph-sign-out"></i> 退出</div>
         </nav>
 
         <main class="main-content">
@@ -431,9 +210,8 @@
                     <h1 style="font-size:28px; margin:0;">我的文库</h1>
                     <button class="btn-circle" onclick="openEditor(null)"><i class="ph ph-plus"></i></button>
                 </div>
-
-                <div class="stats-container"
-                    style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+                
+                <div class="stats-container" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
                     <div class="stat-card" style="background:var(--bg-card); padding:15px; border-radius:10px;">
                         <div style="font-size:12px; color:var(--text-sec);">总文章</div>
                         <div style="font-size:20px; font-weight:700;" id="stat-count">0</div>
@@ -449,14 +227,11 @@
 
             <div id="page-settings" class="hidden">
                 <h1 style="font-size:28px; margin-bottom:20px;">设置</h1>
-
+                
                 <div style="background:var(--bg-card); border-radius:12px; padding:0 20px; margin-bottom:20px;">
-                    <div
-                        style="padding:15px 0; border-bottom:1px solid var(--separator); display:flex; justify-content:space-between; align-items:center;">
+                    <div style="padding:15px 0; border-bottom:1px solid var(--separator); display:flex; justify-content:space-between; align-items:center;">
                         <span>字体风格</span>
-                        <select id="set-font" class="btn"
-                            style="background:rgba(0,0,0,0.05); border-radius:6px; padding:4px;"
-                            onchange="updateSettings()">
+                        <select id="set-font" class="btn" style="background:rgba(0,0,0,0.05); border-radius:6px; padding:4px;" onchange="updateSettings()">
                             <option value="system">系统默认</option>
                             <option value="serif">衬线体 (Serif)</option>
                             <option value="mono">等宽 (Mono)</option>
@@ -464,15 +239,11 @@
                     </div>
                     <div style="padding:15px 0; display:flex; justify-content:space-between; align-items:center;">
                         <span>字号大小</span>
-                        <input type="number" id="set-size" value="18"
-                            style="width:60px; text-align:center; border:none; background:rgba(0,0,0,0.05); padding:4px; border-radius:6px;"
-                            onchange="updateSettings()">
+                        <input type="number" id="set-size" value="18" style="width:60px; text-align:center; border:none; background:rgba(0,0,0,0.05); padding:4px; border-radius:6px;" onchange="updateSettings()">
                     </div>
                 </div>
 
-                <button class="btn"
-                    style="width:100%; color:red; background:var(--bg-card); padding:15px; border-radius:12px;"
-                    onclick="signOut()">退出登录</button>
+                <button class="btn" style="width:100%; color:red; background:var(--bg-card); padding:15px; border-radius:12px;" onclick="signOut()">退出登录</button>
             </div>
         </main>
 
@@ -502,17 +273,15 @@
         <div class="toolbar">
             <button class="btn" onclick="closeReader()"><i class="ph ph-caret-left"></i> 返回</button>
             <div style="display:flex; gap:10px;">
-                <input type="number" id="reader-size-control" value="18"
-                    style="width:50px; text-align:center; border:none; background:rgba(0,0,0,0.05); border-radius:6px;"
-                    onchange="quickSizeChange(this.value)">
+                <input type="number" id="reader-size-control" value="18" style="width:50px; text-align:center; border:none; background:rgba(0,0,0,0.05); border-radius:6px;" onchange="quickSizeChange(this.value)">
                 <button class="btn" onclick="switchToEdit()">编辑</button>
             </div>
         </div>
-
+        
         <div class="reader-layout">
             <div class="reader-text-area">
                 <h1 id="reader-title" style="margin-bottom:20px;"></h1>
-                <div id="reader-body"></div>
+                <div id="reader-body"></div> 
             </div>
             <div class="reader-notes-area">
                 <div style="font-size:12px; color:var(--text-sec); margin-bottom:10px;">笔记</div>
@@ -553,13 +322,13 @@
         async function handleAuth() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            if (!email || !password) return alert("请输入邮箱和密码");
+            if(!email || !password) return alert("请输入邮箱和密码");
 
             // 尝试登录
-            let { data, error } = await db.auth.signInWithPassword({ email, password });
+            let { data, error } = await db.auth.signInWithPassword({email, password});
             if (error) {
                 // 如果登录失败，尝试注册
-                const res = await db.auth.signUp({ email, password });
+                const res = await db.auth.signUp({email, password});
                 if (res.error) {
                     document.getElementById('auth-msg').innerText = res.error.message;
                 } else {
@@ -582,9 +351,9 @@
         async function loadDocs() {
             const list = document.getElementById('doc-list');
             list.innerHTML = '<div style="color:#999; text-align:center;">加载中...</div>';
-
-            const { data } = await db.from('articles').select('*').order('created_at', { ascending: false });
-
+            
+            const { data } = await db.from('articles').select('*').order('created_at', {ascending: false});
+            
             if (!data || data.length === 0) {
                 list.innerHTML = '<div style="color:#999; text-align:center;">暂无文章，点击右上角 + 新建</div>';
                 return;
@@ -594,7 +363,7 @@
             let words = 0;
             data.forEach(d => words += (d.content || "").length);
             document.getElementById('stat-count').innerText = data.length;
-            document.getElementById('stat-time').innerText = Math.ceil(words / 300) + "m";
+            document.getElementById('stat-time').innerText = Math.ceil(words/300) + "m";
 
             list.innerHTML = data.map(d => `
                 <div class="doc-item" onclick="openReader('${d.id}')">
@@ -611,12 +380,12 @@
             document.getElementById('view-editor').classList.remove('hidden');
             document.getElementById('doc-title').value = '';
             document.getElementById('doc-body').value = '';
-
+            
             // 应用字体设置
             const size = localStorage.getItem('pref_size') || '18';
             document.getElementById('doc-body').style.fontSize = size + 'px';
 
-            if (id) {
+            if(id) {
                 const { data } = await db.from('articles').select('*').eq('id', id).single();
                 document.getElementById('doc-title').value = data.title;
                 document.getElementById('doc-body').value = data.content;
@@ -633,16 +402,16 @@
         async function saveDoc(close) {
             const title = document.getElementById('doc-title').value;
             const content = document.getElementById('doc-body').value;
-            if (!title && !content && close) return closeEditor();
+            if(!title && !content && close) return closeEditor();
 
             const payload = { title, content, user_id: currentUser.id };
-            if (currentDocId) {
+            if(currentDocId) {
                 await db.from('articles').update(payload).eq('id', currentDocId);
             } else {
                 const res = await db.from('articles').insert(payload).select();
-                if (res.data) currentDocId = res.data[0].id;
+                if(res.data) currentDocId = res.data[0].id;
             }
-            if (close) { closeEditor(); loadDocs(); }
+            if(close) { closeEditor(); loadDocs(); }
         }
 
         // ================= 阅读器 (核心修复) =================
@@ -650,7 +419,7 @@
             currentDocId = id;
             document.getElementById('view-reader').classList.remove('hidden');
             const readerBody = document.getElementById('reader-body');
-
+            
             // 1. 先清空，防止显示上一篇
             readerBody.innerText = "加载中...";
             document.getElementById('reader-title').innerText = "";
@@ -663,10 +432,10 @@
 
             // 3. 拉取数据
             const { data } = await db.from('articles').select('*').eq('id', id).single();
-
+            
             // 4. 关键修复：立即显示纯文本，确保不空白
             document.getElementById('reader-title').innerText = data.title;
-            readerBody.innerText = data.content;
+            readerBody.innerText = data.content; 
             readerBody.dataset.raw = data.content; // 备份给高亮用
 
             // 5. 异步加载高亮
@@ -677,8 +446,8 @@
             const { data: notes } = await db.from('annotations').select('*').eq('article_id', articleId);
             const contentDiv = document.getElementById('reader-body');
             const listDiv = document.getElementById('reader-notes-list');
-
-            if (!notes || notes.length === 0) return; // 没有笔记就保持纯文本
+            
+            if(!notes || notes.length === 0) return; // 没有笔记就保持纯文本
 
             let html = contentDiv.dataset.raw;
             listDiv.innerHTML = "";
@@ -687,7 +456,7 @@
                 const safeNote = n.note.replace(/"/g, "&quot;");
                 // 简单的文本替换高亮
                 html = html.split(n.highlight_text).join(`<span class="highlight" onclick="alert('${safeNote}')">${n.highlight_text}</span>`);
-
+                
                 // 侧边栏卡片
                 listDiv.innerHTML += `
                     <div class="note-card">
@@ -701,7 +470,7 @@
         }
 
         async function deleteNote(id) {
-            if (confirm("删除笔记?")) {
+            if(confirm("删除笔记?")) {
                 await db.from('annotations').delete().eq('id', id);
                 loadAnnotations(currentDocId);
             }
@@ -711,10 +480,10 @@
         document.getElementById('reader-body').addEventListener('mouseup', () => {
             const sel = window.getSelection();
             const text = sel.toString().trim();
-            if (!text) return;
+            if(!text) return;
             setTimeout(async () => {
                 const note = prompt("添加笔记:");
-                if (note) {
+                if(note) {
                     await db.from('annotations').insert({ article_id: currentDocId, highlight_text: text, note: note });
                     loadAnnotations(currentDocId);
                 }
@@ -730,11 +499,11 @@
             document.getElementById('page-dashboard').classList.add('hidden');
             document.getElementById('page-settings').classList.add('hidden');
             document.getElementById('page-' + id).classList.remove('hidden');
-
+            
             // 底部导航状态
             document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
-            if (id === 'dashboard') document.getElementById('tab-dash').classList.add('active');
-            if (id === 'settings') document.getElementById('tab-set').classList.add('active');
+            if(id === 'dashboard') document.getElementById('tab-dash').classList.add('active');
+            if(id === 'settings') document.getElementById('tab-set').classList.add('active');
         }
 
         function updateSettings() {
@@ -750,16 +519,15 @@
         function applyStyle(size) {
             localStorage.setItem('pref_size', size);
             document.documentElement.style.setProperty('--user-size', size + 'px');
-
+            
             // 实时生效
             const reader = document.getElementById('reader-body');
             const editor = document.getElementById('doc-body');
-            if (reader) reader.style.fontSize = size + 'px';
-            if (editor) editor.style.fontSize = size + 'px';
+            if(reader) reader.style.fontSize = size + 'px';
+            if(editor) editor.style.fontSize = size + 'px';
         }
 
         init();
     </script>
 </body>
-
 </html>
