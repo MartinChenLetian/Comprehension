@@ -298,7 +298,177 @@
             color: var(--text-sec);
         }
 
+<<<<<<< HEAD
         /* Overlays */
+=======
+        /* Reader Mode */
+        .reader-layout {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        .reader-text-area {
+            flex: 2;
+            padding: 60px;
+            overflow-y: auto;
+            border-right: 1px solid var(--separator);
+            background: var(--bg-card);
+        }
+
+        .reader-notes-area {
+            flex: 1;
+            padding: 24px;
+            background: var(--bg-body);
+            overflow-y: auto;
+            min-width: 320px;
+        }
+
+        .reader-content {
+            white-space: pre-wrap;
+            color: var(--text-main);
+            line-height: 1.8;
+        }
+
+        .highlight {
+            background-color: rgba(255, 214, 10, 0.4);
+            border-bottom: 2px solid #FFD60A;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: 0.2s;
+        }
+
+        .highlight:hover {
+            background-color: rgba(255, 214, 10, 0.7);
+        }
+
+        .note-card {
+            background: var(--bg-card);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid var(--separator);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        }
+
+        .note-quote {
+            border-left: 3px solid #FFD60A;
+            padding-left: 8px;
+            color: var(--text-sec);
+            font-size: 12px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .note-text {
+            font-size: 14px;
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        /* Share Sheet */
+        .share-sheet {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            z-index: 120;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .share-sheet.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .share-card {
+            width: min(520px, 92vw);
+            margin: 0 auto 24px;
+            background: var(--bg-card);
+            border-radius: 18px;
+            border: 1px solid var(--separator);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            transform: translateY(20px);
+            transition: transform 0.2s ease;
+        }
+
+        .share-sheet.active .share-card {
+            transform: translateY(0);
+        }
+
+        .share-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .share-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .share-subtitle {
+            font-size: 12px;
+            color: var(--text-sec);
+            margin-top: 4px;
+        }
+
+        .share-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .share-action {
+            background: rgba(0, 0, 0, 0.04);
+            border: 1px solid transparent;
+            border-radius: 12px;
+            padding: 14px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            color: var(--text-main);
+        }
+
+        .share-action i {
+            font-size: 22px;
+            color: var(--primary);
+        }
+
+        .share-action span {
+            font-size: 12px;
+        }
+
+        .share-action:hover {
+            border-color: var(--primary);
+            background: rgba(0, 122, 255, 0.1);
+        }
+
+        .share-tip {
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--text-sec);
+            background: rgba(0, 0, 0, 0.04);
+            padding: 8px 10px;
+            border-radius: 8px;
+        }
+
+        /* Common */
+>>>>>>> 3df7b13 (,。)
         .overlay {
             position: fixed;
             inset: 0;
@@ -446,6 +616,14 @@
             position: relative;
         }
 
+        .auth-img::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.1));
+            pointer-events: none;
+        }
+
         .auth-img div {
             position: absolute;
             inset: 0;
@@ -467,6 +645,127 @@
             flex-direction: column;
             justify-content: center;
             padding: 60px;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .auth-card {
+            width: 100%;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            border: 1px solid var(--separator);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .auth-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .auth-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0A84FF, #5AC8FA);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .auth-brand-name {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .auth-brand-tagline {
+            font-size: 12px;
+            color: var(--text-sec);
+            margin-top: 2px;
+        }
+
+        .auth-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .auth-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0 0 6px;
+        }
+
+        .auth-subtitle {
+            color: var(--text-sec);
+            margin: 0;
+            font-size: 13px;
+        }
+
+        .auth-badge {
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(0, 122, 255, 0.12);
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .auth-input {
+            margin-bottom: 14px;
+        }
+
+        .auth-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 4px 0 22px;
+            font-size: 13px;
+            color: var(--text-sec);
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .auth-remember {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .auth-switch {
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 13px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: inherit;
+        }
+
+        .auth-switch:hover {
+            background: rgba(0, 122, 255, 0.1);
+        }
+
+        .auth-submit {
+            width: 100%;
+            height: 48px;
+        }
+
+        .auth-msg {
+            text-align: center;
+            color: #FF3B30;
+            margin-top: 16px;
+            font-size: 14px;
+            min-height: 18px;
         }
 
         /* ================== PDF Generation Styles (Invisible on Screen) ================== */
@@ -569,6 +868,22 @@
                 padding: 40px 24px;
             }
 
+            .auth-card {
+                padding: 24px;
+            }
+
+            .auth-head {
+                align-items: flex-start;
+            }
+
+            .share-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .share-card {
+                margin-bottom: 90px;
+            }
+
             .sidebar {
                 display: none;
             }
@@ -646,18 +961,30 @@
             <div id="bg-2"></div>
         </div>
         <div class="auth-form">
-            <h1 style="margin-bottom:10px;">Smart Reader</h1>
-            <p style="color:var(--text-sec); margin-bottom:40px;">极简创作与沉浸阅读</p>
-            <input type="email" id="email" class="input-clean" placeholder="邮箱" style="margin-bottom:16px;">
-            <input type="password" id="password" class="input-clean" placeholder="密码" style="margin-bottom:24px;">
-            <div
-                style="display:flex; justify-content:space-between; margin-bottom:30px; font-size:14px; color:var(--text-sec);">
-                <label style="display:flex; gap:6px;"><input type="checkbox" id="remember"> 14天免登录</label>
-                <a onclick="toggleAuth()" style="color:var(--primary); cursor:pointer;">注册账号</a>
+            <div class="auth-card">
+                <div class="auth-brand">
+                    <div class="auth-logo">SR</div>
+                    <div>
+                        <div class="auth-brand-name">Smart Reader</div>
+                        <div class="auth-brand-tagline">极简创作与沉浸阅读</div>
+                    </div>
+                </div>
+                <div class="auth-head">
+                    <div>
+                        <h1 id="auth-title" class="auth-title">欢迎回来</h1>
+                        <p id="auth-subtitle" class="auth-subtitle">继续你的阅读进度</p>
+                    </div>
+                    <span class="auth-badge" id="auth-badge">登录</span>
+                </div>
+                <input type="email" id="email" class="input-clean auth-input" placeholder="邮箱">
+                <input type="password" id="password" class="input-clean auth-input" placeholder="密码">
+                <div class="auth-row">
+                    <label class="auth-remember"><input type="checkbox" id="remember"> 14天免登录</label>
+                    <button class="auth-switch" type="button" onclick="toggleAuth()" id="auth-switch">没有账号？去注册</button>
+                </div>
+                <button class="btn-primary auth-submit" onclick="handleAuth()" id="auth-btn">登录</button>
+                <div id="auth-msg" class="auth-msg"></div>
             </div>
-            <button class="btn-primary" onclick="handleAuth()" style="width:100%; height:48px;"
-                id="auth-btn">登录</button>
-            <div id="auth-msg" style="text-align:center; color:#FF3B30; margin-top:16px; font-size:14px;"></div>
         </div>
     </div>
 
@@ -797,10 +1124,15 @@
                 <input type="number" id="reader-size-input" class="toolbar-control num-input" value="18"
                     onchange="validateFontSize(this)" oninput="syncReaderFont()">
             </div>
+<<<<<<< HEAD
 
             <div style="display:flex; align-items:center; gap:8px;">
                 <button class="btn-icon-sm" onclick="exportToPDF()" title="导出PDF"><i class="ph ph-share-network"
                         style="font-size:20px;"></i></button>
+=======
+            <div style="display:flex; gap:8px; align-items:center;">
+                <button class="btn-text" onclick="openShare()"><i class="ph ph-share-network"></i> 分享</button>
+>>>>>>> 3df7b13 (,。)
                 <button class="btn-text" onclick="switchToEdit()">编辑</button>
             </div>
         </div>
@@ -815,6 +1147,33 @@
                     笔记</div>
                 <div id="reader-notes-list"></div>
             </div>
+        </div>
+    </div>
+
+    <div id="share-sheet" class="share-sheet hidden" onclick="closeShare(true)">
+        <div class="share-card" onclick="event.stopPropagation()">
+            <div class="share-header">
+                <div>
+                    <div class="share-title">分享文章</div>
+                    <div id="share-doc-title" class="share-subtitle">未命名</div>
+                </div>
+                <button class="btn-text" onclick="closeShare()">关闭</button>
+            </div>
+            <div class="share-actions">
+                <button class="share-action" onclick="shareDoc('system')">
+                    <i class="ph ph-share-network"></i><span>系统分享</span>
+                </button>
+                <button class="share-action" onclick="shareDoc('copy-title')">
+                    <i class="ph ph-text-aa"></i><span>复制标题</span>
+                </button>
+                <button class="share-action" onclick="shareDoc('copy-all')">
+                    <i class="ph ph-copy"></i><span>复制全文</span>
+                </button>
+                <button class="share-action" onclick="shareDoc('download')">
+                    <i class="ph ph-file-text"></i><span>下载 TXT</span>
+                </button>
+            </div>
+            <div id="share-tip" class="share-tip">可直接在系统分享、或复制内容。</div>
         </div>
     </div>
 
@@ -925,9 +1284,13 @@
                 sessionStorage.setItem('active', 'true'); updateUser(session.user);
             }
             if (window.innerWidth < 768) document.getElementById('mobile-logout').style.display = 'block';
+<<<<<<< HEAD
 
             // Init History Manager
             editorHistory = new HistoryManager('doc-body');
+=======
+            updateAuthCopy();
+>>>>>>> 3df7b13 (,。)
         }
 
         // --- Reading Time Logic ---
@@ -1036,9 +1399,29 @@
             ['doc-body', 'reader-body'].forEach(id => { const el = document.getElementById(id); if (el) { el.style.fontFamily = cssF; el.style.fontSize = cssS; } });
         }
 
+        function updateAuthCopy() {
+            const title = document.getElementById('auth-title');
+            const subtitle = document.getElementById('auth-subtitle');
+            const badge = document.getElementById('auth-badge');
+            const switchBtn = document.getElementById('auth-switch');
+            if (!title || !subtitle || !badge || !switchBtn) return;
+            if (isSignup) {
+                title.innerText = "创建你的账号";
+                subtitle.innerText = "一次注册，跨设备同步阅读";
+                badge.innerText = "注册";
+                switchBtn.innerText = "已有账号？去登录";
+            } else {
+                title.innerText = "欢迎回来";
+                subtitle.innerText = "继续你的阅读进度";
+                badge.innerText = "登录";
+                switchBtn.innerText = "没有账号？去注册";
+            }
+        }
+
         async function handleAuth() {
             const email = document.getElementById('email').value, password = document.getElementById('password').value;
             const btn = document.getElementById('auth-btn'), msg = document.getElementById('auth-msg');
+            msg.innerText = "";
             if (!email || !password) return msg.innerText = "请填写完整";
             btn.innerText = "处理中...";
             let res;
@@ -1047,14 +1430,19 @@
 
             if (res.error) { msg.innerText = res.error.message; btn.innerText = isSignup ? "注册" : "登录"; }
             else {
-                if (isSignup && !res.data.session) { msg.innerText = "验证邮件已发送"; isSignup = false; btn.innerText = "登录"; }
+                if (isSignup && !res.data.session) { msg.innerText = "验证邮件已发送"; isSignup = false; btn.innerText = "登录"; updateAuthCopy(); }
                 else {
                     if (document.getElementById('remember').checked) localStorage.setItem('remember', 'true');
                     sessionStorage.setItem('active', 'true'); updateUser(res.data.user);
                 }
             }
         }
-        function toggleAuth() { isSignup = !isSignup; document.getElementById('auth-btn').innerText = isSignup ? "注册" : "登录"; }
+        function toggleAuth() {
+            isSignup = !isSignup;
+            document.getElementById('auth-btn').innerText = isSignup ? "注册" : "登录";
+            document.getElementById('auth-msg').innerText = "";
+            updateAuthCopy();
+        }
         function updateUser(user) {
             currentUser = user; document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-app').classList.remove('hidden');
             const name = user.user_metadata?.full_name || user.email.split('@')[0], avatar = user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${name}`;
@@ -1064,6 +1452,21 @@
         }
 
         function countWords(s) { return s ? s.trim().split(/\s+/).length : 0; }
+
+        async function copyToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(text);
+                return;
+            }
+            const area = document.createElement('textarea');
+            area.value = text;
+            area.setAttribute('readonly', '');
+            area.style.position = 'fixed';
+            area.style.top = '-9999px';
+            document.body.appendChild(area);
+            area.select();
+            try { document.execCommand('copy'); } finally { area.remove(); }
+        }
 
         async function loadDocs() {
             const list = document.getElementById('doc-list'); list.innerHTML = 'Loading...';
@@ -1114,8 +1517,91 @@
             loadAnnotations(id);
         }
 
+<<<<<<< HEAD
         function escapeHtml(text) {
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+=======
+        function openShare() {
+            const sheet = document.getElementById('share-sheet');
+            const title = document.getElementById('reader-title').innerText || '未命名';
+            document.getElementById('share-doc-title').innerText = title;
+            document.getElementById('share-tip').innerText = "可直接在系统分享、或复制内容。";
+            sheet.classList.remove('hidden');
+            requestAnimationFrame(() => sheet.classList.add('active'));
+        }
+
+        function closeShare(force) {
+            const sheet = document.getElementById('share-sheet');
+            if (!sheet || sheet.classList.contains('hidden')) return;
+            if (force) {
+                sheet.classList.add('hidden');
+                sheet.classList.remove('active');
+                return;
+            }
+            sheet.classList.remove('active');
+            setTimeout(() => sheet.classList.add('hidden'), 200);
+        }
+
+        async function shareDoc(type) {
+            const title = document.getElementById('reader-title').innerText || '未命名';
+            const bodyEl = document.getElementById('reader-body');
+            const content = bodyEl?.dataset?.raw || bodyEl?.innerText || '';
+            const tip = document.getElementById('share-tip');
+            const text = `${title}\n\n${content}`.trim();
+            try {
+                if (type === 'system') {
+                    if (navigator.share) {
+                        await navigator.share({ title, text });
+                        tip.innerText = "已调起系统分享";
+                    } else {
+                        await copyToClipboard(text);
+                        tip.innerText = "已复制全文，当前浏览器不支持系统分享";
+                    }
+                    return;
+                }
+                if (type === 'copy-title') {
+                    await copyToClipboard(title);
+                    tip.innerText = "标题已复制";
+                    return;
+                }
+                if (type === 'copy-all') {
+                    await copyToClipboard(text);
+                    tip.innerText = "全文已复制";
+                    return;
+                }
+                if (type === 'download') {
+                    const safeTitle = title.replace(/[\\/:*?"<>|]/g, '').trim() || 'note';
+                    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `${safeTitle}.txt`;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    URL.revokeObjectURL(url);
+                    tip.innerText = "已生成 TXT 文件";
+                }
+            } catch (e) {
+                tip.innerText = "操作失败，请再试一次";
+            }
+        }
+
+        async function loadAnnotations(id) {
+            const { data } = await db.from('annotations').select('*').eq('article_id', id).order('created_at', { ascending: true });
+            activeNotes = data || [];
+            const div = document.getElementById('reader-body'), list = document.getElementById('reader-notes-list'); list.innerHTML = '';
+            let html = div.dataset.raw;
+            if (data && data.length) {
+                data.forEach(n => {
+                    if (html.includes(n.highlight_text)) {
+                        html = html.split(n.highlight_text).join(`<span class="highlight" onclick="showNoteAction('${n.id}', '${n.note.replace(/'/g, "\\'").replace(/\n/g, " ")}')">${n.highlight_text}</span>`);
+                    }
+                    list.innerHTML += `<div class="note-card"><div class="note-quote">"${n.highlight_text}"</div><div class="note-text">${n.note}</div><div style="text-align:right;margin-top:8px;"><button class="btn-text danger" style="padding:0;font-size:12px;" onclick="window.deleteNote('${n.id}')">删除</button></div></div>`;
+                });
+                div.innerHTML = html;
+            } else list.innerHTML = '<div style="color:var(--text-sec);text-align:center;">暂无笔记</div>';
+>>>>>>> 3df7b13 (,。)
         }
 
         async function loadAnnotations(id) {
@@ -1245,8 +1731,13 @@
             document.getElementById('tab-set-mb').classList.toggle('active', !isDash);
             if (isDash) loadDocs();
         }
+<<<<<<< HEAD
         function closeReader() { stopReadingTimer(); document.getElementById('view-reader').classList.add('hidden'); showPage('dashboard'); }
         function switchToEdit() { stopReadingTimer(); document.getElementById('view-reader').classList.add('hidden'); openEditor(currentDocId); }
+=======
+        function closeReader() { closeShare(true); document.getElementById('view-reader').classList.add('hidden'); }
+        function switchToEdit() { closeReader(); openEditor(currentDocId); }
+>>>>>>> 3df7b13 (,。)
         async function signOut() { await db.auth.signOut(); localStorage.removeItem('remember'); sessionStorage.removeItem('active'); location.reload(); }
         function setTheme(v) { document.body.setAttribute('data-theme', v === 'dark' || (v === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'); }
 
