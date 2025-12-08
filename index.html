@@ -13,35 +13,26 @@
     <style>
         /* ================== Apple Design System ================== */
         :root {
-            /* iOS Blue */
             --primary: #007AFF;
-            --primary-hover: #0062cc;
-            /* System Grays */
             --bg-body: #F2F2F7;
-            /* iOS Grouped Background */
-            --bg-card: rgba(255, 255, 255, 0.85);
-            /* Glassy White */
+            --bg-card: #FFFFFF;
             --bg-sidebar: rgba(242, 242, 247, 0.8);
             --text-main: #1C1C1E;
             --text-sec: #8E8E93;
-            --separator: rgba(60, 60, 67, 0.16);
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-
-            /* Typography (San Francisco approximation) */
-            --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-            --radius-l: 18px;
-            --radius-m: 12px;
-            --radius-s: 8px;
+            --separator: rgba(60, 60, 67, 0.15);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+            --radius: 14px;
         }
 
         [data-theme="dark"] {
             --bg-body: #000000;
-            --bg-card: rgba(28, 28, 30, 0.85);
-            --bg-sidebar: rgba(28, 28, 30, 0.8);
+            --bg-card: #1C1C1E;
+            --bg-sidebar: #121212;
             --text-main: #FFFFFF;
             --text-sec: #98989D;
-            --separator: rgba(84, 84, 88, 0.35);
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --separator: rgba(84, 84, 88, 0.4);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         * {
@@ -57,58 +48,80 @@
             padding: 0;
             height: 100vh;
             overflow: hidden;
-            transition: background 0.3s;
         }
 
         .hidden {
             display: none !important;
         }
 
-        /* 按钮风格 (iOS Button) */
+        /* --- 按钮样式 --- */
         .btn {
             border: none;
             outline: none;
             cursor: pointer;
             font-family: inherit;
-            transition: all 0.2s;
+            transition: 0.2s;
             font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn:active {
-            transform: scale(0.96);
+            transform: scale(0.95);
             opacity: 0.8;
         }
 
+        /* 蓝色胶囊按钮 */
         .btn-primary {
             background: var(--primary);
             color: white;
-            border-radius: 40px;
+            border-radius: 20px;
             padding: 10px 24px;
             font-size: 15px;
         }
 
-        .btn-icon {
+        /* 圆形按钮 (Apple Style Circle) */
+        .btn-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 20px;
+        }
+
+        .btn-circle:hover {
+            background: #f0f0f5;
+        }
+
+        [data-theme="dark"] .btn-circle {
+            background: #2C2C2E;
+            color: #0A84FF;
+        }
+
+        /* 文本按钮 */
+        .btn-text {
             background: transparent;
             color: var(--primary);
-            font-size: 22px;
-            padding: 8px;
-            border-radius: 50%;
+            padding: 8px 16px;
+            font-size: 15px;
         }
 
-        .btn-icon:hover {
-            background: rgba(0, 122, 255, 0.1);
+        .btn-text.danger {
+            color: #FF3B30;
         }
 
-        /* 输入框风格 (iOS TextField) */
+        /* --- 输入框 --- */
         .input-apple {
             width: 100%;
-            padding: 12px 16px;
+            padding: 12px;
             background: rgba(118, 118, 128, 0.12);
             border: none;
             border-radius: 10px;
             color: var(--text-main);
             font-size: 16px;
-            transition: 0.2s;
         }
 
         .input-apple:focus {
@@ -116,102 +129,7 @@
             outline: none;
         }
 
-        .input-apple::placeholder {
-            color: var(--text-sec);
-        }
-
-        /* 毛玻璃卡片 */
-        .glass-panel {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--separator);
-            border-radius: var(--radius-l);
-        }
-
-        /* ================== 1. 登录页 (Split View) ================== */
-        .auth-container {
-            display: flex;
-            height: 100vh;
-            width: 100vw;
-        }
-
-        /* 左侧风景 (Immersive) */
-        .auth-banner {
-            flex: 1.8;
-            position: relative;
-            overflow: hidden;
-            background: #000;
-            cursor: pointer;
-        }
-
-        .banner-layer {
-            position: absolute;
-            inset: 0;
-            background-size: cover;
-            background-position: center;
-            opacity: 0;
-            transition: opacity 1.5s ease;
-        }
-
-        .banner-layer.active {
-            opacity: 1;
-            transform: scale(1.02);
-            transition: opacity 1.5s ease, transform 10s linear;
-        }
-
-        /* 引导提示 */
-        .tap-hint {
-            position: absolute;
-            bottom: 50px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 14px;
-            letter-spacing: 1px;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 8px 16px;
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-
-        .tap-hint.show {
-            opacity: 1;
-        }
-
-        /* 右侧登录 */
-        .auth-form-container {
-            flex: 1;
-            max-width: 500px;
-            padding: 60px;
-            background: var(--bg-body);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            box-shadow: -20px 0 50px rgba(0, 0, 0, 0.05);
-            z-index: 10;
-        }
-
-        .auth-header {
-            margin-bottom: 40px;
-        }
-
-        .auth-title {
-            font-size: 34px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: -0.5px;
-        }
-
-        .auth-sub {
-            color: var(--text-sec);
-            font-size: 17px;
-        }
-
-        /* ================== 2. 主应用 (macOS Sidebar Layout) ================== */
+        /* --- 布局 --- */
         .app-container {
             display: flex;
             height: 100vh;
@@ -227,74 +145,54 @@
             display: flex;
             flex-direction: column;
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
         }
 
-        .user-profile {
+        .user-card {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px;
-            margin-bottom: 30px;
-            border-radius: var(--radius-m);
-            transition: 0.2s;
+            padding: 12px;
+            border-radius: 12px;
             cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 20px;
         }
 
-        .user-profile:hover {
+        .user-card:hover {
             background: rgba(0, 0, 0, 0.05);
         }
 
-        .avatar {
+        .user-avatar {
             width: 44px;
             height: 44px;
             border-radius: 50%;
             object-fit: cover;
-        }
-
-        .user-name {
-            font-weight: 600;
-            font-size: 15px;
-        }
-
-        .user-email {
-            font-size: 12px;
-            color: var(--text-sec);
+            background: #ddd;
         }
 
         .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
             padding: 10px 12px;
-            margin-bottom: 4px;
             border-radius: 8px;
             color: var(--text-main);
-            text-decoration: none;
             font-size: 15px;
             cursor: pointer;
-            transition: 0.2s;
-        }
-
-        .nav-item:hover {
-            background: rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 2px;
         }
 
         .nav-item.active {
-            background: var(--primary);
-            color: white;
-        }
-
-        .nav-item.active i {
-            color: white;
-        }
-
-        .nav-item i {
-            font-size: 20px;
+            background: rgba(0, 122, 255, 0.15);
             color: var(--primary);
+            font-weight: 600;
         }
 
-        /* 内容区 */
+        .nav-item:hover:not(.active) {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        /* 主内容 */
         .main-content {
             flex: 1;
             overflow-y: auto;
@@ -312,265 +210,313 @@
         .page-title {
             font-size: 34px;
             font-weight: 700;
-            letter-spacing: -0.8px;
+            letter-spacing: -0.5px;
         }
 
-        /* 文章网格 (Apple Files Style) */
-        .grid-layout {
+        /* 统计卡片 */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-sec);
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        /* 文档列表 */
+        .doc-list {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 24px;
+            gap: 20px;
         }
 
-        .doc-card {
+        .doc-item {
             background: var(--bg-card);
-            border-radius: var(--radius-l);
             padding: 20px;
-            height: 200px;
-            position: relative;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-            border: 1px solid var(--separator);
-            cursor: pointer;
+            border-radius: var(--radius);
+            height: 180px;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
+            box-shadow: var(--shadow);
+            transition: transform 0.2s;
+            cursor: pointer;
+            border: 1px solid transparent;
         }
 
-        .doc-card:hover {
-            transform: scale(1.02);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-        }
-
-        .doc-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            line-height: 1.3;
+        .doc-item:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
         }
 
         .doc-preview {
             font-size: 14px;
             color: var(--text-sec);
-            flex: 1;
             overflow: hidden;
             display: -webkit-box;
             -webkit-line-clamp: 4;
             -webkit-box-orient: vertical;
+            line-height: 1.5;
         }
 
-        .doc-meta {
-            font-size: 12px;
-            color: var(--text-sec);
-            margin-top: 15px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        /* 编辑器/阅读器 覆盖层 */
-        .overlay-page {
+        /* --- 覆盖层 (Editor/Reader) --- */
+        .overlay {
             position: fixed;
             inset: 0;
             background: var(--bg-body);
             z-index: 100;
             display: flex;
             flex-direction: column;
-            padding: 0;
         }
 
-        .overlay-header {
+        .toolbar {
             height: 60px;
+            background: var(--bg-card);
             border-bottom: 1px solid var(--separator);
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 20px;
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
         }
 
-        .editor-body {
+        .toolbar-center {
+            font-weight: 600;
+            font-size: 17px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        /* 编辑器字体控制栏 */
+        .format-bar {
+            background: var(--bg-body);
+            border-bottom: 1px solid var(--separator);
+            padding: 8px 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .format-btn {
+            font-size: 14px;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+        }
+
+        .editor-area {
             flex: 1;
-            padding: 40px;
             max-width: 800px;
-            margin: 0 auto;
             width: 100%;
+            margin: 0 auto;
+            padding: 40px;
             overflow-y: auto;
         }
 
-        textarea {
+        #editor-title {
+            font-size: 32px;
+            font-weight: 800;
+            border: none;
+            background: transparent;
             width: 100%;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        #editor-title:focus {
+            outline: none;
+        }
+
+        #editor-body {
+            width: 100%;
+            min-height: 60vh;
             border: none;
             background: transparent;
             resize: none;
             outline: none;
-            font-size: 18px;
             line-height: 1.6;
             color: var(--text-main);
-            font-family: var(--font-stack);
+            font-size: 18px;
         }
 
-        .title-input {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 20px;
-            height: auto;
+        /* 阅读模式 */
+        .reader-content {
+            font-size: 20px;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            font-family: 'Georgia', serif;
         }
 
-        /* 设置列表 (iOS Settings Style) */
-        .settings-list {
+        /* Settings List */
+        .settings-box {
             max-width: 600px;
             margin: 0 auto;
         }
 
         .settings-group {
             background: var(--bg-card);
-            border-radius: var(--radius-l);
+            border-radius: var(--radius);
             overflow: hidden;
             margin-bottom: 24px;
-            border: 1px solid var(--separator);
         }
 
-        .setting-item {
+        .setting-row {
             padding: 16px;
+            border-bottom: 1px solid var(--separator);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid var(--separator);
-            font-size: 16px;
         }
 
-        .setting-item:last-child {
+        .setting-row:last-child {
             border-bottom: none;
         }
 
-        .setting-label {
+        /* Auth */
+        .auth-split {
             display: flex;
-            align-items: center;
-            gap: 10px;
+            height: 100vh;
         }
 
-        /* Loading */
-        .spinner {
-            width: 24px;
-            height: 24px;
-            border: 3px solid rgba(0, 122, 255, 0.3);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            display: none;
+        .auth-img {
+            flex: 1.5;
+            background: #000;
+            position: relative;
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        .auth-img div {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            transition: opacity 1s;
+            opacity: 0;
+        }
+
+        .auth-img div.active {
+            opacity: 1;
+        }
+
+        .auth-form {
+            flex: 1;
+            max-width: 480px;
+            background: var(--bg-body);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 60px;
         }
     </style>
 </head>
 
 <body>
 
-    <div id="view-auth" class="auth-container">
-        <div class="auth-banner" id="banner-area">
-            <div class="banner-layer active" id="layer-1"></div>
-            <div class="banner-layer" id="layer-2"></div>
-
-            <div class="tap-hint" id="tap-hint">点击图片切换下一张</div>
+    <div id="view-auth" class="auth-split">
+        <div class="auth-img" id="auth-banner">
+            <div id="bg-1" class="active"></div>
+            <div id="bg-2"></div>
         </div>
+        <div class="auth-form">
+            <h1 style="margin-bottom:10px;">Smart Reader</h1>
+            <p style="color:var(--text-sec); margin-bottom:30px;">专注于阅读与写作的极简空间</p>
 
-        <div class="auth-form-container">
-            <div class="auth-header">
-                <div class="auth-title">Smart Reader</div>
-                <div class="auth-sub">你的私人阅读空间</div>
-            </div>
+            <input type="email" id="email" class="input-apple" placeholder="邮箱" style="margin-bottom:16px;">
+            <input type="password" id="password" class="input-apple" placeholder="密码" style="margin-bottom:24px;">
 
-            <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px;">
-                <input type="email" id="email" class="input-apple" placeholder="Apple ID (邮箱)">
-                <input type="password" id="password" class="input-apple" placeholder="密码">
-
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="captcha-in" class="input-apple" placeholder="验证码">
-                    <canvas id="captcha-canvas" width="100" height="46" style="border-radius:10px; cursor:pointer;"
-                        onclick="drawCaptcha()"></canvas>
-                </div>
-            </div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 30px;">
-                <label style="font-size:14px; color:var(--text-sec); display:flex; gap:6px; cursor:pointer;">
-                    <input type="checkbox" id="remember"> 14天内免登录
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+                <label style="font-size:14px; color:var(--text-sec); display:flex; gap:6px;">
+                    <input type="checkbox" id="remember"> 14天免登录
                 </label>
-                <a onclick="toggleMode()"
-                    style="font-size:14px; color:var(--primary); cursor:pointer; font-weight:500;">注册新账号</a>
+                <a onclick="toggleAuth()"
+                    style="color:var(--primary); font-size:14px; cursor:pointer; font-weight:600;">注册新账号</a>
             </div>
 
-            <button class="btn btn-primary" style="width:100%; height:50px; font-size:17px;" onclick="handleAuth()">
-                <span id="btn-text">登录</span>
-                <div class="spinner" id="btn-spin"></div>
-            </button>
-            <div id="auth-msg" style="color:var(--primary); text-align:center; margin-top:16px; font-size:14px;"></div>
+            <button class="btn-primary" onclick="handleAuth()" style="width:100%; height:48px; font-size:16px;"
+                id="auth-btn">登录</button>
+            <div id="auth-msg" style="text-align:center; color: #FF3B30; margin-top:16px; font-size:14px;"></div>
         </div>
     </div>
 
     <div id="view-app" class="app-container hidden">
         <nav class="sidebar">
-            <div class="user-profile" onclick="showPage('settings')">
-                <img id="sidebar-avatar" class="avatar" src="">
-                <div>
-                    <div class="user-name" id="sidebar-name">User</div>
-                    <div class="user-email" id="sidebar-email">...</div>
+            <div class="user-card" onclick="showPage('settings')">
+                <img id="nav-avatar" class="user-avatar">
+                <div style="overflow:hidden;">
+                    <div style="font-weight:600; white-space:nowrap; text-overflow:ellipsis;" id="nav-name">User</div>
+                    <div style="font-size:12px; color:var(--text-sec);">点击管理</div>
                 </div>
             </div>
 
-            <div style="flex:1;">
-                <a class="nav-item active" onclick="showPage('dashboard')" id="nav-dash">
-                    <i class="ph ph-squares-four"></i> 文库
-                </a>
-                <a class="nav-item" onclick="showPage('settings')" id="nav-set">
-                    <i class="ph ph-gear"></i> 设置
-                </a>
+            <div class="nav-item active" onclick="showPage('dashboard')" id="tab-dash">
+                <i class="ph ph-squares-four" style="font-size:20px;"></i> 文库
+            </div>
+            <div class="nav-item" onclick="showPage('settings')" id="tab-set">
+                <i class="ph ph-gear" style="font-size:20px;"></i> 设置
             </div>
 
-            <a class="nav-item" onclick="signOut()" style="color:var(--text-sec); margin-top:auto;">
-                <i class="ph ph-sign-out" style="color:var(--text-sec)"></i> 退出登录
-            </a>
+            <div style="margin-top:auto;">
+                <div class="nav-item" onclick="signOut()" style="color:#FF3B30;">
+                    <i class="ph ph-sign-out" style="font-size:20px;"></i> 退出
+                </div>
+            </div>
         </nav>
 
         <main class="main-content">
             <div id="page-dashboard">
                 <div class="page-header">
                     <div class="page-title">文库</div>
-                    <button class="btn-icon" onclick="openEditor()"
-                        style="background:var(--bg-card); box-shadow:0 2px 8px rgba(0,0,0,0.1);"><i
-                            class="ph ph-plus"></i></button>
+                    <button class="btn btn-circle" onclick="openEditor(null)">
+                        <i class="ph ph-plus"></i>
+                    </button>
                 </div>
 
-                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:16px; margin-bottom:30px;">
-                    <div class="glass-panel" style="padding:16px;">
-                        <div style="font-size:13px; color:var(--text-sec); margin-bottom:4px;">TOTAL DOCS</div>
-                        <div style="font-size:24px; font-weight:700;" id="stat-count">0</div>
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Articles</div>
+                        <div class="stat-value" id="stat-count">0</div>
                     </div>
-                    <div class="glass-panel" style="padding:16px;">
-                        <div style="font-size:13px; color:var(--text-sec); margin-bottom:4px;">READING TIME</div>
-                        <div style="font-size:24px; font-weight:700;">2h 14m</div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Words</div>
+                        <div class="stat-value" id="stat-words">0</div>
                     </div>
-                    <div class="glass-panel" style="padding:16px;">
-                        <div style="font-size:13px; color:var(--text-sec); margin-bottom:4px;">STREAK</div>
-                        <div style="font-size:24px; font-weight:700;">3 Days</div>
+                    <div class="stat-card">
+                        <div class="stat-label">Reading Time</div>
+                        <div class="stat-value" id="stat-time">0m</div>
                     </div>
                 </div>
 
-                <div id="doc-grid" class="grid-layout">加载中...</div>
+                <div id="doc-list" class="doc-list">加载中...</div>
             </div>
 
             <div id="page-settings" class="hidden">
                 <div class="page-header">
                     <div class="page-title">设置</div>
                 </div>
-
-                <div class="settings-list">
+                <div class="settings-box">
                     <div class="settings-group">
-                        <div class="setting-item">
-                            <div class="setting-label"><i class="ph ph-moon"></i> 深色模式</div>
+                        <div class="setting-row">
+                            <span>深色模式</span>
                             <select class="btn" style="background:transparent; color:var(--text-sec);"
                                 onchange="setTheme(this.value)">
                                 <option value="system">跟随系统</option>
@@ -578,23 +524,26 @@
                                 <option value="dark">深色</option>
                             </select>
                         </div>
-                        <div class="setting-item">
-                            <div class="setting-label"><i class="ph ph-image"></i> 更换头像</div>
-                            <input type="file" id="avatar-input" hidden onchange="uploadAvatar(this)">
-                            <button class="btn" style="color:var(--primary);"
-                                onclick="document.getElementById('avatar-input').click()">选择图片</button>
-                        </div>
                     </div>
 
                     <div class="settings-group">
-                        <div class="setting-item">
-                            <div class="setting-label"><i class="ph ph-export"></i> 导出数据</div>
-                            <button class="btn" style="color:var(--primary);" onclick="exportData()">下载 JSON</button>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-label" style="color:var(--danger);"><i class="ph ph-lock-key"></i> 修改密码
+                        <div class="setting-row" style="flex-direction:column; align-items:flex-start; gap:15px;">
+                            <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                                <span>个人头像</span>
+                                <button class="btn-text"
+                                    onclick="document.getElementById('avatar-upload').click()">更换图片</button>
+                                <input type="file" id="avatar-upload" hidden accept="image/*"
+                                    onchange="uploadAvatar(this)">
                             </div>
-                            <button class="btn" style="color:var(--danger);" onclick="changePwd()">重置</button>
+                            <div style="display:flex; gap:15px; align-items:center;">
+                                <img id="setting-avatar-preview"
+                                    style="width:60px; height:60px; border-radius:50%; object-fit:cover; background:#eee;">
+                                <div style="font-size:13px; color:var(--text-sec);">点击右侧按钮上传新头像。<br>支持 JPG, PNG.</div>
+                            </div>
+                        </div>
+                        <div class="setting-row">
+                            <span>修改密码</span>
+                            <button class="btn-text danger" onclick="changePassword()">重置</button>
                         </div>
                     </div>
                 </div>
@@ -602,148 +551,102 @@
         </main>
     </div>
 
-    <div id="view-editor" class="overlay-page hidden">
-        <div class="overlay-header">
-            <button class="btn" onclick="closeEditor()" style="color:var(--primary);">取消</button>
-            <div style="font-weight:600;" id="editor-mode-title">编辑文章</div>
-            <button class="btn" onclick="saveDoc()" style="color:var(--primary); font-weight:700;">完成</button>
+    <div id="view-editor" class="overlay hidden">
+        <div class="toolbar">
+            <button class="btn-text" onclick="closeEditor()">取消</button>
+            <div class="toolbar-center">
+                <span id="save-status" style="font-size:13px; color:var(--text-sec); font-weight:400;">已保存</span>
+            </div>
+            <button class="btn-text" style="font-weight:600;" onclick="saveDoc(true)">完成</button>
         </div>
-        <div class="editor-body">
-            <input type="text" id="doc-title" class="input-apple title-input" placeholder="大标题">
-            <textarea id="doc-content" placeholder="在此输入正文... (支持拖入 .txt 文件)" style="min-height: 80vh;"></textarea>
+
+        <div class="format-bar">
+            <span style="font-size:12px; color:var(--text-sec);">字体:</span>
+            <select id="font-family" class="btn"
+                style="background:rgba(0,0,0,0.05); border-radius:6px; padding:2px 8px; font-size:13px;"
+                onchange="updateEditorStyle()">
+                <option value="sans-serif">无衬线 (Sans)</option>
+                <option value="serif">衬线 (Serif)</option>
+                <option value="monospace">等宽 (Mono)</option>
+            </select>
+
+            <span style="font-size:12px; color:var(--text-sec); margin-left:10px;">大小:</span>
+            <input type="range" id="font-size" min="14" max="32" value="18" oninput="updateEditorStyle()">
+        </div>
+
+        <div class="editor-area">
+            <input type="text" id="doc-title" placeholder="标题" onkeyup="triggerAutoSave()">
+            <textarea id="doc-body" placeholder="开始写作..." onkeyup="triggerAutoSave()"></textarea>
+        </div>
+    </div>
+
+    <div id="view-reader" class="overlay hidden">
+        <div class="toolbar">
+            <button class="btn-text" onclick="closeReader()"><i class="ph ph-arrow-left"></i> 返回</button>
+            <div style="font-size:15px; font-weight:600; color:var(--text-main);" id="reader-top-title">Title</div>
+            <button class="btn-text" onclick="switchToEdit()">编辑</button>
+        </div>
+        <div class="editor-area" style="padding-top:20px;">
+            <h1 id="reader-title" style="margin-bottom:30px; font-size:40px;"></h1>
+            <div id="reader-body" class="reader-content"></div>
         </div>
     </div>
 
     <script>
-        // ================= 配置 (保留你的Supabase) =================
+        // ================= 配置 =================
         const supabaseUrl = 'https://oktgxeukllgglharkutf.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rdGd4ZXVrbGxnZ2xoYXJrdXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNzI1MTAsImV4cCI6MjA4MDY0ODUxMH0.R-XORb7qYMZPGLj4ZdPt3bIrI61TgOs7vCyxwGmnCpg';
         const db = supabase.createClient(supabaseUrl, supabaseKey);
 
-        // ================= 1. 稳定的图片系统 (Static Reliable URLs) =================
-        const stableImages = [
-            'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2000', // Mountains
-            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2000', // Forest
-            'https://images.unsplash.com/photo-1501785888041-af3ef285b470?q=80&w=2000', // Coast
-            'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=2000', // Fog
-            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000', // Canyon
-            'https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=2000', // Forest Dark
-            'https://images.unsplash.com/photo-1433086966358-54859d0ed716?q=80&w=2000', // Bridge
-            'https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?q=80&w=2000', // Stars
-            'https://images.unsplash.com/photo-1494500764479-0c8f2919a3d8?q=80&w=2000', // Lake
-            'https://images.unsplash.com/photo-1502082553048-f009c37129b9?q=80&w=2000'  // Tree
+        // 图片源
+        const bgImages = [
+            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000',
+            'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2000',
+            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2000'
         ];
 
-        const imgEngine = {
-            queue: [],
-            idx: 0,
-            activeLayer: 1,
-            timer: null,
-
-            init() {
-                // 初始化队列
-                this.queue = [...stableImages];
-                this.loadNext(false); // 立即加载第一张
-
-                // 点击事件
-                document.getElementById('banner-area').addEventListener('click', () => {
-                    this.loadNext(true);
-                    this.hideHint();
-                });
-
-                // 首次提示
-                if (!localStorage.getItem('seen_hint')) {
-                    document.getElementById('tap-hint').classList.add('show');
-                }
-
-                // 5分钟定时
-                this.timer = setInterval(() => this.loadNext(false), 300000);
-            },
-
-            loadNext(manual) {
-                if (manual) { clearInterval(this.timer); this.timer = setInterval(() => this.loadNext(false), 300000); }
-
-                // 无限循环逻辑
-                const url = this.queue[this.idx % this.queue.length];
-                this.idx++;
-
-                // 预加载下一张 (Buffer)
-                const nextUrl = this.queue[this.idx % this.queue.length];
-                new Image().src = nextUrl;
-
-                // 切换图层
-                const nextLayer = this.activeLayer === 1 ? 2 : 1;
-                const currEl = document.getElementById(`layer-${this.activeLayer}`);
-                const nextEl = document.getElementById(`layer-${nextLayer}`);
-
-                nextEl.style.backgroundImage = `url('${url}')`;
-                nextEl.classList.add('active');
-                currEl.classList.remove('active');
-                this.activeLayer = nextLayer;
-            },
-
-            hideHint() {
-                document.getElementById('tap-hint').classList.remove('show');
-                localStorage.setItem('seen_hint', 'true');
-            }
-        };
-
-        // ================= 2. 应用逻辑 =================
+        // ================= 逻辑 =================
         let currentUser = null;
         let isSignup = false;
-        let captchaVal = '';
         let currentDocId = null;
+        let saveTimer = null;
+        let bgIdx = 0;
 
+        // 1. 初始化
         async function init() {
-            imgEngine.init();
-            drawCaptcha();
+            // 背景轮播
+            setInterval(() => {
+                bgIdx = (bgIdx + 1) % bgImages.length;
+                const active = document.querySelector('.auth-img div.active');
+                const next = active.id === 'bg-1' ? document.getElementById('bg-2') : document.getElementById('bg-1');
+                next.style.backgroundImage = `url('${bgImages[bgIdx]}')`;
+                next.classList.add('active');
+                active.classList.remove('active');
+            }, 5000);
+            document.getElementById('bg-1').style.backgroundImage = `url('${bgImages[0]}')`;
 
-            // 自动登录检查
+            // 自动登录
             const { data: { session } } = await db.auth.getSession();
-            const remember = localStorage.getItem('apple_remember');
-
-            if (session) {
-                if (!remember && !sessionStorage.getItem('active')) {
-                    await db.auth.signOut();
-                } else {
-                    sessionStorage.setItem('active', 'true');
-                    updateUser(session.user);
-                }
+            if (session && (localStorage.getItem('remember') || sessionStorage.getItem('active'))) {
+                sessionStorage.setItem('active', 'true');
+                updateUser(session.user);
             }
 
-            // 文件拖拽导入
-            const dropZone = document.getElementById('doc-content');
-            dropZone.addEventListener('drop', (e) => {
-                e.preventDefault();
-                const file = e.dataTransfer.files[0];
-                if (file && (file.name.endsWith('.txt') || file.name.endsWith('.md'))) {
-                    const reader = new FileReader();
-                    reader.onload = (ev) => dropZone.value = ev.target.result;
-                    reader.readAsText(file);
-                    if (!document.getElementById('doc-title').value) document.getElementById('doc-title').value = file.name.replace(/\.[^/.]+$/, "");
-                }
-            });
+            // 文本框自适应
+            const tx = document.getElementById('doc-body');
+            tx.addEventListener("input", function () { this.style.height = 'auto'; this.style.height = this.scrollHeight + 'px'; });
         }
 
-        function drawCaptcha() {
-            const ctx = document.getElementById('captcha-canvas').getContext('2d');
-            ctx.fillStyle = '#f2f2f7'; ctx.fillRect(0, 0, 100, 46);
-            ctx.font = 'bold 24px Arial'; ctx.fillStyle = '#1c1c1e';
-            captchaVal = Math.random().toString(36).substring(2, 6).toUpperCase();
-            ctx.fillText(captchaVal, 20, 32);
-        }
-
+        // 2. 认证
         async function handleAuth() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const code = document.getElementById('captcha-in').value.toUpperCase();
             const remember = document.getElementById('remember').checked;
-            const btn = document.getElementById('btn-spin');
             const msg = document.getElementById('auth-msg');
+            const btn = document.getElementById('auth-btn');
 
-            if (code !== captchaVal) { drawCaptcha(); return msg.innerText = "验证码错误"; }
-
-            btn.style.display = 'block'; document.getElementById('btn-text').style.display = 'none';
+            if (!email || !password) return msg.innerText = "请填写完整";
+            btn.innerText = "处理中...";
 
             let res;
             if (isSignup) res = await db.auth.signUp({ email, password });
@@ -751,93 +654,140 @@
 
             if (res.error) {
                 msg.innerText = res.error.message;
-                btn.style.display = 'none'; document.getElementById('btn-text').style.display = 'block';
+                btn.innerText = isSignup ? "注册" : "登录";
             } else {
                 if (isSignup && !res.data.session) {
-                    msg.innerText = "注册成功，请登录"; isSignup = false; drawCaptcha();
+                    msg.innerText = "注册成功，请登录"; isSignup = false; btn.innerText = "登录";
                 } else {
-                    if (remember) localStorage.setItem('apple_remember', 'true');
-                    else localStorage.removeItem('apple_remember');
+                    if (remember) localStorage.setItem('remember', 'true');
                     sessionStorage.setItem('active', 'true');
                     updateUser(res.data.user);
                 }
             }
         }
 
-        function updateUser(user) {
-            currentUser = user;
-            if (user) {
-                document.getElementById('view-auth').classList.add('hidden');
-                document.getElementById('view-app').classList.remove('hidden');
-
-                const name = user.email.split('@')[0];
-                const avatar = user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/notionists/svg?seed=${user.id}`;
-
-                document.getElementById('sidebar-name').innerText = name;
-                document.getElementById('sidebar-email').innerText = user.email;
-                document.getElementById('sidebar-avatar').src = avatar;
-
-                showPage('dashboard');
-            }
+        function toggleAuth() {
+            isSignup = !isSignup;
+            document.getElementById('auth-btn').innerText = isSignup ? "注册" : "登录";
         }
 
-        // 路由与功能
+        function updateUser(user) {
+            currentUser = user;
+            document.getElementById('view-auth').classList.add('hidden');
+            document.getElementById('view-app').classList.remove('hidden');
+
+            const name = user.email.split('@')[0];
+            // 增加时间戳防止缓存
+            const avatar = user.user_metadata?.avatar_url
+                ? `${user.user_metadata.avatar_url}?t=${Date.now()}`
+                : `https://api.dicebear.com/7.x/initials/svg?seed=${name}`;
+
+            document.getElementById('nav-name').innerText = name;
+            document.getElementById('nav-avatar').src = avatar;
+            document.getElementById('setting-avatar-preview').src = avatar;
+
+            showPage('dashboard');
+        }
+
+        async function signOut() {
+            await db.auth.signOut();
+            localStorage.removeItem('remember');
+            sessionStorage.removeItem('active');
+            location.reload();
+        }
+
+        // 3. 页面路由
         function showPage(id) {
             document.getElementById('page-dashboard').classList.add('hidden');
             document.getElementById('page-settings').classList.add('hidden');
             document.getElementById('page-' + id).classList.remove('hidden');
 
-            document.getElementById('nav-dash').classList.remove('active');
-            document.getElementById('nav-set').classList.remove('active');
-            document.getElementById('nav-' + (id === 'dashboard' ? 'dash' : 'set')).classList.add('active');
+            document.getElementById('tab-dash').classList.toggle('active', id === 'dashboard');
+            document.getElementById('tab-set').classList.toggle('active', id === 'settings');
 
             if (id === 'dashboard') loadDocs();
         }
 
-        function toggleMode() {
-            isSignup = !isSignup;
-            document.querySelector('.auth-title').innerText = isSignup ? '创建账号' : 'Smart Reader';
-            document.querySelector('.auth-sub').innerText = isSignup ? '加入我们' : '你的私人阅读空间';
-            document.getElementById('btn-text').innerText = isSignup ? '注册' : '登录';
-        }
-
+        // 4. 文档管理 & 真实统计
         async function loadDocs() {
-            const grid = document.getElementById('doc-grid');
-            grid.innerHTML = '加载中...';
+            const list = document.getElementById('doc-list');
+            list.innerHTML = '加载中...';
             const { data } = await db.from('articles').select('*').order('created_at', { ascending: false });
 
-            document.getElementById('stat-count').innerText = data ? data.length : 0;
-
-            if (!data || !data.length) {
-                grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:50px; color:var(--text-sec);">暂无文档，点击右上角 + 新建</div>`;
-                return;
+            // 真实数据统计
+            let count = 0;
+            let words = 0;
+            if (data && data.length > 0) {
+                count = data.length;
+                data.forEach(doc => {
+                    words += (doc.content || "").length;
+                });
             }
+            // 估算阅读时间 (300字/分)
+            const time = Math.ceil(words / 300);
 
-            grid.innerHTML = data.map(d => `
-                <div class="doc-card" onclick="openEditor('${d.id}')">
-                    <div class="doc-title">${d.title || '无标题'}</div>
-                    <div class="doc-preview">${d.content}</div>
-                    <div class="doc-meta">
+            document.getElementById('stat-count').innerText = count;
+            document.getElementById('stat-words').innerText = words.toLocaleString();
+            document.getElementById('stat-time').innerText = time + "m";
+
+            if (!data || !data.length) return list.innerHTML = '<div style="color:var(--text-sec); padding:20px;">暂无文档</div>';
+
+            list.innerHTML = data.map(d => `
+                <div class="doc-item" onclick="openReader('${d.id}')">
+                    <div>
+                        <h3 style="margin-top:0; font-size:18px;">${d.title || '无标题'}</h3>
+                        <div class="doc-preview">${d.content}</div>
+                    </div>
+                    <div style="font-size:12px; color:var(--text-sec); display:flex; justify-content:space-between;">
                         <span>${new Date(d.created_at).toLocaleDateString()}</span>
-                        <i class="ph ph-pencil-simple"></i>
                     </div>
                 </div>
             `).join('');
         }
 
-        async function openEditor(id = null) {
+        // 5. 编辑器 & 自动保存
+        async function openEditor(id) {
             currentDocId = id;
             document.getElementById('view-editor').classList.remove('hidden');
             document.getElementById('doc-title').value = '';
-            document.getElementById('doc-content').value = '';
+            document.getElementById('doc-body').value = '';
+            document.getElementById('save-status').innerText = '准备就绪';
 
             if (id) {
-                document.getElementById('editor-mode-title').innerText = "编辑文章";
                 const { data } = await db.from('articles').select('*').eq('id', id).single();
                 document.getElementById('doc-title').value = data.title;
-                document.getElementById('doc-content').value = data.content;
+                document.getElementById('doc-body').value = data.content;
+            }
+        }
+
+        function triggerAutoSave() {
+            const status = document.getElementById('save-status');
+            status.innerText = "正在输入...";
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => saveDoc(false), 2000); // 2秒无操作触发保存
+        }
+
+        async function saveDoc(close = false) {
+            const title = document.getElementById('doc-title').value;
+            const content = document.getElementById('doc-body').value;
+            if (!title && !content && close) return closeEditor(); // 空内容直接关闭
+
+            const status = document.getElementById('save-status');
+            status.innerText = "正在保存...";
+
+            const payload = { title, content, user_id: currentUser.id };
+
+            if (currentDocId) {
+                await db.from('articles').update(payload).eq('id', currentDocId);
             } else {
-                document.getElementById('editor-mode-title').innerText = "新建文章";
+                const res = await db.from('articles').insert(payload).select();
+                if (res.data) currentDocId = res.data[0].id;
+            }
+
+            status.innerText = "已保存";
+            if (close) {
+                closeEditor();
+                loadDocs();
             }
         }
 
@@ -845,42 +795,68 @@
             document.getElementById('view-editor').classList.add('hidden');
         }
 
-        async function saveDoc() {
-            const title = document.getElementById('doc-title').value;
-            const content = document.getElementById('doc-content').value;
-            if (!title && !content) return closeEditor();
-
-            const payload = { title, content, user_id: currentUser.id };
-
-            if (currentDocId) {
-                await db.from('articles').update(payload).eq('id', currentDocId);
-            } else {
-                await db.from('articles').insert(payload);
-                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-            }
-            closeEditor();
-            loadDocs();
+        function updateEditorStyle() {
+            const font = document.getElementById('font-family').value;
+            const size = document.getElementById('font-size').value;
+            const body = document.getElementById('doc-body');
+            body.style.fontFamily = font;
+            body.style.fontSize = size + 'px';
         }
 
-        // 设置功能
-        function setTheme(val) {
-            const dark = val === 'dark' || (val === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-            document.body.setAttribute('data-theme', dark ? 'dark' : 'light');
+        // 6. 阅读模式
+        async function openReader(id) {
+            currentDocId = id;
+            document.getElementById('view-reader').classList.remove('hidden');
+            const { data } = await db.from('articles').select('*').eq('id', id).single();
+            document.getElementById('reader-title').innerText = data.title;
+            document.getElementById('reader-top-title').innerText = data.title;
+            document.getElementById('reader-body').innerText = data.content;
         }
 
+        function closeReader() {
+            document.getElementById('view-reader').classList.add('hidden');
+        }
+
+        function switchToEdit() {
+            closeReader();
+            openEditor(currentDocId);
+        }
+
+        // 7. 头像上传修复
         async function uploadAvatar(input) {
             const file = input.files[0];
             if (!file) return;
-            const path = `${currentUser.id}/${Date.now()}`;
-            await db.storage.from('avatars').upload(path, file);
-            const { data } = db.storage.from('avatars').getPublicUrl(path);
-            await db.auth.updateUser({ data: { avatar_url: data.publicUrl } });
-            document.getElementById('sidebar-avatar').src = data.publicUrl;
+
+            const btn = input.previousElementSibling; // Button
+            const preview = document.getElementById('setting-avatar-preview');
+
+            try {
+                // 上传
+                const path = `${currentUser.id}/${Date.now()}`;
+                const { error: uploadErr } = await db.storage.from('avatars').upload(path, file);
+
+                if (uploadErr) throw uploadErr;
+
+                // 获取URL
+                const { data } = db.storage.from('avatars').getPublicUrl(path);
+
+                // 更新Auth
+                const { error: updateErr } = await db.auth.updateUser({ data: { avatar_url: data.publicUrl } });
+                if (updateErr) throw updateErr;
+
+                // 成功
+                preview.src = data.publicUrl;
+                document.getElementById('nav-avatar').src = data.publicUrl;
+                alert("头像更新成功");
+            } catch (err) {
+                console.error(err);
+                alert("上传失败: 请确保后台Storage存在名为'avatars'的Public Bucket");
+            }
         }
 
-        async function signOut() {
-            await db.auth.signOut();
-            location.reload();
+        function setTheme(val) {
+            const dark = val === 'dark' || (val === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.body.setAttribute('data-theme', dark ? 'dark' : 'light');
         }
 
         init();
