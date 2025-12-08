@@ -9,9 +9,10 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="shortcut icon" href="public/icons/icon.png" type="image/x-icon">
 
     <style>
-        /* ================== Clean & Flat Design ================== */
+        /* ================== Ultra Clean Design ================== */
         :root {
             --primary: #007AFF;
             --primary-hover: #0062cc;
@@ -22,10 +23,11 @@
 
             --text-main: #1D1D1F;
             --text-sec: #86868B;
-            --separator: rgba(0, 0, 0, 0.1);
+            --separator: rgba(0, 0, 0, 0.08);
 
-            --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.05);
-            --shadow-float: 0 4px 12px rgba(0, 0, 0, 0.08);
+            /* 去除所有彩色弥散阴影，改用极简微阴影 */
+            --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
 
             --radius: 12px;
             --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
@@ -37,9 +39,9 @@
             --bg-sidebar: rgba(28, 28, 30, 0.95);
             --text-main: #F5F5F7;
             --text-sec: #86868B;
-            --separator: rgba(255, 255, 255, 0.15);
-            --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.3);
-            --shadow-float: 0 4px 12px rgba(0, 0, 0, 0.4);
+            --separator: rgba(255, 255, 255, 0.12);
+            --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.4);
         }
 
         * {
@@ -62,7 +64,7 @@
             display: none !important;
         }
 
-        /* --- 按钮样式 --- */
+        /* --- 极简按钮 (无阴影/微阴影) --- */
         .btn {
             border: none;
             outline: none;
@@ -81,13 +83,13 @@
             opacity: 0.8;
         }
 
+        /* 主按钮：纯色扁平 */
         .btn-primary {
             background: var(--primary);
             color: white;
             border-radius: 8px;
             padding: 8px 20px;
             font-size: 14px;
-            box-shadow: var(--shadow-subtle);
         }
 
         .btn-primary:hover {
@@ -123,14 +125,15 @@
             color: var(--text-main);
         }
 
-        /* 圆形悬浮按钮 */
+        /* 圆形悬浮按钮 (FAB) - 只有极淡的阴影 */
         .btn-circle {
             width: 48px;
             height: 48px;
             border-radius: 50%;
             background: var(--primary);
             color: white;
-            box-shadow: var(--shadow-float);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            /* 纯黑投影，不带色 */
             font-size: 24px;
             display: flex;
             align-items: center;
@@ -298,7 +301,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            box-shadow: var(--shadow-subtle);
+            box-shadow: var(--shadow-card);
             transition: all 0.2s ease;
             cursor: pointer;
             border: 1px solid var(--separator);
@@ -306,7 +309,7 @@
 
         .doc-item:hover {
             transform: translateY(-2px);
-            box-shadow: var(--shadow-float);
+            box-shadow: var(--shadow-hover);
             border-color: var(--primary);
         }
 
@@ -438,7 +441,7 @@
             padding: 16px;
             border-radius: 12px;
             margin-bottom: 16px;
-            box-shadow: var(--shadow-subtle);
+            box-shadow: var(--shadow-card);
             font-size: 14px;
             border: 1px solid var(--separator);
         }
@@ -907,23 +910,23 @@
             }
         }
 
-        // --- 阅读器 (核心修复：先渲染文本，再加载高亮) ---
+        // --- 阅读器 (核心修复) ---
         async function openReader(id) {
             currentDocId = id;
             document.getElementById('view-reader').classList.remove('hidden');
 
             // 1. 获取文章内容
-            const { data } = await db.from('articles').select('*').eq('id', id).single();
-            if (!data) return alert("文章加载失败");
+            const { data, error } = await db.from('articles').select('*').eq('id', id).single();
+            if (error || !data) return alert("文章加载失败: " + (error?.message || "无数据"));
 
-            // 2. 立即渲染正文，确保不空白
+            // 2. 立即渲染正文，确保可见
             const contentDiv = document.getElementById('reader-body');
             document.getElementById('reader-title').innerText = data.title;
             document.getElementById('reader-top-title').innerText = data.title;
 
-            // 必须先赋值 innerText
+            // 先显示纯文本，防止等待笔记时白屏
             contentDiv.innerText = data.content;
-            contentDiv.dataset.raw = data.content; // 存原始内容
+            contentDiv.dataset.raw = data.content; // 备份原始文本
 
             // 3. 异步加载高亮
             loadAnnotations(id);
@@ -935,14 +938,18 @@
             const listDiv = document.getElementById('reader-notes-list');
             listDiv.innerHTML = '';
 
-            // 基于 raw content 重新生成 HTML
+            // 获取原始文本
             let html = contentDiv.dataset.raw;
+            // 容错处理：如果 dataset.raw 丢了，回退到 innerText
+            if (!html) html = contentDiv.innerText;
 
             if (notes && notes.length > 0) {
                 notes.forEach(n => {
-                    const safeNote = n.note.replace(/"/g, "&quot;");
-                    // 渲染高亮
-                    html = html.split(n.highlight_text).join(`<span class="highlight" title="${safeNote}">${n.highlight_text}</span>`);
+                    // 安全替换：如果找不到匹配文字，跳过，不报错
+                    if (html.includes(n.highlight_text)) {
+                        const safeNote = n.note.replace(/"/g, "&quot;");
+                        html = html.split(n.highlight_text).join(`<span class="highlight" title="${safeNote}">${n.highlight_text}</span>`);
+                    }
 
                     listDiv.innerHTML += `
                         <div class="note-card">
