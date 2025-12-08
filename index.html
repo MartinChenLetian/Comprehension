@@ -11,17 +11,16 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        /* ================== Design System ================== */
+        /* ================== Design System (Apple Style) ================== */
         :root {
             --primary: #007AFF;
-            --primary-bg: rgba(0, 122, 255, 0.12);
-            /* 选中态背景 */
             --bg-body: #F5F5F7;
             --bg-card: #FFFFFF;
             --bg-sidebar: rgba(250, 250, 250, 0.95);
             --text-main: #1D1D1F;
             --text-sec: #86868B;
-            --separator: rgba(0, 0, 0, 0.08);
+            --separator: rgba(0, 0, 0, 0.1);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
             --radius: 12px;
             --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
         }
@@ -32,8 +31,8 @@
             --bg-sidebar: rgba(28, 28, 30, 0.95);
             --text-main: #F5F5F7;
             --text-sec: #86868B;
-            --separator: rgba(255, 255, 255, 0.12);
-            --primary-bg: rgba(10, 132, 255, 0.2);
+            --separator: rgba(255, 255, 255, 0.15);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         * {
@@ -56,7 +55,7 @@
             display: none !important;
         }
 
-        /* Buttons & Inputs */
+        /* Buttons */
         .btn {
             border: none;
             outline: none;
@@ -67,7 +66,7 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            transition: 0.2s;
         }
 
         .btn:active {
@@ -81,7 +80,6 @@
             border-radius: 8px;
             padding: 8px 20px;
             font-size: 14px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
         .btn-text {
@@ -109,7 +107,6 @@
             color: var(--text-main);
         }
 
-        /* 修复后的圆形按钮 */
         .btn-circle {
             width: 44px;
             height: 44px;
@@ -117,14 +114,12 @@
             background: var(--primary);
             color: white;
             font-size: 24px;
-            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             flex-shrink: 0;
-            /* 关键：防止被挤压 */
         }
 
         .btn-circle:hover {
-            transform: scale(1.08);
-            box-shadow: 0 6px 16px rgba(0, 122, 255, 0.4);
+            transform: scale(1.05);
         }
 
         .input-clean {
@@ -135,14 +130,12 @@
             border-radius: 10px;
             color: var(--text-main);
             font-size: 16px;
-            transition: 0.2s;
         }
 
         .input-clean:focus {
             background: var(--bg-card);
             border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
         }
 
         /* Layout */
@@ -170,36 +163,6 @@
             position: relative;
         }
 
-        /* Sidebar Navigation Fix (修复侧边栏交互) */
-        .nav-item {
-            padding: 12px 16px;
-            border-radius: 10px;
-            color: var(--text-sec);
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 4px;
-            transition: all 0.2s;
-        }
-
-        .nav-item:hover {
-            background-color: rgba(0, 0, 0, 0.05);
-            color: var(--text-main);
-        }
-
-        .nav-item.active {
-            background-color: var(--primary-bg);
-            color: var(--primary);
-            font-weight: 600;
-        }
-
-        .nav-item.active i {
-            color: var(--primary);
-        }
-
         .user-card {
             display: flex;
             align-items: center;
@@ -207,8 +170,7 @@
             padding: 12px;
             border-radius: 12px;
             cursor: pointer;
-            margin-bottom: 30px;
-            transition: 0.2s;
+            margin-bottom: 20px;
         }
 
         .user-card:hover {
@@ -224,21 +186,43 @@
             border: 1px solid var(--separator);
         }
 
-        /* Dashboard Header Fix (修复按钮位置) */
+        .nav-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--text-sec);
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 4px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .nav-item.active {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .nav-item:hover:not(.active) {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        /* Dashboard */
         .page-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            /* 确保垂直居中 */
             margin-bottom: 30px;
             height: 50px;
         }
 
         .page-title {
-            font-size: 32px;
-            font-weight: 800;
+            font-size: 30px;
+            font-weight: 700;
             letter-spacing: -0.5px;
-            margin: 0;
         }
 
         .stats-container {
@@ -264,14 +248,14 @@
         }
 
         .stat-value {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 700;
             color: var(--text-main);
         }
 
         .doc-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 20px;
             padding-bottom: 100px;
         }
@@ -292,8 +276,8 @@
 
         .doc-item:hover {
             border-color: var(--primary);
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
         }
 
         .doc-preview {
@@ -348,10 +332,6 @@
             color: var(--text-main);
         }
 
-        #doc-title:focus {
-            outline: none;
-        }
-
         #doc-body {
             width: 100%;
             min-height: 60vh;
@@ -362,6 +342,7 @@
             color: var(--text-main);
         }
 
+        /* Reader Mode */
         .reader-layout {
             display: flex;
             height: calc(100vh - 60px);
@@ -380,7 +361,7 @@
             padding: 24px;
             background: var(--bg-body);
             overflow-y: auto;
-            min-width: 300px;
+            min-width: 320px;
         }
 
         .reader-content {
@@ -479,6 +460,7 @@
             padding: 60px;
         }
 
+        /* Mobile */
         .mobile-tab-bar {
             display: none;
         }
@@ -534,6 +516,15 @@
                 padding: 20px 16px 100px 16px;
             }
 
+            .stats-container {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+
+            .doc-list {
+                grid-template-columns: 1fr;
+            }
+
             .reader-layout {
                 flex-direction: column;
             }
@@ -550,11 +541,6 @@
                 min-width: 100%;
                 border-top: 1px solid var(--separator);
                 padding-bottom: 100px;
-            }
-
-            .stats-container,
-            .doc-list {
-                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -605,8 +591,8 @@
         <main class="main-content">
             <div id="page-dashboard">
                 <div class="page-header">
-                    <div class="page-title">我的文库</div>
-                    <button class="btn btn-circle" onclick="openEditor(null)"><i class="ph ph-plus"></i></button>
+                    <div class="page-title">文库</div><button class="btn btn-circle" onclick="openEditor(null)"><i
+                            class="ph ph-plus"></i></button>
                 </div>
                 <div class="stats-container">
                     <div class="stat-card">
@@ -663,8 +649,9 @@
                             </select>
                         </div>
                     </div>
-                    <div style="margin-top:30px; display:none;" id="mobile-logout">
-                        <button class="btn-primary" style="width:100%; background:#FF3B30; color:white;"
+                    <div class="settings-group"
+                        style="border:none; background:transparent; margin-top:20px; display:none;" id="mobile-logout">
+                        <button class="btn-primary" style="width:100%; background:#FF3B30;"
                             onclick="signOut()">退出登录</button>
                     </div>
                 </div>
@@ -738,6 +725,7 @@
 
         const bgImages = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000', 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2000', 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2000'];
         let currentUser = null, isSignup = false, currentDocId = null, saveTimer = null, bgIdx = 0;
+        let activeNotes = []; // 存储当前文章的笔记以便查重
 
         async function init() {
             setInterval(() => {
@@ -831,31 +819,76 @@
 
         async function loadAnnotations(id) {
             const { data } = await db.from('annotations').select('*').eq('article_id', id).order('created_at', { ascending: true });
+            activeNotes = data || []; // Store for duplicate checking
+
             const div = document.getElementById('reader-body'), list = document.getElementById('reader-notes-list'); list.innerHTML = '';
             let html = div.dataset.raw;
             if (data && data.length) {
                 data.forEach(n => {
-                    if (html.includes(n.highlight_text)) html = html.split(n.highlight_text).join(`<span class="highlight" onclick="showNoteAction('${n.id}', '${n.note.replace(/'/g, "\\'")}'); event.stopPropagation();">${n.highlight_text}</span>`);
-                    list.innerHTML += `<div class="note-card"><div class="note-quote">"${n.highlight_text}"</div><div class="note-text">${n.note}</div><div style="text-align:right;margin-top:8px;"><button class="btn-text danger" style="padding:0;font-size:12px;" onclick="deleteNote('${n.id}')">删除</button></div></div>`;
+                    if (html.includes(n.highlight_text)) {
+                        // FIX: Pass safe string to function
+                        html = html.split(n.highlight_text).join(`<span class="highlight" onclick="handleHighlightClick('${n.id}', '${n.note.replace(/'/g, "\\'").replace(/\n/g, " ")}')">${n.highlight_text}</span>`);
+                    }
+                    list.innerHTML += `<div class="note-card"><div class="note-quote">"${n.highlight_text}"</div><div class="note-text">${n.note}</div><div style="text-align:right;margin-top:8px;"><button class="btn-text danger" style="padding:0;font-size:12px;" onclick="window.deleteNote('${n.id}')">删除</button></div></div>`;
                 });
                 div.innerHTML = html;
             } else list.innerHTML = '<div style="color:var(--text-sec);text-align:center;">暂无笔记</div>';
         }
 
-        window.showNoteAction = (id, text) => { if (confirm(`笔记：\n${text}\n\n是否删除？`)) deleteNote(id); };
-        async function deleteNote(id) { await db.from('annotations').delete().eq('id', id); loadAnnotations(currentDocId); }
+        // ================= INTERACTION LOGIC (FIXED) =================
 
+        // 1. Click existing highlight -> Show details/Delete (No duplication)
+        window.handleHighlightClick = (id, text) => {
+            // Prevent event bubbling to document logic
+            event.stopPropagation();
+            if (confirm(`已存在笔记：\n"${text}"\n\n要删除它吗？`)) {
+                window.deleteNote(id);
+            }
+        };
+
+        // 2. Text Selection -> Check duplicate -> Create
         document.getElementById('reader-body').addEventListener('mouseup', (e) => {
-            if (e.target.classList.contains('highlight')) return; // Fix: Prevent duplicate
-            const sel = window.getSelection(), txt = sel.toString().trim();
-            if (!txt) return;
+            // If clicking an existing highlight, stop.
+            if (e.target.classList.contains('highlight')) return;
+
+            const sel = window.getSelection();
+            const text = sel.toString().trim();
+            if (!text) return;
+
+            // CHECK DUPLICATES IN CURRENT ARTICLE
+            const exists = activeNotes.find(n => n.highlight_text === text);
+            if (exists) {
+                // Duplicate found: Prompt to edit
+                if (confirm(`检测到已有笔记：\n"${exists.note}"\n\n是否修改？`)) {
+                    const newNote = prompt("修改笔记内容:", exists.note);
+                    if (newNote && newNote !== exists.note) {
+                        db.from('annotations').update({ note: newNote }).eq('id', exists.id).then(() => loadAnnotations(currentDocId));
+                    }
+                }
+                sel.removeAllRanges(); // Clear selection
+                return;
+            }
+
+            // No duplicate: Create new
             setTimeout(async () => {
                 const note = prompt("添加笔记:");
-                if (note) { await db.from('annotations').insert({ article_id: currentDocId, highlight_text: txt, note: note }); loadAnnotations(currentDocId); }
+                if (note) {
+                    await db.from('annotations').insert({ article_id: currentDocId, highlight_text: text, note: note });
+                    loadAnnotations(currentDocId);
+                }
                 sel.removeAllRanges();
             }, 10);
         });
 
+        // 3. Delete Logic
+        window.deleteNote = async (id) => {
+            if (confirm("确定删除这条笔记吗？")) {
+                await db.from('annotations').delete().eq('id', id);
+                loadAnnotations(currentDocId);
+            }
+        };
+
+        // Editor
         async function openEditor(id) {
             currentDocId = id; document.getElementById('view-editor').classList.remove('hidden');
             document.getElementById('doc-title').value = ''; document.getElementById('doc-body').value = '';
@@ -879,7 +912,10 @@
             if (n) { await db.auth.updateUser({ data: { full_name: n } }); document.getElementById('nav-name').innerText = n; alert("已更新"); }
         }
         async function sendPasswordReset() {
-            if (currentUser) { const { error } = await db.auth.resetPasswordForEmail(currentUser.email, { redirectTo: window.location.href }); alert(error ? error.message : "邮件已发送"); }
+            if (currentUser) {
+                const { error } = await db.auth.resetPasswordForEmail(currentUser.email, { redirectTo: window.location.href });
+                alert(error ? error.message : "邮件已发送 (请确保在Supabase后台配置了Site URL)");
+            }
         }
         async function uploadAvatar(inp) {
             const f = inp.files[0]; if (!f) return;
@@ -896,14 +932,11 @@
         function showPage(id) {
             ['dashboard', 'settings'].forEach(p => document.getElementById('page-' + p).classList.add('hidden'));
             document.getElementById('page-' + id).classList.remove('hidden');
-
-            // Toggle active tabs
             const isDash = id === 'dashboard';
             document.getElementById('tab-dash-pc').classList.toggle('active', isDash);
             document.getElementById('tab-set-pc').classList.toggle('active', !isDash);
             document.getElementById('tab-dash-mb').classList.toggle('active', isDash);
             document.getElementById('tab-set-mb').classList.toggle('active', !isDash);
-
             if (isDash) loadDocs();
         }
         function closeReader() { document.getElementById('view-reader').classList.add('hidden'); }
