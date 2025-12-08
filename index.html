@@ -389,7 +389,7 @@
         }
 
         .share-card {
-            width: min(520px, 92vw);
+            width: min(560px, 94vw);
             margin: 0 auto 24px;
             background: var(--bg-card);
             border-radius: 18px;
@@ -409,7 +409,7 @@
             align-items: flex-start;
             justify-content: space-between;
             gap: 12px;
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
 
         .share-title {
@@ -430,7 +430,7 @@
         }
 
         .share-action {
-            background: rgba(0, 0, 0, 0.04);
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.05));
             border: 1px solid transparent;
             border-radius: 12px;
             padding: 14px 10px;
@@ -465,6 +465,67 @@
             background: rgba(0, 0, 0, 0.04);
             padding: 8px 10px;
             border-radius: 8px;
+        }
+
+        /* Print Layout */
+        #print-root {
+            display: none;
+            color: #111;
+            font-family: "Times New Roman", "Noto Serif SC", "Songti SC", serif;
+        }
+
+        #print-title {
+            font-size: 20pt;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 6pt;
+        }
+
+        #print-meta {
+            font-size: 10pt;
+            color: #444;
+            text-align: center;
+            margin-bottom: 16pt;
+        }
+
+        #print-body {
+            font-size: 12pt;
+            line-height: 1.8;
+            text-align: justify;
+            word-break: break-word;
+        }
+
+        #print-body p {
+            text-indent: 2em;
+            margin: 0 0 12pt;
+        }
+
+        #print-footer {
+            margin-top: 18pt;
+            text-align: right;
+            font-size: 10pt;
+            color: #666;
+        }
+
+        @media print {
+            @page {
+                size: A4;
+                margin: 22mm 20mm;
+            }
+
+            body {
+                background: #fff;
+                height: auto;
+                overflow: visible;
+            }
+
+            body > *:not(#print-root) {
+                display: none !important;
+            }
+
+            #print-root {
+                display: block;
+            }
         }
 
         /* Common */
@@ -611,17 +672,9 @@
         }
 
         .auth-img {
-            flex: 1.5;
+            flex: 2.2;
             background: #000;
             position: relative;
-        }
-
-        .auth-img::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(120deg, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.1));
-            pointer-events: none;
         }
 
         .auth-img div {
@@ -639,33 +692,31 @@
 
         .auth-form {
             flex: 1;
-            max-width: 480px;
+            max-width: none;
+            width: 100%;
             background: var(--bg-body);
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 60px;
-            align-items: center;
+            padding: 80px 8vw;
+            align-items: flex-start;
             gap: 20px;
         }
 
-        .auth-card {
-            width: 100%;
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 32px;
-            border: 1px solid var(--separator);
-            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+        .auth-inner {
+            width: min(520px, 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
         }
 
         .auth-brand {
             display: flex;
             align-items: center;
             gap: 12px;
-            margin-bottom: 24px;
         }
 
-        .auth-logo {
+        .auth-mark {
             width: 40px;
             height: 40px;
             border-radius: 12px;
@@ -678,56 +729,43 @@
             letter-spacing: 1px;
         }
 
-        .auth-brand-name {
+        .auth-brand-title {
             font-size: 18px;
             font-weight: 700;
         }
 
-        .auth-brand-tagline {
+        .auth-brand-sub {
             font-size: 12px;
             color: var(--text-sec);
             margin-top: 2px;
         }
 
-        .auth-head {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
         .auth-title {
-            font-size: 24px;
-            font-weight: 700;
             margin: 0 0 6px;
+            font-size: 26px;
+            font-weight: 700;
         }
 
         .auth-subtitle {
-            color: var(--text-sec);
             margin: 0;
-            font-size: 13px;
+            font-size: 14px;
+            color: var(--text-sec);
         }
 
-        .auth-badge {
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: rgba(0, 122, 255, 0.12);
-            color: var(--primary);
-            font-size: 12px;
-            font-weight: 600;
-            flex-shrink: 0;
+        .auth-card {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
         }
 
         .auth-input {
-            margin-bottom: 14px;
+            margin-top: 2px;
         }
 
         .auth-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin: 4px 0 22px;
             font-size: 13px;
             color: var(--text-sec);
             gap: 10px;
@@ -763,9 +801,43 @@
         .auth-msg {
             text-align: center;
             color: #FF3B30;
-            margin-top: 16px;
+            margin-top: 8px;
             font-size: 14px;
             min-height: 18px;
+        }
+
+        .captcha-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .captcha-canvas {
+            width: 120px;
+            height: 40px;
+            border-radius: 10px;
+            border: 1px solid var(--separator);
+            background: #f0f2f5;
+        }
+
+        .captcha-input {
+            flex: 1;
+            min-width: 160px;
+        }
+
+        .captcha-refresh {
+            border: none;
+            background: transparent;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 6px;
+            border-radius: 8px;
+        }
+
+        .captcha-refresh:hover {
+            background: rgba(0, 122, 255, 0.1);
         }
 
         /* ================== PDF Generation Styles (Invisible on Screen) ================== */
@@ -864,16 +936,25 @@
             }
 
             .auth-form {
-                max-width: 100%;
-                padding: 40px 24px;
+                padding: 32px 20px;
+                align-items: center;
+            }
+
+            .auth-inner {
+                width: 100%;
+                max-width: 440px;
             }
 
             .auth-card {
-                padding: 24px;
+                background: var(--bg-card);
+                border: 1px solid var(--separator);
+                border-radius: 16px;
+                padding: 22px;
+                box-shadow: 0 16px 34px rgba(0, 0, 0, 0.08);
             }
 
-            .auth-head {
-                align-items: flex-start;
+            .auth-title {
+                font-size: 22px;
             }
 
             .share-actions {
@@ -961,29 +1042,35 @@
             <div id="bg-2"></div>
         </div>
         <div class="auth-form">
-            <div class="auth-card">
+            <div class="auth-inner">
                 <div class="auth-brand">
-                    <div class="auth-logo">SR</div>
+                    <div class="auth-mark">SR</div>
                     <div>
-                        <div class="auth-brand-name">Smart Reader</div>
-                        <div class="auth-brand-tagline">极简创作与沉浸阅读</div>
+                        <div class="auth-brand-title">Smart Reader</div>
+                        <div class="auth-brand-sub">极简创作与沉浸阅读</div>
                     </div>
                 </div>
-                <div class="auth-head">
-                    <div>
-                        <h1 id="auth-title" class="auth-title">欢迎回来</h1>
-                        <p id="auth-subtitle" class="auth-subtitle">继续你的阅读进度</p>
+                <div>
+                    <h1 id="auth-title" class="auth-title">欢迎回来</h1>
+                    <p id="auth-subtitle" class="auth-subtitle">继续你的阅读进度</p>
+                </div>
+                <div class="auth-card">
+                    <input type="email" id="email" class="input-clean auth-input" placeholder="邮箱">
+                    <input type="password" id="password" class="input-clean auth-input" placeholder="密码">
+                    <div class="captcha-row">
+                        <canvas id="captcha-canvas" class="captcha-canvas" width="120" height="40"></canvas>
+                        <input type="text" id="captcha-input" class="input-clean captcha-input" placeholder="输入验证码">
+                        <button class="captcha-refresh" type="button" onclick="refreshCaptcha()" title="换一题">
+                            <i class="ph ph-arrow-clockwise"></i>
+                        </button>
                     </div>
-                    <span class="auth-badge" id="auth-badge">登录</span>
+                    <div class="auth-row">
+                        <label class="auth-remember"><input type="checkbox" id="remember"> 14天免登录</label>
+                        <button class="auth-switch" type="button" onclick="toggleAuth()" id="auth-switch">没有账号？去注册</button>
+                    </div>
+                    <button class="btn-primary auth-submit" onclick="handleAuth()" id="auth-btn">登录</button>
+                    <div id="auth-msg" class="auth-msg"></div>
                 </div>
-                <input type="email" id="email" class="input-clean auth-input" placeholder="邮箱">
-                <input type="password" id="password" class="input-clean auth-input" placeholder="密码">
-                <div class="auth-row">
-                    <label class="auth-remember"><input type="checkbox" id="remember"> 14天免登录</label>
-                    <button class="auth-switch" type="button" onclick="toggleAuth()" id="auth-switch">没有账号？去注册</button>
-                </div>
-                <button class="btn-primary auth-submit" onclick="handleAuth()" id="auth-btn">登录</button>
-                <div id="auth-msg" class="auth-msg"></div>
             </div>
         </div>
     </div>
@@ -1156,12 +1243,13 @@
                 <div>
                     <div class="share-title">分享文章</div>
                     <div id="share-doc-title" class="share-subtitle">未命名</div>
+                    <div id="share-doc-meta" class="share-subtitle">论文排版 · PDF</div>
                 </div>
                 <button class="btn-text" onclick="closeShare()">关闭</button>
             </div>
             <div class="share-actions">
-                <button class="share-action" onclick="shareDoc('system')">
-                    <i class="ph ph-share-network"></i><span>系统分享</span>
+                <button class="share-action" onclick="shareDoc('pdf')">
+                    <i class="ph ph-file-pdf"></i><span>系统分享 PDF</span>
                 </button>
                 <button class="share-action" onclick="shareDoc('copy-title')">
                     <i class="ph ph-text-aa"></i><span>复制标题</span>
@@ -1173,8 +1261,15 @@
                     <i class="ph ph-file-text"></i><span>下载 TXT</span>
                 </button>
             </div>
-            <div id="share-tip" class="share-tip">可直接在系统分享、或复制内容。</div>
+            <div id="share-tip" class="share-tip">系统分享会打开论文排版打印，选择“保存为 PDF”。</div>
         </div>
+    </div>
+
+    <div id="print-root">
+        <div id="print-title"></div>
+        <div id="print-meta"></div>
+        <div id="print-body"></div>
+        <div id="print-footer"></div>
     </div>
 
     <script>
@@ -1186,82 +1281,6 @@
         const bgImages = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000', 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2000', 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2000'];
         let currentUser = null, isSignup = false, currentDocId = null, saveTimer = null, bgIdx = 0;
         let activeNotes = [];
-
-        // Timer Variables
-        let readingTimer = null;
-        let sessionSeconds = 0;
-        let docTotalSeconds = 0;
-
-        // Custom History Manager for Undo/Redo Control
-        class HistoryManager {
-            constructor(textareaId) {
-                this.textarea = document.getElementById(textareaId);
-                this.stack = [];
-                this.pointer = -1;
-                this.isTyping = false;
-
-                // Initialize
-                this.textarea.addEventListener('keydown', (e) => this.handleKeydown(e));
-                this.textarea.addEventListener('input', () => this.handleInput());
-            }
-
-            save(text) {
-                if (this.pointer < this.stack.length - 1) {
-                    this.stack = this.stack.slice(0, this.pointer + 1); // Truncate redo stack
-                }
-                this.stack.push(text);
-                this.pointer++;
-            }
-
-            handleInput() {
-                if (!this.isTyping) {
-                    // Initial state or first type after pause
-                    if (this.stack.length === 0) this.save(this.textarea.value); // Save initial state
-                }
-
-                clearTimeout(this.isTyping);
-                this.isTyping = setTimeout(() => {
-                    this.save(this.textarea.value); // Save after typing stops (debounce 500ms)
-                }, 500);
-            }
-
-            handleKeydown(e) {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-                    if (e.shiftKey) {
-                        this.redo();
-                    } else {
-                        this.undo(e);
-                    }
-                }
-            }
-
-            undo(e) {
-                if (this.pointer > 0) {
-                    // We have history, use native or custom?
-                    // To strictly prevent browser fallback when empty, we must manage it manually.
-                    // But syncing manual text replacement with browser cursor is hard.
-                    // TRICK: We let browser do its thing, BUT if our stack is at index 0, we KILL the event.
-                    // Actually, simple logic:
-                    e.preventDefault(); // Stop browser native undo
-                    this.pointer--;
-                    this.textarea.value = this.stack[this.pointer];
-                } else {
-                    // Stack is empty (at initial state). 
-                    // Prevent default to stop browser from undoing navigation/other inputs.
-                    e.preventDefault();
-                    console.log("Nothing to undo (Stack Empty)");
-                }
-            }
-
-            redo() {
-                if (this.pointer < this.stack.length - 1) {
-                    this.pointer++;
-                    this.textarea.value = this.stack[this.pointer];
-                }
-            }
-        }
-
-        let editorHistory = null;
 
         async function init() {
             setInterval(() => {
@@ -1290,7 +1309,6 @@
             editorHistory = new HistoryManager('doc-body');
 =======
             updateAuthCopy();
->>>>>>> 3df7b13 (,。)
         }
 
         // --- Reading Time Logic ---
@@ -1402,20 +1420,79 @@
         function updateAuthCopy() {
             const title = document.getElementById('auth-title');
             const subtitle = document.getElementById('auth-subtitle');
-            const badge = document.getElementById('auth-badge');
             const switchBtn = document.getElementById('auth-switch');
-            if (!title || !subtitle || !badge || !switchBtn) return;
+            const btn = document.getElementById('auth-btn');
+            if (!title || !subtitle || !switchBtn || !btn) return;
             if (isSignup) {
                 title.innerText = "创建你的账号";
-                subtitle.innerText = "一次注册，跨设备同步阅读";
-                badge.innerText = "注册";
+                subtitle.innerText = "注册后将发送验证邮件";
                 switchBtn.innerText = "已有账号？去登录";
+                btn.innerText = "注册";
             } else {
                 title.innerText = "欢迎回来";
                 subtitle.innerText = "继续你的阅读进度";
-                badge.innerText = "登录";
                 switchBtn.innerText = "没有账号？去注册";
+                btn.innerText = "登录";
             }
+        }
+
+        function refreshCaptcha() {
+            const canvas = document.getElementById('captcha-canvas');
+            const input = document.getElementById('captcha-input');
+            if (!canvas || !input) return;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+            const width = 120;
+            const height = 40;
+            const ratio = window.devicePixelRatio || 1;
+            canvas.width = width * ratio;
+            canvas.height = height * ratio;
+            canvas.style.width = `${width}px`;
+            canvas.style.height = `${height}px`;
+            ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 5; i += 1) {
+                code += chars[Math.floor(Math.random() * chars.length)];
+            }
+            captchaAnswer = code;
+
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, '#f3f5f7');
+            gradient.addColorStop(1, '#e8ebf0');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            for (let i = 0; i < 4; i += 1) {
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.15)';
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * width, Math.random() * height);
+                ctx.lineTo(Math.random() * width, Math.random() * height);
+                ctx.stroke();
+            }
+            for (let i = 0; i < 24; i += 1) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+                ctx.beginPath();
+                ctx.arc(Math.random() * width, Math.random() * height, Math.random() * 1.4 + 0.6, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            const spacing = (width - 20) / 5;
+            for (let i = 0; i < code.length; i += 1) {
+                const ch = code[i];
+                const x = 10 + i * spacing + Math.random() * 4;
+                const y = 26 + Math.random() * 6;
+                const angle = (Math.random() - 0.5) * 0.4;
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(angle);
+                ctx.fillStyle = `rgb(${70 + Math.random() * 100}, ${70 + Math.random() * 80}, ${70 + Math.random() * 80})`;
+                ctx.font = '22px "Times New Roman", serif';
+                ctx.fillText(ch, 0, 0);
+                ctx.restore();
+            }
+            input.value = "";
         }
 
         async function handleAuth() {
@@ -1423,14 +1500,21 @@
             const btn = document.getElementById('auth-btn'), msg = document.getElementById('auth-msg');
             msg.innerText = "";
             if (!email || !password) return msg.innerText = "请填写完整";
+            const captchaInput = document.getElementById('captcha-input').value.trim();
+            if (!captchaInput) return msg.innerText = "请填写验证码";
+            if (captchaInput.toLowerCase() !== captchaAnswer.toLowerCase()) {
+                msg.innerText = "验证码错误，请重试";
+                refreshCaptcha();
+                return;
+            }
             btn.innerText = "处理中...";
             let res;
             if (isSignup) res = await db.auth.signUp({ email, password });
             else res = await db.auth.signInWithPassword({ email, password });
 
-            if (res.error) { msg.innerText = res.error.message; btn.innerText = isSignup ? "注册" : "登录"; }
+            if (res.error) { msg.innerText = res.error.message; btn.innerText = isSignup ? "注册" : "登录"; refreshCaptcha(); }
             else {
-                if (isSignup && !res.data.session) { msg.innerText = "验证邮件已发送"; isSignup = false; btn.innerText = "登录"; updateAuthCopy(); }
+                if (isSignup && !res.data.session) { msg.innerText = "验证邮件已发送"; isSignup = false; updateAuthCopy(); refreshCaptcha(); }
                 else {
                     if (document.getElementById('remember').checked) localStorage.setItem('remember', 'true');
                     sessionStorage.setItem('active', 'true'); updateUser(res.data.user);
@@ -1439,9 +1523,10 @@
         }
         function toggleAuth() {
             isSignup = !isSignup;
-            document.getElementById('auth-btn').innerText = isSignup ? "注册" : "登录";
-            document.getElementById('auth-msg').innerText = "";
+            const msg = document.getElementById('auth-msg');
+            if (msg) msg.innerText = "";
             updateAuthCopy();
+            refreshCaptcha();
         }
         function updateUser(user) {
             currentUser = user; document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-app').classList.remove('hidden');
@@ -1471,28 +1556,17 @@
         async function loadDocs() {
             const list = document.getElementById('doc-list'); list.innerHTML = 'Loading...';
             const { data } = await db.from('articles').select('*').order('created_at', { ascending: false });
-            let c = 0, w = 0, tSeconds = 0;
-            if (data && data.length) {
-                c = data.length;
-                data.forEach(d => {
-                    w += countWords(d.content || "");
-                    tSeconds += (d.reading_seconds || 0);
-                });
-            }
-            document.getElementById('stat-count').innerText = c;
-            document.getElementById('stat-words').innerText = w.toLocaleString();
-
-            const th = Math.floor(tSeconds / 3600);
-            const tm = Math.floor((tSeconds % 3600) / 60);
-            document.getElementById('stat-time').innerText = `${th}h ${tm}m`;
-
+            let c = 0, w = 0;
+            if (data && data.length) { c = data.length; data.forEach(d => w += countWords(d.content || "")); }
+            document.getElementById('stat-count').innerText = c; document.getElementById('stat-words').innerText = w.toLocaleString();
+            document.getElementById('stat-time').innerText = Math.ceil(w / 250) + "m";
             if (!data || !data.length) return list.innerHTML = '<div style="color:var(--text-sec);padding:20px;text-align:center;">暂无文档</div>';
             list.innerHTML = data.map(d => `
                 <div class="doc-item" onclick="openReader('${d.id}')">
                     <div><h3 style="margin-top:0;font-size:18px;">${d.title || '无标题'}</h3><div class="doc-preview">${d.content}</div></div>
                     <div class="doc-footer">
                         <span>${new Date(d.created_at).toLocaleDateString()}</span>
-                        <button class="btn-icon-sm delete" onclick="event.stopPropagation(); deleteDoc('${d.id}')" title="删除"><i class="ph ph-trash"></i></button>
+                        <button class="btn-icon-danger" onclick="event.stopPropagation(); deleteDoc('${d.id}')" title="删除文章"><i class="ph ph-trash"></i></button>
                     </div>
                 </div>`).join('');
         }
@@ -1500,7 +1574,8 @@
         window.deleteDoc = async (id) => {
             if (confirm("确定删除这篇文章吗？")) {
                 const { error } = await db.from('articles').delete().eq('id', id);
-                if (error) alert("删除失败: " + error.message); else loadDocs();
+                if (error) alert("删除失败，请检查 RLS 策略");
+                else loadDocs();
             }
         };
 
@@ -1509,11 +1584,8 @@
             const { data } = await db.from('articles').select('*').eq('id', id).single();
             if (!data) return alert("Error");
             document.getElementById('reader-title').innerText = data.title;
-            const div = document.getElementById('reader-body');
-            div.innerText = data.content;
-            div.dataset.raw = data.content;
+            const div = document.getElementById('reader-body'); div.innerText = data.content; div.dataset.raw = data.content;
             applyFontStyle(localStorage.getItem('pref_font') || 'system', localStorage.getItem('pref_size') || '18');
-            startReadingTimer(data.reading_seconds || 0);
             loadAnnotations(id);
         }
 
@@ -1524,8 +1596,10 @@
         function openShare() {
             const sheet = document.getElementById('share-sheet');
             const title = document.getElementById('reader-title').innerText || '未命名';
+            const meta = document.getElementById('share-doc-meta');
             document.getElementById('share-doc-title').innerText = title;
-            document.getElementById('share-tip').innerText = "可直接在系统分享、或复制内容。";
+            if (meta) meta.innerText = "论文排版 · PDF";
+            document.getElementById('share-tip').innerText = "系统分享会打开论文排版打印，选择“保存为 PDF”。";
             sheet.classList.remove('hidden');
             requestAnimationFrame(() => sheet.classList.add('active'));
         }
@@ -1549,14 +1623,10 @@
             const tip = document.getElementById('share-tip');
             const text = `${title}\n\n${content}`.trim();
             try {
-                if (type === 'system') {
-                    if (navigator.share) {
-                        await navigator.share({ title, text });
-                        tip.innerText = "已调起系统分享";
-                    } else {
-                        await copyToClipboard(text);
-                        tip.innerText = "已复制全文，当前浏览器不支持系统分享";
-                    }
+                if (type === 'pdf') {
+                    renderPrintContent(title, content);
+                    closeShare(true);
+                    setTimeout(() => window.print(), 100);
                     return;
                 }
                 if (type === 'copy-title') {
@@ -1583,8 +1653,44 @@
                     tip.innerText = "已生成 TXT 文件";
                 }
             } catch (e) {
-                tip.innerText = "操作失败，请再试一次";
+                if (tip) tip.innerText = "操作失败，请再试一次";
             }
+        }
+
+        async function loadDocs() {
+            const list = document.getElementById('doc-list'); list.innerHTML = 'Loading...';
+            const { data } = await db.from('articles').select('*').order('created_at', { ascending: false });
+            let c = 0, w = 0;
+            if (data && data.length) { c = data.length; data.forEach(d => w += countWords(d.content || "")); }
+            document.getElementById('stat-count').innerText = c; document.getElementById('stat-words').innerText = w.toLocaleString();
+            document.getElementById('stat-time').innerText = Math.ceil(w / 250) + "m";
+            if (!data || !data.length) return list.innerHTML = '<div style="color:var(--text-sec);padding:20px;text-align:center;">暂无文档</div>';
+            list.innerHTML = data.map(d => `
+                <div class="doc-item" onclick="openReader('${d.id}')">
+                    <div><h3 style="margin-top:0;font-size:18px;">${d.title || '无标题'}</h3><div class="doc-preview">${d.content}</div></div>
+                    <div class="doc-footer">
+                        <span>${new Date(d.created_at).toLocaleDateString()}</span>
+                        <button class="btn-icon-danger" onclick="event.stopPropagation(); deleteDoc('${d.id}')" title="删除文章"><i class="ph ph-trash"></i></button>
+                    </div>
+                </div>`).join('');
+        }
+
+        window.deleteDoc = async (id) => {
+            if (confirm("确定删除这篇文章吗？")) {
+                const { error } = await db.from('articles').delete().eq('id', id);
+                if (error) alert("删除失败，请检查 RLS 策略");
+                else loadDocs();
+            }
+        };
+
+        async function openReader(id) {
+            currentDocId = id; document.getElementById('view-reader').classList.remove('hidden');
+            const { data } = await db.from('articles').select('*').eq('id', id).single();
+            if (!data) return alert("Error");
+            document.getElementById('reader-title').innerText = data.title;
+            const div = document.getElementById('reader-body'); div.innerText = data.content; div.dataset.raw = data.content;
+            applyFontStyle(localStorage.getItem('pref_font') || 'system', localStorage.getItem('pref_size') || '18');
+            loadAnnotations(id);
         }
 
         async function loadAnnotations(id) {
