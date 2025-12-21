@@ -15,7 +15,7 @@
             --primary: #007AFF; 
             --bg-body: #F2F2F7;
             --bg-card: #FFFFFF;
-            --bg-sidebar: rgba(255, 255, 255, 0.85);
+            --bg-sidebar: rgba(255, 255, 255, 0.95);
             --text-main: #1C1C1E;
             --text-sec: #8E8E93;
             --separator: rgba(60, 60, 67, 0.12);
@@ -27,7 +27,7 @@
         [data-theme="dark"] {
             --bg-body: #000000;
             --bg-card: #1C1C1E;
-            --bg-sidebar: rgba(28, 28, 30, 0.85);
+            --bg-sidebar: rgba(28, 28, 30, 0.95);
             --text-main: #F2F2F7;
             --text-sec: #8E8E93;
             --separator: rgba(255, 255, 255, 0.15);
@@ -42,7 +42,6 @@
         .btn:active { transform: scale(0.96); opacity: 0.8; }
         .btn-primary { background: var(--primary); color: white; border-radius: 10px; padding: 10px 24px; font-size: 15px; }
         .btn-text { background: transparent; color: var(--primary); padding: 6px 12px; font-size: 14px; border-radius: 8px; }
-        .btn-text:hover { background: rgba(0,122,255,0.1); }
         .btn-text.danger { color: #FF3B30; }
         .btn-back { background: transparent; color: var(--text-sec); font-size: 15px; padding: 8px 12px; border-radius: 8px; }
         .btn-circle { width: 44px; height: 44px; border-radius: 50%; background: var(--bg-card); color: var(--primary); font-size: 22px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); flex-shrink: 0; }
@@ -57,7 +56,6 @@
         .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--separator); padding: 20px 16px; display: flex; flex-direction: column; flex-shrink: 0; backdrop-filter: blur(20px); }
         .main-content { flex: 1; overflow-y: auto; padding: 40px; position: relative; }
 
-        /* Sidebar Elements */
         .user-card { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; margin-bottom: 24px; }
         .user-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: #eee; border: 1px solid var(--separator); }
         .nav-item { padding: 10px 12px; border-radius: 10px; color: var(--text-sec); font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; margin-bottom: 4px; font-weight: 500; transition: 0.2s; }
@@ -68,7 +66,7 @@
         .page-title { font-size: 34px; font-weight: 800; letter-spacing: -0.5px; }
         .stats-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; }
         .stat-card { background: var(--bg-card); padding: 20px; border-radius: var(--radius); border: 1px solid var(--separator); }
-        .stat-label { font-size: 12px; font-weight: 700; color: var(--text-sec); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .stat-label { font-size: 12px; font-weight: 700; color: var(--text-sec); text-transform: uppercase; margin-bottom: 6px; }
         .stat-value { font-size: 28px; font-weight: 700; color: var(--text-main); }
         
         .doc-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding-bottom: 100px; }
@@ -106,13 +104,25 @@
         .auth-img div.active { opacity: 1; }
         .auth-form { flex: 1; max-width: 480px; background: var(--bg-body); display: flex; flex-direction: column; justify-content: center; padding: 60px; }
 
-        /* PDF Watermark Overlay */
-        .pdf-watermark-container {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: none;
-            overflow: hidden; opacity: 0.04; /* 非常淡 */
+        /* ================== PDF Generation Styles (Invisible on Screen) ================== */
+        #pdf-staging-area {
+            position: fixed; top: -9999px; left: -9999px; width: 800px; background: white; padding: 40px;
+            font-family: 'Georgia', serif; /* PDF 使用衬线体更易读 */
+            color: #000;
         }
-        .watermark-text {
-            position: absolute; font-size: 24px; font-weight: bold; color: #000; transform: rotate(-45deg); white-space: nowrap; user-select: none;
+        .pdf-header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #eee; padding-bottom: 20px; }
+        .pdf-title { font-size: 28px; font-weight: bold; margin-bottom: 10px; }
+        .pdf-meta { font-size: 12px; color: #666; }
+        .pdf-body { font-size: 14px; line-height: 1.8; text-align: justify; margin-bottom: 40px; white-space: pre-wrap; }
+        
+        .pdf-notes-section { border-top: 1px solid #ccc; padding-top: 20px; margin-top: 20px; page-break-before: always; }
+        .pdf-notes-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; }
+        .pdf-note-item { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; page-break-inside: avoid; }
+        .pdf-note-quote { font-style: italic; color: #555; font-size: 12px; border-left: 3px solid #ccc; padding-left: 8px; margin-bottom: 5px; }
+        .pdf-note-content { font-size: 13px; }
+
+        .pdf-watermark {
+            text-align: center; color: #ccc; font-size: 10px; margin-top: 50px; border-top: 1px solid #eee; padding-top: 10px;
         }
 
         /* Mobile */
@@ -134,7 +144,7 @@
 </head>
 <body>
 
-    <div id="pdf-watermark" class="pdf-watermark-container"></div>
+    <div id="pdf-staging-area"></div>
 
     <div id="view-auth" class="auth-split">
         <div class="auth-img"><div id="bg-1" class="active"></div><div id="bg-2"></div></div>
@@ -234,12 +244,12 @@
             </div>
 
             <div style="display:flex; align-items:center; gap:8px;">
-                <button class="btn-icon-sm" onclick="exportToPDF()" title="分享为PDF"><i class="ph ph-share-network" style="font-size:20px;"></i></button>
+                <button class="btn-icon-sm" onclick="exportToPDF()" title="导出PDF"><i class="ph ph-share-network" style="font-size:20px;"></i></button>
                 <button class="btn-text" onclick="switchToEdit()">编辑</button>
             </div>
         </div>
         <div class="reader-layout">
-            <div class="reader-text-area" id="reader-pdf-content">
+            <div class="reader-text-area">
                 <h1 id="reader-title" style="margin-bottom:30px; font-size:32px; font-weight:800;"></h1>
                 <div id="reader-body" class="reader-content"></div>
             </div>
@@ -264,6 +274,77 @@
         let sessionSeconds = 0;
         let docTotalSeconds = 0;
 
+        // Custom History Manager for Undo/Redo Control
+        class HistoryManager {
+            constructor(textareaId) {
+                this.textarea = document.getElementById(textareaId);
+                this.stack = [];
+                this.pointer = -1;
+                this.isTyping = false;
+                
+                // Initialize
+                this.textarea.addEventListener('keydown', (e) => this.handleKeydown(e));
+                this.textarea.addEventListener('input', () => this.handleInput());
+            }
+
+            save(text) {
+                if (this.pointer < this.stack.length - 1) {
+                    this.stack = this.stack.slice(0, this.pointer + 1); // Truncate redo stack
+                }
+                this.stack.push(text);
+                this.pointer++;
+            }
+
+            handleInput() {
+                if (!this.isTyping) {
+                    // Initial state or first type after pause
+                    if (this.stack.length === 0) this.save(this.textarea.value); // Save initial state
+                }
+                
+                clearTimeout(this.isTyping);
+                this.isTyping = setTimeout(() => {
+                    this.save(this.textarea.value); // Save after typing stops (debounce 500ms)
+                }, 500);
+            }
+
+            handleKeydown(e) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                    if (e.shiftKey) {
+                        this.redo();
+                    } else {
+                        this.undo(e);
+                    }
+                }
+            }
+
+            undo(e) {
+                if (this.pointer > 0) {
+                    // We have history, use native or custom?
+                    // To strictly prevent browser fallback when empty, we must manage it manually.
+                    // But syncing manual text replacement with browser cursor is hard.
+                    // TRICK: We let browser do its thing, BUT if our stack is at index 0, we KILL the event.
+                    // Actually, simple logic:
+                    e.preventDefault(); // Stop browser native undo
+                    this.pointer--;
+                    this.textarea.value = this.stack[this.pointer];
+                } else {
+                    // Stack is empty (at initial state). 
+                    // Prevent default to stop browser from undoing navigation/other inputs.
+                    e.preventDefault(); 
+                    console.log("Nothing to undo (Stack Empty)");
+                }
+            }
+
+            redo() {
+                if (this.pointer < this.stack.length - 1) {
+                    this.pointer++;
+                    this.textarea.value = this.stack[this.pointer];
+                }
+            }
+        }
+        
+        let editorHistory = null;
+
         async function init() {
             setInterval(() => {
                 bgIdx = (bgIdx + 1) % bgImages.length;
@@ -285,17 +366,18 @@
                 sessionStorage.setItem('active', 'true'); updateUser(session.user);
             }
             if(window.innerWidth < 768) document.getElementById('mobile-logout').style.display = 'block';
+
+            // Init History Manager
+            editorHistory = new HistoryManager('doc-body');
         }
 
         // --- Reading Time Logic ---
         function startReadingTimer(initialSeconds) {
-            stopReadingTimer(); // clear any existing
+            stopReadingTimer();
             sessionSeconds = 0;
             docTotalSeconds = initialSeconds || 0;
             updateTimerDisplay();
-            
             readingTimer = setInterval(() => {
-                // Only count if window is focused
                 if (document.visibilityState === 'visible') {
                     sessionSeconds++;
                     updateTimerDisplay();
@@ -304,15 +386,11 @@
         }
 
         function stopReadingTimer() {
-            if (readingTimer) {
-                clearInterval(readingTimer);
-                readingTimer = null;
-            }
-            // Save time to DB when stopping
+            if (readingTimer) { clearInterval(readingTimer); readingTimer = null; }
             if (currentDocId && sessionSeconds > 0) {
                 const newTotal = docTotalSeconds + sessionSeconds;
                 db.from('articles').update({ reading_seconds: newTotal }).eq('id', currentDocId).then();
-                sessionSeconds = 0; // Reset session
+                sessionSeconds = 0;
             }
         }
 
@@ -321,79 +399,66 @@
             const h = Math.floor(total / 3600);
             const m = Math.floor((total % 3600) / 60);
             const s = total % 60;
-            // Format: 1h 23m or 23:45
             let text = h > 0 ? `${h}h ${m}m` : `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
             document.getElementById('reader-timer-display').innerText = text;
         }
 
-        // --- PDF Export Logic ---
+        // --- PDF Generation Logic (Rebuilt for Layout) ---
         async function exportToPDF() {
-            const element = document.getElementById('reader-pdf-content');
             const title = document.getElementById('reader-title').innerText || 'Document';
+            const content = document.getElementById('reader-body').dataset.raw || "";
             
-            // 1. Create watermark
-            const watermarkDiv = document.getElementById('pdf-watermark');
-            watermarkDiv.innerHTML = '';
-            watermarkDiv.style.display = 'block';
-            
-            // Fill watermark (Simple repetition)
-            const wmText = `${currentUser.email} - ${new Date().toLocaleDateString()}`;
-            for (let i = 0; i < 20; i++) {
-                const span = document.createElement('span');
-                span.className = 'watermark-text';
-                span.innerText = wmText;
-                span.style.top = `${Math.random() * 100}%`;
-                span.style.left = `${Math.random() * 100}%`;
-                watermarkDiv.appendChild(span);
-            }
+            // 1. Build Virtual DOM for PDF
+            const container = document.getElementById('pdf-staging-area');
+            container.innerHTML = `
+                <div class="pdf-header">
+                    <div class="pdf-title">${title}</div>
+                    <div class="pdf-meta">Created by ${currentUser.email} | Smart Reader Pro</div>
+                </div>
+                <div class="pdf-body">${escapeHtml(content)}</div>
+                ${activeNotes.length > 0 ? `
+                    <div class="pdf-notes-section">
+                        <div class="pdf-notes-title">Annotation Summary</div>
+                        ${activeNotes.map(n => `
+                            <div class="pdf-note-item">
+                                <div class="pdf-note-quote">"${n.highlight_text}"</div>
+                                <div class="pdf-note-content">${n.note}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                <div class="pdf-watermark">
+                    Copyright © 2025–2025 Chen Letian 保留一切权利。
+                </div>
+            `;
 
-            // 2. Generate PDF
+            // 2. Generate
             const opt = {
-                margin: 10,
+                margin: 15,
                 filename: `${title}.pdf`,
                 image: { type: 'jpeg', quality: 0.98 },
                 html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } // Fix paragraph splitting
             };
 
-            // Hack: Temporarily append watermark to content element for capture
-            const clone = element.cloneNode(true);
-            clone.style.position = 'relative';
-            const wmClone = watermarkDiv.cloneNode(true);
-            wmClone.style.display = 'block';
-            wmClone.style.position = 'absolute';
-            clone.appendChild(wmClone);
-
             try {
-                const worker = html2pdf().set(opt).from(clone).toPdf();
+                const worker = html2pdf().set(opt).from(container).toPdf();
                 const pdfBlob = await worker.output('blob');
                 
-                // 3. Share or Download
+                // 3. Share
                 const file = new File([pdfBlob], `${title}.pdf`, { type: 'application/pdf' });
                 if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        files: [file],
-                        title: title,
-                        text: 'Shared via Smart Reader'
-                    });
+                    await navigator.share({ files: [file], title: title });
                 } else {
-                    // Fallback to download
                     const url = URL.createObjectURL(pdfBlob);
                     const a = document.createElement('a');
-                    a.href = url;
-                    a.download = `${title}.pdf`;
-                    a.click();
+                    a.href = url; a.download = `${title}.pdf`; a.click();
                 }
-            } catch (err) {
-                console.error(err);
-                alert("生成或分享失败，请重试");
-            } finally {
-                watermarkDiv.style.display = 'none';
-            }
+            } catch (err) { alert("生成失败: " + err.message); }
         }
 
         // --- Standard Logic ---
-        
         function validateFontSize(input) {
             let val = parseInt(input.value); if(isNaN(val)||val<16) val=16; if(val>42) val=42; input.value=val;
             input.id==='editor-size'?syncFont():syncReaderFont();
@@ -455,7 +520,6 @@
             document.getElementById('stat-count').innerText=c; 
             document.getElementById('stat-words').innerText=w.toLocaleString();
             
-            // Stats: Total Real Reading Time
             const th = Math.floor(tSeconds/3600);
             const tm = Math.floor((tSeconds%3600)/60);
             document.getElementById('stat-time').innerText=`${th}h ${tm}m`;
@@ -472,7 +536,7 @@
         }
 
         window.deleteDoc = async (id) => {
-            if(confirm("确定删除这篇文章吗？笔记也会一同删除。")) {
+            if(confirm("确定删除这篇文章吗？")) {
                 const { error } = await db.from('articles').delete().eq('id', id);
                 if(error) alert("删除失败: " + error.message); else loadDocs();
             }
@@ -484,15 +548,10 @@
             if(!data) return alert("Error");
             document.getElementById('reader-title').innerText=data.title;
             const div=document.getElementById('reader-body'); 
-            
             div.innerText = data.content; 
             div.dataset.raw = data.content; 
-
             applyFontStyle(localStorage.getItem('pref_font')||'system', localStorage.getItem('pref_size')||'18');
-            
-            // Start Timer with saved time
             startReadingTimer(data.reading_seconds || 0);
-            
             loadAnnotations(id);
         }
 
@@ -513,28 +572,15 @@
             if (data && data.length > 0) {
                 let html = "";
                 let lastIndex = 0;
-
                 data.forEach(n => {
                     if (n.start_index < lastIndex) return; 
                     if (n.start_index >= rawText.length) return;
-
                     html += escapeHtml(rawText.substring(lastIndex, n.start_index));
-                    
                     const exactText = rawText.substring(n.start_index, n.end_index);
                     const safeNote = n.note.replace(/'/g, "\\'").replace(/\n/g, " ");
                     html += `<span class="highlight" onclick="handleHighlightClick('${n.id}', '${safeNote}')">${escapeHtml(exactText)}</span>`;
-                    
                     lastIndex = n.end_index;
-
-                    listDiv.innerHTML += `
-                        <div class="note-card">
-                            <div class="note-quote">"${escapeHtml(exactText)}"</div>
-                            <div class="note-text">${escapeHtml(n.note)}</div>
-                            <div style="text-align:right;margin-top:8px;">
-                                <button class="btn-text danger" style="padding:0;font-size:12px;" onclick="window.deleteNote('${n.id}')">删除</button>
-                            </div>
-                        </div>
-                    `;
+                    listDiv.innerHTML += `<div class="note-card"><div class="note-quote">"${escapeHtml(exactText)}"</div><div class="note-text">${escapeHtml(n.note)}</div><div style="text-align:right;margin-top:8px;"><button class="btn-text danger" style="padding:0;font-size:12px;" onclick="window.deleteNote('${n.id}')">删除</button></div></div>`;
                 });
                 html += escapeHtml(rawText.substring(lastIndex)); 
                 contentDiv.innerHTML = html;
@@ -556,32 +602,23 @@
         
         document.getElementById('reader-body').addEventListener('mouseup', (e) => {
             if(e.target.classList.contains('highlight')) return; 
-
             const sel = window.getSelection();
             if (sel.rangeCount === 0) return;
             const text = sel.toString().trim();
             if (!text) return;
-
             const range = sel.getRangeAt(0);
-            
             const preCaretRange = range.cloneRange();
             preCaretRange.selectNodeContents(document.getElementById('reader-body'));
             preCaretRange.setEnd(range.startContainer, range.startOffset);
             const startIndex = preCaretRange.toString().length;
             const endIndex = startIndex + text.length;
 
-            const overlap = activeNotes.find(n => 
-                (startIndex >= n.start_index && startIndex < n.end_index) || 
-                (endIndex > n.start_index && endIndex <= n.end_index) ||
-                (startIndex <= n.start_index && endIndex >= n.end_index)
-            );
+            const overlap = activeNotes.find(n => (startIndex >= n.start_index && startIndex < n.end_index) || (endIndex > n.start_index && endIndex <= n.end_index) || (startIndex <= n.start_index && endIndex >= n.end_index));
 
             if (overlap) {
                 if(confirm(`该区域已有笔记：\n"${overlap.note}"\n\n是否修改？`)) {
                     const newNote = prompt("修改笔记:", overlap.note);
-                    if (newNote && newNote !== overlap.note) {
-                        db.from('annotations').update({note: newNote}).eq('id', overlap.id).then(() => loadAnnotations(currentDocId));
-                    }
+                    if (newNote && newNote !== overlap.note) db.from('annotations').update({note: newNote}).eq('id', overlap.id).then(() => loadAnnotations(currentDocId));
                 }
                 sel.removeAllRanges();
                 return;
@@ -590,13 +627,7 @@
             setTimeout(async()=>{
                 const note = prompt("添加笔记:");
                 if(note) { 
-                    await db.from('annotations').insert({
-                        article_id: currentDocId, 
-                        highlight_text: text, 
-                        start_index: startIndex, 
-                        end_index: endIndex, 
-                        note: note
-                    }); 
+                    await db.from('annotations').insert({ article_id: currentDocId, highlight_text: text, start_index: startIndex, end_index: endIndex, note: note }); 
                     loadAnnotations(currentDocId); 
                 }
                 sel.removeAllRanges();
@@ -607,18 +638,23 @@
             currentDocId=id; document.getElementById('view-editor').classList.remove('hidden');
             document.getElementById('doc-title').value=''; document.getElementById('doc-body').value='';
             document.getElementById('save-status').innerText='准备就绪';
-            if(id) { const {data}=await db.from('articles').select('*').eq('id',id).single(); document.getElementById('doc-title').value=data.title; document.getElementById('doc-body').value=data.content; }
+            
+            // Re-init history for new doc
+            editorHistory.stack = [];
+            editorHistory.pointer = -1;
+
+            if(id) { 
+                const {data}=await db.from('articles').select('*').eq('id',id).single(); 
+                document.getElementById('doc-title').value=data.title; 
+                document.getElementById('doc-body').value=data.content;
+                editorHistory.save(data.content); // Init history
+            }
         }
-        function closeEditor(){ 
-            document.getElementById('view-editor').classList.add('hidden'); 
-            showPage('dashboard'); 
-        }
+        function closeEditor(){ document.getElementById('view-editor').classList.add('hidden'); showPage('dashboard'); }
         function triggerAutoSave(){ document.getElementById('save-status').innerText="输入中..."; clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveDoc(false),2000); }
         async function saveDoc(close){
             const t=document.getElementById('doc-title').value, c=document.getElementById('doc-body').value;
-            // Allow closing empty new docs without saving
-            if(!t && !c && close) return closeEditor();
-
+            if(!t&&!c&&close) return closeEditor();
             document.getElementById('save-status').innerText="保存中...";
             const pl={title:t, content:c, user_id:currentUser.id};
             if(currentDocId) await db.from('articles').update(pl).eq('id',currentDocId);
@@ -626,13 +662,8 @@
             document.getElementById('save-status').innerText="已保存"; if(close) { closeEditor(); loadDocs(); }
         }
 
-        async function updateName(){ 
-            const n=document.getElementById('set-name').value; 
-            if(n) { await db.auth.updateUser({data:{full_name:n}}); document.getElementById('nav-name').innerText=n; alert("已更新"); } 
-        }
-        async function sendPasswordReset(){
-            if(currentUser) { const {error}=await db.auth.resetPasswordForEmail(currentUser.email,{redirectTo:window.location.href}); alert(error?error.message:"邮件已发送"); }
-        }
+        async function updateName(){ const n=document.getElementById('set-name').value; if(n) { await db.auth.updateUser({data:{full_name:n}}); document.getElementById('nav-name').innerText=n; alert("已更新"); } }
+        async function sendPasswordReset(){ if(currentUser) { const {error}=await db.auth.resetPasswordForEmail(currentUser.email,{redirectTo:window.location.href}); alert(error?error.message:"邮件已发送"); } }
         async function uploadAvatar(inp){
             const f=inp.files[0]; if(!f) return;
             document.getElementById('setting-avatar-preview').src=URL.createObjectURL(f);
@@ -642,31 +673,21 @@
                 const {data}=db.storage.from('avatars').getPublicUrl(path);
                 await db.auth.updateUser({data:{avatar_url:data.publicUrl}});
                 document.getElementById('nav-avatar').src=data.publicUrl; alert("头像更新成功");
-            } catch(e){ alert("上传失败，请检查Bucket权限"); }
+            } catch(e){ alert("上传失败"); }
         }
 
         function showPage(id) {
             ['dashboard','settings'].forEach(p=>document.getElementById('page-'+p).classList.add('hidden'));
             document.getElementById('page-'+id).classList.remove('hidden');
-            
             const isDash = id==='dashboard';
             document.getElementById('tab-dash-pc').classList.toggle('active', isDash);
             document.getElementById('tab-set-pc').classList.toggle('active', !isDash);
             document.getElementById('tab-dash-mb').classList.toggle('active', isDash);
             document.getElementById('tab-set-mb').classList.toggle('active', !isDash);
-
             if(isDash) loadDocs();
         }
-        function closeReader(){ 
-            stopReadingTimer(); // Stop timer on exit
-            document.getElementById('view-reader').classList.add('hidden'); 
-            showPage('dashboard');
-        }
-        function switchToEdit(){ 
-            stopReadingTimer(); 
-            document.getElementById('view-reader').classList.add('hidden'); 
-            openEditor(currentDocId); 
-        }
+        function closeReader(){ stopReadingTimer(); document.getElementById('view-reader').classList.add('hidden'); showPage('dashboard'); }
+        function switchToEdit(){ stopReadingTimer(); document.getElementById('view-reader').classList.add('hidden'); openEditor(currentDocId); }
         async function signOut(){ await db.auth.signOut(); localStorage.removeItem('remember'); sessionStorage.removeItem('active'); location.reload(); }
         function setTheme(v){ document.body.setAttribute('data-theme', v==='dark'||(v==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'); }
 
