@@ -10,90 +10,114 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
-        /* ================== Design System ================== */
+        /* ================== Design System (Apple Modern) ================== */
         :root {
             --primary: #007AFF; 
-            --bg-body: #F5F5F7;
+            --primary-bg: rgba(0, 122, 255, 0.1);
+            --bg-body: #F2F2F7; /* iOS System Gray 6 */
             --bg-card: #FFFFFF;
-            --bg-sidebar: rgba(250, 250, 250, 0.95);
-            --text-main: #1D1D1F;
-            --text-sec: #86868B;
-            --separator: rgba(0, 0, 0, 0.1);
-            --radius: 12px;
+            --bg-sidebar: rgba(255, 255, 255, 0.85); /* 毛玻璃基底 */
+            --text-main: #1C1C1E;
+            --text-sec: #8E8E93;
+            --separator: rgba(60, 60, 67, 0.12);
+            --shadow: 0 4px 24px rgba(0,0,0,0.06);
+            --radius: 14px;
             --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            --safe-bottom: env(safe-area-inset-bottom);
         }
 
         [data-theme="dark"] {
             --bg-body: #000000;
             --bg-card: #1C1C1E;
-            --bg-sidebar: rgba(28, 28, 30, 0.95);
-            --text-main: #F5F5F7;
-            --text-sec: #86868B;
+            --bg-sidebar: rgba(28, 28, 30, 0.85);
+            --text-main: #F2F2F7;
+            --text-sec: #8E8E93;
             --separator: rgba(255, 255, 255, 0.15);
+            --shadow: 0 4px 24px rgba(0,0,0,0.4);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: var(--font-stack); background-color: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; height: 100vh; overflow: hidden; }
+        body { font-family: var(--font-stack); background-color: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; height: 100vh; overflow: hidden; transition: background 0.3s; }
         .hidden { display: none !important; }
 
-        /* Buttons */
-        .btn { border: none; outline: none; cursor: pointer; font-family: inherit; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; }
-        .btn:active { opacity: 0.7; transform: scale(0.98); }
-        .btn-primary { background: var(--primary); color: white; border-radius: 8px; padding: 8px 20px; font-size: 14px; }
-        .btn-text { background: transparent; color: var(--primary); padding: 6px 12px; font-size: 14px; border-radius: 6px; }
+        /* Buttons & Interactions */
+        .btn { border: none; outline: none; cursor: pointer; font-family: inherit; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease; }
+        .btn:active { transform: scale(0.96); opacity: 0.8; }
+        
+        .btn-primary { background: var(--primary); color: white; border-radius: 10px; padding: 10px 24px; font-size: 15px; }
+        .btn-text { background: transparent; color: var(--primary); padding: 6px 12px; font-size: 14px; border-radius: 8px; }
+        .btn-text:hover { background: var(--primary-bg); }
         .btn-text.danger { color: #FF3B30; }
+        .btn-text.danger:hover { background: rgba(255, 59, 48, 0.1); }
+        
         .btn-back { background: transparent; color: var(--text-sec); font-size: 15px; padding: 8px 12px; border-radius: 8px; }
-        .btn-circle { width: 44px; height: 44px; border-radius: 50%; background: var(--primary); color: white; font-size: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); flex-shrink: 0; }
-        .btn-icon-danger { background: transparent; color: #FF3B30; padding: 8px; border-radius: 50%; font-size: 18px; transition: 0.2s; }
-        
-        .input-clean { width: 100%; padding: 12px; background: rgba(120, 120, 128, 0.1); border: 1px solid transparent; border-radius: 10px; color: var(--text-main); font-size: 16px; }
-        .input-clean:focus { background: var(--bg-card); border-color: var(--primary); outline: none; }
+        .btn-back:hover { color: var(--text-main); background: rgba(0,0,0,0.05); }
 
-        /* Layout */
+        .btn-circle { width: 44px; height: 44px; border-radius: 50%; background: var(--bg-card); color: var(--primary); font-size: 22px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); flex-shrink: 0; }
+        .btn-circle:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
+
+        .btn-icon-sm { background: transparent; padding: 6px; border-radius: 6px; color: var(--text-sec); transition: 0.2s; }
+        .btn-icon-sm:hover { background: rgba(0,0,0,0.05); color: var(--text-main); }
+        .btn-icon-sm.delete:hover { background: rgba(255, 59, 48, 0.1); color: #FF3B30; }
+
+        .input-clean { width: 100%; padding: 12px; background: rgba(120, 120, 128, 0.12); border: 1px solid transparent; border-radius: 10px; color: var(--text-main); font-size: 16px; transition: 0.2s; }
+        .input-clean:focus { background: var(--bg-card); box-shadow: 0 0 0 2px var(--primary); outline: none; }
+
+        /* Layout Structure */
         .app-container { display: flex; height: 100vh; width: 100vw; }
-        .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--separator); padding: 24px 16px; display: flex; flex-direction: column; flex-shrink: 0; backdrop-filter: blur(20px); }
-        .main-content { flex: 1; overflow-y: auto; padding: 40px; position: relative; }
         
-        .user-card { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; cursor: pointer; margin-bottom: 20px; }
-        .user-avatar { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; background: #eee; border: 1px solid var(--separator); }
-        .nav-item { padding: 10px 12px; border-radius: 8px; color: var(--text-sec); font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-        .nav-item.active { background: rgba(0,0,0,0.05); color: var(--text-main); font-weight: 600; }
+        .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--separator); padding: 20px 16px; display: flex; flex-direction: column; flex-shrink: 0; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .main-content { flex: 1; overflow-y: auto; padding: 40px; position: relative; }
+
+        /* Sidebar Elements */
+        .user-card { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; cursor: default; margin-bottom: 24px; }
+        .user-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: #eee; border: 1px solid var(--separator); }
+        .nav-item { padding: 10px 12px; border-radius: 10px; color: var(--text-sec); font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; margin-bottom: 4px; font-weight: 500; transition: 0.2s; }
+        .nav-item:hover { background: rgba(0,0,0,0.04); color: var(--text-main); }
+        .nav-item.active { background: var(--bg-card); color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.04); font-weight: 600; }
 
         /* Dashboard */
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; height: 50px; }
-        .page-title { font-size: 30px; font-weight: 700; letter-spacing: -0.5px; }
+        .page-title { font-size: 34px; font-weight: 800; letter-spacing: -0.5px; }
+        
         .stats-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; }
         .stat-card { background: var(--bg-card); padding: 20px; border-radius: var(--radius); border: 1px solid var(--separator); }
-        .stat-value { font-size: 24px; font-weight: 700; color: var(--text-main); }
-        
-        .doc-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; padding-bottom: 100px; }
-        .doc-item { background: var(--bg-card); padding: 24px; border-radius: var(--radius); height: auto; min-height: 180px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--separator); cursor: pointer; transition: 0.2s; position: relative; }
-        .doc-item:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .doc-preview { font-size: 14px; color: var(--text-sec); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-height: 1.6; margin-top: 10px; margin-bottom: 20px; }
-        .doc-footer { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-sec); }
+        .stat-label { font-size: 12px; font-weight: 700; color: var(--text-sec); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .stat-value { font-size: 28px; font-weight: 700; color: var(--text-main); }
 
-        /* Reader */
-        .reader-layout { display: flex; height: calc(100vh - 60px); }
-        .reader-text-area { flex: 2; padding: 60px; overflow-y: auto; border-right: 1px solid var(--separator); background: var(--bg-card); position: relative; }
-        .reader-notes-area { flex: 1; padding: 24px; background: var(--bg-body); overflow-y: auto; min-width: 320px; }
-        
-        /* 关键：保留空白符，确保索引准确 */
-        .reader-content { white-space: pre-wrap; color: var(--text-main); line-height: 1.8; word-wrap: break-word; }
-        
-        .highlight { background-color: rgba(255, 214, 10, 0.4); border-bottom: 2px solid #FFD60A; cursor: pointer; border-radius: 2px; }
-        .highlight:hover { background-color: rgba(255, 214, 10, 0.7); }
-        
-        .note-card { background: var(--bg-card); padding: 16px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--separator); box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .note-quote { border-left: 3px solid #FFD60A; padding-left: 8px; color: var(--text-sec); font-size: 12px; margin-bottom: 8px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .note-text { font-size: 14px; color: var(--text-main); line-height: 1.5; }
+        .doc-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding-bottom: 100px; }
+        .doc-item { background: var(--bg-card); padding: 24px; border-radius: var(--radius); height: auto; min-height: 180px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--separator); cursor: pointer; transition: all 0.2s; position: relative; }
+        .doc-item:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: transparent; }
+        .doc-preview { font-size: 15px; color: var(--text-sec); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-height: 1.6; margin-top: 12px; margin-bottom: 24px; }
+        .doc-footer { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-sec); }
 
-        /* Editor & Common */
+        /* Overlays (Editor/Reader) */
         .overlay { position: fixed; inset: 0; background: var(--bg-body); z-index: 100; display: flex; flex-direction: column; }
         .toolbar { height: 60px; background: var(--bg-card); border-bottom: 1px solid var(--separator); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; }
-        .toolbar-control { background: rgba(0,0,0,0.05); border: none; border-radius: 6px; padding: 6px 10px; font-size: 13px; color: var(--text-main); margin-left: 8px; }
+        
         .editor-area { flex: 1; max-width: 800px; width: 100%; margin: 0 auto; padding: 40px; overflow-y: auto; }
-        #doc-title { font-size: 32px; font-weight: 800; border: none; background: transparent; width: 100%; margin-bottom: 24px; color: var(--text-main); }
+        #doc-title { font-size: 36px; font-weight: 800; border: none; background: transparent; width: 100%; margin-bottom: 20px; color: var(--text-main); }
         #doc-body { width: 100%; min-height: 60vh; border: none; background: transparent; resize: none; outline: none; color: var(--text-main); }
+
+        /* Reader Split View */
+        .reader-layout { display: flex; height: calc(100vh - 60px); }
+        .reader-text-area { flex: 2; padding: 60px; overflow-y: auto; border-right: 1px solid var(--separator); background: var(--bg-card); }
+        .reader-notes-area { flex: 1; padding: 24px; background: var(--bg-body); overflow-y: auto; min-width: 320px; }
+        
+        /* Typography Content */
+        .reader-content { white-space: pre-wrap; color: var(--text-main); line-height: 1.8; word-wrap: break-word; }
+        
+        /* Highlighting (Coordinate Based) */
+        .highlight { background-color: rgba(255, 214, 10, 0.4); border-bottom: 2px solid #FFD60A; cursor: pointer; border-radius: 2px; transition: 0.2s; }
+        .highlight:hover { background-color: rgba(255, 214, 10, 0.7); }
+        
+        .note-card { background: var(--bg-card); padding: 16px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--separator); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+        .note-quote { border-left: 3px solid #FFD60A; padding-left: 8px; color: var(--text-sec); font-size: 13px; margin-bottom: 8px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .note-text { font-size: 15px; color: var(--text-main); line-height: 1.5; }
+
+        /* Utilities */
+        .toolbar-control { background: rgba(0,0,0,0.05); border: none; border-radius: 8px; padding: 6px 12px; font-size: 14px; color: var(--text-main); margin-left: 8px; font-weight: 500; }
+        .num-input { width: 60px; text-align: center; }
 
         /* Auth */
         .auth-split { display: flex; height: 100vh; }
@@ -102,6 +126,7 @@
         .auth-img div.active { opacity: 1; }
         .auth-form { flex: 1; max-width: 480px; background: var(--bg-body); display: flex; flex-direction: column; justify-content: center; padding: 60px; }
 
+        /* Mobile */
         .mobile-tab-bar { display: none; }
         @media (max-width: 768px) {
             .auth-split { flex-direction: column; } .auth-img { display: none; } .auth-form { max-width: 100%; padding: 40px 24px; }
@@ -111,9 +136,10 @@
             .tab-item.active { color: var(--primary); }
             .main-content { padding: 20px 16px 100px 16px; }
             .reader-layout { flex-direction: column; }
-            .reader-text-area { padding: 20px; border-right: none; height: auto; overflow: visible; }
-            .reader-notes-area { height: auto; min-width: 100%; border-top: 1px solid var(--separator); padding-bottom: 100px; }
+            .reader-text-area { padding: 24px; border-right: none; height: auto; overflow: visible; }
+            .reader-notes-area { height: auto; min-width: 100%; border-top: 1px solid var(--separator); padding-bottom: 120px; }
             .stats-container, .doc-list { grid-template-columns: 1fr; }
+            .page-title { font-size: 28px; }
         }
     </style>
 </head>
@@ -137,9 +163,9 @@
 
     <div id="view-app" class="app-container hidden">
         <nav class="sidebar">
-            <div class="user-card" style="margin-bottom:20px; cursor:default;">
-                <img id="nav-avatar" style="width:44px; height:44px; border-radius:50%; object-fit:cover; background:#eee;">
-                <div style="margin-left:12px; overflow:hidden;"><div style="font-weight:600;" id="nav-name">User</div><div style="font-size:12px; color:var(--text-sec);">已登录</div></div>
+            <div class="user-card">
+                <img id="nav-avatar" class="user-avatar">
+                <div style="overflow:hidden;"><div style="font-weight:700; font-size:16px;" id="nav-name">User</div><div style="font-size:12px; color:var(--text-sec);">已登录</div></div>
             </div>
             <div class="nav-item active" onclick="showPage('dashboard')" id="tab-dash-pc"><i class="ph ph-squares-four" style="font-size:20px;"></i> 文库</div>
             <div class="nav-item" onclick="showPage('settings')" id="tab-set-pc"><i class="ph ph-gear" style="font-size:20px;"></i> 设置</div>
@@ -148,7 +174,7 @@
 
         <main class="main-content">
             <div id="page-dashboard">
-                <div class="page-header"><div class="page-title">文库</div><button class="btn btn-circle" onclick="openEditor(null)"><i class="ph ph-plus"></i></button></div>
+                <div class="page-header"><div class="page-title">文库</div><button class="btn btn-circle" onclick="openEditor(null)"><i class="ph ph-plus" style="font-weight:bold;"></i></button></div>
                 <div class="stats-container">
                     <div class="stat-card"><div class="stat-label">ARTICLES</div><div class="stat-value" id="stat-count">0</div></div>
                     <div class="stat-card"><div class="stat-label">WORDS</div><div class="stat-value" id="stat-words">0</div></div>
@@ -168,7 +194,7 @@
                             <span>头像</span><div style="display:flex; align-items:center; gap:10px;"><img id="setting-avatar-preview" style="width:36px; height:36px; border-radius:50%; object-fit:cover;"><input type="file" id="avatar-upload" hidden onchange="uploadAvatar(this)"><button class="btn-text" onclick="document.getElementById('avatar-upload').click()">更换</button></div>
                         </div>
                         <div style="padding:16px; display:flex; justify-content:space-between; align-items:center;">
-                            <span>重置密码</span><button class="btn-text danger" onclick="sendPasswordReset()">发送邮件</button>
+                            <span>重置密码 (MFA)</span><button class="btn-text danger" onclick="sendPasswordReset()">发送邮件</button>
                         </div>
                     </div>
                     <div style="background:var(--bg-card); border-radius:12px; border:1px solid var(--separator); overflow:hidden;">
@@ -233,7 +259,7 @@
 
         const bgImages = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000', 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2000', 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2000'];
         let currentUser=null, isSignup=false, currentDocId=null, saveTimer=null, bgIdx=0;
-        let activeNotes = []; 
+        let activeNotes = [];
 
         async function init() {
             setInterval(() => {
@@ -258,6 +284,7 @@
             if(window.innerWidth < 768) document.getElementById('mobile-logout').style.display = 'block';
         }
 
+        // Font Logic (16-42 Limit)
         function validateFontSize(input) {
             let val = parseInt(input.value); if(isNaN(val)||val<16) val=16; if(val>42) val=42; input.value=val;
             input.id==='editor-size'?syncFont():syncReaderFont();
@@ -318,16 +345,15 @@
                     <div><h3 style="margin-top:0;font-size:18px;">${d.title||'无标题'}</h3><div class="doc-preview">${d.content}</div></div>
                     <div class="doc-footer">
                         <span>${new Date(d.created_at).toLocaleDateString()}</span>
-                        <button class="btn-icon-danger" onclick="event.stopPropagation(); deleteDoc('${d.id}')" title="删除文章"><i class="ph ph-trash"></i></button>
+                        <button class="btn-icon-sm delete" onclick="event.stopPropagation(); deleteDoc('${d.id}')" title="删除"><i class="ph ph-trash"></i></button>
                     </div>
                 </div>`).join('');
         }
 
         window.deleteDoc = async (id) => {
-            if(confirm("确定删除这篇文章吗？")) {
+            if(confirm("确定删除这篇文章吗？笔记也会一同删除。")) {
                 const { error } = await db.from('articles').delete().eq('id', id);
-                if(error) alert("删除失败，请检查 RLS 策略");
-                else loadDocs();
+                if(error) alert("删除失败: " + error.message); else loadDocs();
             }
         };
 
@@ -336,22 +362,19 @@
             const {data}=await db.from('articles').select('*').eq('id',id).single();
             if(!data) return alert("Error");
             document.getElementById('reader-title').innerText=data.title;
-            const div=document.getElementById('reader-body'); 
-            
-            // 核心修复：纯文本渲染
-            div.innerText = data.content; 
-            div.dataset.raw = data.content; // Store raw text for re-rendering logic
-
+            const div=document.getElementById('reader-body'); div.innerText=data.content; div.dataset.raw=data.content;
             applyFontStyle(localStorage.getItem('pref_font')||'system', localStorage.getItem('pref_size')||'18');
             loadAnnotations(id);
         }
 
-        // ================= NEW: INDEX-BASED HIGHLIGHTING (精准定位) =================
-        
+        // ================= COORDINATE-BASED HIGHLIGHT (Corrected) =================
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
         async function loadAnnotations(id) {
             const {data} = await db.from('annotations').select('*').eq('article_id',id).order('start_index', {ascending: true});
-            activeNotes = data || []; // Update cache
-            
+            activeNotes = data || []; // Update for dup check
             const contentDiv = document.getElementById('reader-body');
             const listDiv = document.getElementById('reader-notes-list');
             listDiv.innerHTML = '';
@@ -360,87 +383,72 @@
             if (!rawText) return;
 
             if (data && data.length > 0) {
-                // 重建 HTML：通过切片拼接
                 let html = "";
                 let lastIndex = 0;
 
                 data.forEach(n => {
-                    // 安全检查：如果数据库里的索引超出了文本长度（比如文章被修改过），则跳过
-                    if (n.start_index >= rawText.length || n.end_index > rawText.length) return;
+                    if (n.start_index < lastIndex) return; // Skip overlaps
+                    if (n.start_index >= rawText.length) return;
 
-                    // 1. 添加高亮前的普通文本
+                    // 1. Text before highlight
                     html += escapeHtml(rawText.substring(lastIndex, n.start_index));
                     
-                    // 2. 添加高亮文本 span
-                    const highlightText = escapeHtml(rawText.substring(n.start_index, n.end_index));
-                    const safeNote = n.note.replace(/'/g, "\\'").replace(/\n/g, " "); // Escape for JS onclick
-                    html += `<span class="highlight" onclick="handleHighlightClick('${n.id}', '${safeNote}')">${highlightText}</span>`;
+                    // 2. Highlighted text
+                    const exactText = rawText.substring(n.start_index, n.end_index);
+                    const safeNote = n.note.replace(/'/g, "\\'").replace(/\n/g, " ");
+                    html += `<span class="highlight" onclick="handleHighlightClick('${n.id}', '${safeNote}')">${escapeHtml(exactText)}</span>`;
                     
-                    // 3. 更新游标
                     lastIndex = n.end_index;
 
-                    // 渲染侧边栏卡片
+                    // 3. Sidebar Note
                     listDiv.innerHTML += `
                         <div class="note-card">
-                            <div class="note-quote">"${highlightText}"</div>
-                            <div class="note-text">${n.note}</div>
+                            <div class="note-quote">"${escapeHtml(exactText)}"</div>
+                            <div class="note-text">${escapeHtml(n.note)}</div>
                             <div style="text-align:right;margin-top:8px;">
                                 <button class="btn-text danger" style="padding:0;font-size:12px;" onclick="window.deleteNote('${n.id}')">删除</button>
                             </div>
                         </div>
                     `;
                 });
-
-                // 4. 添加剩余文本
-                html += escapeHtml(rawText.substring(lastIndex));
+                html += escapeHtml(rawText.substring(lastIndex)); // Remaining text
                 contentDiv.innerHTML = html;
             } else {
-                contentDiv.innerText = rawText; // Reset to plain text if no notes
+                contentDiv.innerText = rawText;
                 listDiv.innerHTML = '<div style="color:var(--text-sec);text-align:center;">暂无笔记</div>';
             }
         }
 
-        // HTML 转义防止 XSS
-        function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-        }
-
-        // --- Interaction Handlers ---
-
+        // ================= INTERACTION HANDLERS (UPDATED) =================
         window.handleHighlightClick = (id, text) => {
-            event.stopPropagation();
+            event.stopPropagation(); // Stop bubbling
             if(confirm(`已存在笔记：\n"${text}"\n\n要删除它吗？`)) window.deleteNote(id); 
         };
 
         window.deleteNote = async (id) => { 
             const { error } = await db.from('annotations').delete().eq('id',id); 
-            if(error) alert("删除失败: " + error.message);
-            else loadAnnotations(currentDocId); 
+            if(error) alert("删除失败: " + error.message); else loadAnnotations(currentDocId); 
         };
         
-        // **核心逻辑：获取选区索引**
+        // Smart Selection Handler
         document.getElementById('reader-body').addEventListener('mouseup', (e) => {
-            if(e.target.classList.contains('highlight')) return; // Ignore click on existing highlight
+            if(e.target.classList.contains('highlight')) return; // Ignore click on existing highlights
 
             const sel = window.getSelection();
             if (sel.rangeCount === 0) return;
-            
-            const range = sel.getRangeAt(0);
             const text = sel.toString().trim();
             if (!text) return;
 
-            // 计算 Start Index：这需要黑魔法，因为 DOM 里面可能有 span 标签干扰
-            // 简单方案：我们获取 Range 相对于 reader-body 的偏移量
-            // 但因为 reader-body 内部已经是复杂的 HTML (包含 span)，直接 getStartOffset 可能会出错
-            // 这里为了稳健，我们使用一种 trick：
-            // 1. 获取选区前的所有纯文本长度
+            const range = sel.getRangeAt(0);
+            
+            // Calculate Start Index relative to container
             const preCaretRange = range.cloneRange();
             preCaretRange.selectNodeContents(document.getElementById('reader-body'));
             preCaretRange.setEnd(range.startContainer, range.startOffset);
             const startIndex = preCaretRange.toString().length;
             const endIndex = startIndex + text.length;
 
-            // 查重：检查是否区间重叠 (Overlap Check)
+            // Check Duplicate / Overlap
             const overlap = activeNotes.find(n => 
                 (startIndex >= n.start_index && startIndex < n.end_index) || 
                 (endIndex > n.start_index && endIndex <= n.end_index) ||
@@ -448,24 +456,29 @@
             );
 
             if (overlap) {
-                alert("此处已包含在现有笔记中，请先删除旧笔记。");
+                // Prompt to edit if duplicate found
+                if(confirm(`该区域已有笔记：\n"${overlap.note}"\n\n是否修改？`)) {
+                    const newNote = prompt("修改笔记:", overlap.note);
+                    if (newNote && newNote !== overlap.note) {
+                        db.from('annotations').update({note: newNote}).eq('id', overlap.id).then(() => loadAnnotations(currentDocId));
+                    }
+                }
                 sel.removeAllRanges();
                 return;
             }
 
+            // Create New
             setTimeout(async()=>{
                 const note = prompt("添加笔记:");
                 if(note) { 
-                    const { error } = await db.from('annotations').insert({
+                    await db.from('annotations').insert({
                         article_id: currentDocId, 
-                        highlight_text: text, // 仅做冗余备份
-                        note: note,
-                        start_index: startIndex, // 核心定位数据
-                        end_index: endIndex      // 核心定位数据
-                    });
-                    
-                    if(error) alert("保存失败: " + error.message);
-                    else loadAnnotations(currentDocId); 
+                        highlight_text: text, 
+                        start_index: startIndex, 
+                        end_index: endIndex, 
+                        note: note
+                    }); 
+                    loadAnnotations(currentDocId); 
                 }
                 sel.removeAllRanges();
             }, 10);
@@ -511,11 +524,13 @@
         function showPage(id) {
             ['dashboard','settings'].forEach(p=>document.getElementById('page-'+p).classList.add('hidden'));
             document.getElementById('page-'+id).classList.remove('hidden');
+            
             const isDash = id==='dashboard';
             document.getElementById('tab-dash-pc').classList.toggle('active', isDash);
             document.getElementById('tab-set-pc').classList.toggle('active', !isDash);
             document.getElementById('tab-dash-mb').classList.toggle('active', isDash);
             document.getElementById('tab-set-mb').classList.toggle('active', !isDash);
+
             if(isDash) loadDocs();
         }
         function closeReader(){ document.getElementById('view-reader').classList.add('hidden'); }
