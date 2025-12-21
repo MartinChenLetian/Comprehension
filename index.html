@@ -7,23 +7,21 @@
     
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
-        /* ================== Design System (Apple Modern) ================== */
+        /* ================== Design System ================== */
         :root {
             --primary: #007AFF; 
-            --primary-bg: rgba(0, 122, 255, 0.1);
-            --bg-body: #F2F2F7; /* iOS System Gray 6 */
+            --bg-body: #F2F2F7;
             --bg-card: #FFFFFF;
-            --bg-sidebar: rgba(255, 255, 255, 0.85); /* 毛玻璃基底 */
+            --bg-sidebar: rgba(255, 255, 255, 0.85);
             --text-main: #1C1C1E;
             --text-sec: #8E8E93;
             --separator: rgba(60, 60, 67, 0.12);
             --shadow: 0 4px 24px rgba(0,0,0,0.06);
             --radius: 14px;
             --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
-            --safe-bottom: env(safe-area-inset-bottom);
         }
 
         [data-theme="dark"] {
@@ -33,89 +31,71 @@
             --text-main: #F2F2F7;
             --text-sec: #8E8E93;
             --separator: rgba(255, 255, 255, 0.15);
-            --shadow: 0 4px 24px rgba(0,0,0,0.4);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: var(--font-stack); background-color: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; height: 100vh; overflow: hidden; transition: background 0.3s; }
         .hidden { display: none !important; }
 
-        /* Buttons & Interactions */
-        .btn { border: none; outline: none; cursor: pointer; font-family: inherit; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease; }
+        /* Buttons */
+        .btn { border: none; outline: none; cursor: pointer; font-family: inherit; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s; }
         .btn:active { transform: scale(0.96); opacity: 0.8; }
-        
         .btn-primary { background: var(--primary); color: white; border-radius: 10px; padding: 10px 24px; font-size: 15px; }
         .btn-text { background: transparent; color: var(--primary); padding: 6px 12px; font-size: 14px; border-radius: 8px; }
-        .btn-text:hover { background: var(--primary-bg); }
+        .btn-text:hover { background: rgba(0,122,255,0.1); }
         .btn-text.danger { color: #FF3B30; }
-        .btn-text.danger:hover { background: rgba(255, 59, 48, 0.1); }
-        
         .btn-back { background: transparent; color: var(--text-sec); font-size: 15px; padding: 8px 12px; border-radius: 8px; }
-        .btn-back:hover { color: var(--text-main); background: rgba(0,0,0,0.05); }
-
         .btn-circle { width: 44px; height: 44px; border-radius: 50%; background: var(--bg-card); color: var(--primary); font-size: 22px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); flex-shrink: 0; }
-        .btn-circle:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); }
-
-        .btn-icon-sm { background: transparent; padding: 6px; border-radius: 6px; color: var(--text-sec); transition: 0.2s; }
+        .btn-icon-sm { background: transparent; padding: 8px; border-radius: 8px; color: var(--text-sec); transition: 0.2s; cursor: pointer; border: none; }
         .btn-icon-sm:hover { background: rgba(0,0,0,0.05); color: var(--text-main); }
-        .btn-icon-sm.delete:hover { background: rgba(255, 59, 48, 0.1); color: #FF3B30; }
 
         .input-clean { width: 100%; padding: 12px; background: rgba(120, 120, 128, 0.12); border: 1px solid transparent; border-radius: 10px; color: var(--text-main); font-size: 16px; transition: 0.2s; }
         .input-clean:focus { background: var(--bg-card); box-shadow: 0 0 0 2px var(--primary); outline: none; }
 
-        /* Layout Structure */
+        /* Layout */
         .app-container { display: flex; height: 100vh; width: 100vw; }
-        
-        .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--separator); padding: 20px 16px; display: flex; flex-direction: column; flex-shrink: 0; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+        .sidebar { width: 260px; background: var(--bg-sidebar); border-right: 1px solid var(--separator); padding: 20px 16px; display: flex; flex-direction: column; flex-shrink: 0; backdrop-filter: blur(20px); }
         .main-content { flex: 1; overflow-y: auto; padding: 40px; position: relative; }
 
         /* Sidebar Elements */
-        .user-card { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; cursor: default; margin-bottom: 24px; }
+        .user-card { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; margin-bottom: 24px; }
         .user-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; background: #eee; border: 1px solid var(--separator); }
         .nav-item { padding: 10px 12px; border-radius: 10px; color: var(--text-sec); font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 12px; margin-bottom: 4px; font-weight: 500; transition: 0.2s; }
-        .nav-item:hover { background: rgba(0,0,0,0.04); color: var(--text-main); }
         .nav-item.active { background: var(--bg-card); color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.04); font-weight: 600; }
 
         /* Dashboard */
         .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; height: 50px; }
         .page-title { font-size: 34px; font-weight: 800; letter-spacing: -0.5px; }
-        
         .stats-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 40px; }
         .stat-card { background: var(--bg-card); padding: 20px; border-radius: var(--radius); border: 1px solid var(--separator); }
         .stat-label { font-size: 12px; font-weight: 700; color: var(--text-sec); text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
         .stat-value { font-size: 28px; font-weight: 700; color: var(--text-main); }
-
+        
         .doc-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding-bottom: 100px; }
         .doc-item { background: var(--bg-card); padding: 24px; border-radius: var(--radius); height: auto; min-height: 180px; display: flex; flex-direction: column; justify-content: space-between; border: 1px solid var(--separator); cursor: pointer; transition: all 0.2s; position: relative; }
-        .doc-item:hover { transform: translateY(-4px); box-shadow: var(--shadow); border-color: transparent; }
+        .doc-item:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
         .doc-preview { font-size: 15px; color: var(--text-sec); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-height: 1.6; margin-top: 12px; margin-bottom: 24px; }
         .doc-footer { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--text-sec); }
 
-        /* Overlays (Editor/Reader) */
+        /* Overlays */
         .overlay { position: fixed; inset: 0; background: var(--bg-body); z-index: 100; display: flex; flex-direction: column; }
         .toolbar { height: 60px; background: var(--bg-card); border-bottom: 1px solid var(--separator); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; }
-        
         .editor-area { flex: 1; max-width: 800px; width: 100%; margin: 0 auto; padding: 40px; overflow-y: auto; }
         #doc-title { font-size: 36px; font-weight: 800; border: none; background: transparent; width: 100%; margin-bottom: 20px; color: var(--text-main); }
         #doc-body { width: 100%; min-height: 60vh; border: none; background: transparent; resize: none; outline: none; color: var(--text-main); }
 
-        /* Reader Split View */
+        /* Reader */
         .reader-layout { display: flex; height: calc(100vh - 60px); }
-        .reader-text-area { flex: 2; padding: 60px; overflow-y: auto; border-right: 1px solid var(--separator); background: var(--bg-card); }
+        .reader-text-area { flex: 2; padding: 60px; overflow-y: auto; border-right: 1px solid var(--separator); background: var(--bg-card); position: relative; }
         .reader-notes-area { flex: 1; padding: 24px; background: var(--bg-body); overflow-y: auto; min-width: 320px; }
-        
-        /* Typography Content */
         .reader-content { white-space: pre-wrap; color: var(--text-main); line-height: 1.8; word-wrap: break-word; }
         
-        /* Highlighting (Coordinate Based) */
         .highlight { background-color: rgba(255, 214, 10, 0.4); border-bottom: 2px solid #FFD60A; cursor: pointer; border-radius: 2px; transition: 0.2s; }
         .highlight:hover { background-color: rgba(255, 214, 10, 0.7); }
-        
         .note-card { background: var(--bg-card); padding: 16px; border-radius: 12px; margin-bottom: 16px; border: 1px solid var(--separator); box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
         .note-quote { border-left: 3px solid #FFD60A; padding-left: 8px; color: var(--text-sec); font-size: 13px; margin-bottom: 8px; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .note-text { font-size: 15px; color: var(--text-main); line-height: 1.5; }
 
-        /* Utilities */
         .toolbar-control { background: rgba(0,0,0,0.05); border: none; border-radius: 8px; padding: 6px 12px; font-size: 14px; color: var(--text-main); margin-left: 8px; font-weight: 500; }
         .num-input { width: 60px; text-align: center; }
 
@@ -125,6 +105,15 @@
         .auth-img div { position: absolute; inset: 0; background-size: cover; background-position: center; transition: opacity 1s; opacity: 0; }
         .auth-img div.active { opacity: 1; }
         .auth-form { flex: 1; max-width: 480px; background: var(--bg-body); display: flex; flex-direction: column; justify-content: center; padding: 60px; }
+
+        /* PDF Watermark Overlay */
+        .pdf-watermark-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 9999; display: none;
+            overflow: hidden; opacity: 0.04; /* 非常淡 */
+        }
+        .watermark-text {
+            position: absolute; font-size: 24px; font-weight: bold; color: #000; transform: rotate(-45deg); white-space: nowrap; user-select: none;
+        }
 
         /* Mobile */
         .mobile-tab-bar { display: none; }
@@ -144,6 +133,8 @@
     </style>
 </head>
 <body>
+
+    <div id="pdf-watermark" class="pdf-watermark-container"></div>
 
     <div id="view-auth" class="auth-split">
         <div class="auth-img"><div id="bg-1" class="active"></div><div id="bg-2"></div></div>
@@ -178,7 +169,7 @@
                 <div class="stats-container">
                     <div class="stat-card"><div class="stat-label">ARTICLES</div><div class="stat-value" id="stat-count">0</div></div>
                     <div class="stat-card"><div class="stat-label">WORDS</div><div class="stat-value" id="stat-words">0</div></div>
-                    <div class="stat-card"><div class="stat-label">TIME</div><div class="stat-value" id="stat-time">0m</div></div>
+                    <div class="stat-card"><div class="stat-label">READ TIME</div><div class="stat-value" id="stat-time">0h 0m</div></div>
                 </div>
                 <div id="doc-list" class="doc-list">加载中...</div>
             </div>
@@ -194,7 +185,7 @@
                             <span>头像</span><div style="display:flex; align-items:center; gap:10px;"><img id="setting-avatar-preview" style="width:36px; height:36px; border-radius:50%; object-fit:cover;"><input type="file" id="avatar-upload" hidden onchange="uploadAvatar(this)"><button class="btn-text" onclick="document.getElementById('avatar-upload').click()">更换</button></div>
                         </div>
                         <div style="padding:16px; display:flex; justify-content:space-between; align-items:center;">
-                            <span>重置密码 (MFA)</span><button class="btn-text danger" onclick="sendPasswordReset()">发送邮件</button>
+                            <span>重置密码</span><button class="btn-text danger" onclick="sendPasswordReset()">发送邮件</button>
                         </div>
                     </div>
                     <div style="background:var(--bg-card); border-radius:12px; border:1px solid var(--separator); overflow:hidden;">
@@ -234,14 +225,21 @@
     <div id="view-reader" class="overlay hidden">
         <div class="toolbar">
             <button class="btn-back" onclick="closeReader()"><i class="ph ph-caret-left"></i> 返回</button>
-            <div style="display:flex; align-items:center;">
+            
+            <div style="display:flex; align-items:center; gap:8px;">
+                <div style="font-size:12px; color:var(--text-sec); font-variant-numeric:tabular-nums;" id="reader-timer-display">00:00</div>
+                
                 <select id="reader-font-select" class="toolbar-control" onchange="syncReaderFont()"><option value="system">Sans</option><option value="serif">Serif</option><option value="mono">Mono</option></select>
                 <input type="number" id="reader-size-input" class="toolbar-control num-input" value="18" onchange="validateFontSize(this)" oninput="syncReaderFont()">
             </div>
-            <button class="btn-text" onclick="switchToEdit()">编辑</button>
+
+            <div style="display:flex; align-items:center; gap:8px;">
+                <button class="btn-icon-sm" onclick="exportToPDF()" title="分享为PDF"><i class="ph ph-share-network" style="font-size:20px;"></i></button>
+                <button class="btn-text" onclick="switchToEdit()">编辑</button>
+            </div>
         </div>
         <div class="reader-layout">
-            <div class="reader-text-area">
+            <div class="reader-text-area" id="reader-pdf-content">
                 <h1 id="reader-title" style="margin-bottom:30px; font-size:32px; font-weight:800;"></h1>
                 <div id="reader-body" class="reader-content"></div>
             </div>
@@ -260,6 +258,11 @@
         const bgImages = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000', 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2000', 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2000'];
         let currentUser=null, isSignup=false, currentDocId=null, saveTimer=null, bgIdx=0;
         let activeNotes = [];
+        
+        // Timer Variables
+        let readingTimer = null;
+        let sessionSeconds = 0;
+        let docTotalSeconds = 0;
 
         async function init() {
             setInterval(() => {
@@ -284,7 +287,113 @@
             if(window.innerWidth < 768) document.getElementById('mobile-logout').style.display = 'block';
         }
 
-        // Font Logic (16-42 Limit)
+        // --- Reading Time Logic ---
+        function startReadingTimer(initialSeconds) {
+            stopReadingTimer(); // clear any existing
+            sessionSeconds = 0;
+            docTotalSeconds = initialSeconds || 0;
+            updateTimerDisplay();
+            
+            readingTimer = setInterval(() => {
+                // Only count if window is focused
+                if (document.visibilityState === 'visible') {
+                    sessionSeconds++;
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        function stopReadingTimer() {
+            if (readingTimer) {
+                clearInterval(readingTimer);
+                readingTimer = null;
+            }
+            // Save time to DB when stopping
+            if (currentDocId && sessionSeconds > 0) {
+                const newTotal = docTotalSeconds + sessionSeconds;
+                db.from('articles').update({ reading_seconds: newTotal }).eq('id', currentDocId).then();
+                sessionSeconds = 0; // Reset session
+            }
+        }
+
+        function updateTimerDisplay() {
+            const total = docTotalSeconds + sessionSeconds;
+            const h = Math.floor(total / 3600);
+            const m = Math.floor((total % 3600) / 60);
+            const s = total % 60;
+            // Format: 1h 23m or 23:45
+            let text = h > 0 ? `${h}h ${m}m` : `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+            document.getElementById('reader-timer-display').innerText = text;
+        }
+
+        // --- PDF Export Logic ---
+        async function exportToPDF() {
+            const element = document.getElementById('reader-pdf-content');
+            const title = document.getElementById('reader-title').innerText || 'Document';
+            
+            // 1. Create watermark
+            const watermarkDiv = document.getElementById('pdf-watermark');
+            watermarkDiv.innerHTML = '';
+            watermarkDiv.style.display = 'block';
+            
+            // Fill watermark (Simple repetition)
+            const wmText = `${currentUser.email} - ${new Date().toLocaleDateString()}`;
+            for (let i = 0; i < 20; i++) {
+                const span = document.createElement('span');
+                span.className = 'watermark-text';
+                span.innerText = wmText;
+                span.style.top = `${Math.random() * 100}%`;
+                span.style.left = `${Math.random() * 100}%`;
+                watermarkDiv.appendChild(span);
+            }
+
+            // 2. Generate PDF
+            const opt = {
+                margin: 10,
+                filename: `${title}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Hack: Temporarily append watermark to content element for capture
+            const clone = element.cloneNode(true);
+            clone.style.position = 'relative';
+            const wmClone = watermarkDiv.cloneNode(true);
+            wmClone.style.display = 'block';
+            wmClone.style.position = 'absolute';
+            clone.appendChild(wmClone);
+
+            try {
+                const worker = html2pdf().set(opt).from(clone).toPdf();
+                const pdfBlob = await worker.output('blob');
+                
+                // 3. Share or Download
+                const file = new File([pdfBlob], `${title}.pdf`, { type: 'application/pdf' });
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: title,
+                        text: 'Shared via Smart Reader'
+                    });
+                } else {
+                    // Fallback to download
+                    const url = URL.createObjectURL(pdfBlob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${title}.pdf`;
+                    a.click();
+                }
+            } catch (err) {
+                console.error(err);
+                alert("生成或分享失败，请重试");
+            } finally {
+                watermarkDiv.style.display = 'none';
+            }
+        }
+
+        // --- Standard Logic ---
+        
         function validateFontSize(input) {
             let val = parseInt(input.value); if(isNaN(val)||val<16) val=16; if(val>42) val=42; input.value=val;
             input.id==='editor-size'?syncFont():syncReaderFont();
@@ -335,10 +444,22 @@
         async function loadDocs() {
             const list=document.getElementById('doc-list'); list.innerHTML='Loading...';
             const {data}=await db.from('articles').select('*').order('created_at',{ascending:false});
-            let c=0, w=0;
-            if(data&&data.length){ c=data.length; data.forEach(d=>w+=countWords(d.content||"")); }
-            document.getElementById('stat-count').innerText=c; document.getElementById('stat-words').innerText=w.toLocaleString();
-            document.getElementById('stat-time').innerText=Math.ceil(w/250)+"m";
+            let c=0, w=0, tSeconds=0;
+            if(data&&data.length){ 
+                c=data.length; 
+                data.forEach(d=> {
+                    w+=countWords(d.content||"");
+                    tSeconds += (d.reading_seconds || 0);
+                }); 
+            }
+            document.getElementById('stat-count').innerText=c; 
+            document.getElementById('stat-words').innerText=w.toLocaleString();
+            
+            // Stats: Total Real Reading Time
+            const th = Math.floor(tSeconds/3600);
+            const tm = Math.floor((tSeconds%3600)/60);
+            document.getElementById('stat-time').innerText=`${th}h ${tm}m`;
+
             if(!data||!data.length) return list.innerHTML='<div style="color:var(--text-sec);padding:20px;text-align:center;">暂无文档</div>';
             list.innerHTML=data.map(d=>`
                 <div class="doc-item" onclick="openReader('${d.id}')">
@@ -362,19 +483,26 @@
             const {data}=await db.from('articles').select('*').eq('id',id).single();
             if(!data) return alert("Error");
             document.getElementById('reader-title').innerText=data.title;
-            const div=document.getElementById('reader-body'); div.innerText=data.content; div.dataset.raw=data.content;
+            const div=document.getElementById('reader-body'); 
+            
+            div.innerText = data.content; 
+            div.dataset.raw = data.content; 
+
             applyFontStyle(localStorage.getItem('pref_font')||'system', localStorage.getItem('pref_size')||'18');
+            
+            // Start Timer with saved time
+            startReadingTimer(data.reading_seconds || 0);
+            
             loadAnnotations(id);
         }
 
-        // ================= COORDINATE-BASED HIGHLIGHT (Corrected) =================
         function escapeHtml(text) {
             return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
         }
 
         async function loadAnnotations(id) {
             const {data} = await db.from('annotations').select('*').eq('article_id',id).order('start_index', {ascending: true});
-            activeNotes = data || []; // Update for dup check
+            activeNotes = data || []; 
             const contentDiv = document.getElementById('reader-body');
             const listDiv = document.getElementById('reader-notes-list');
             listDiv.innerHTML = '';
@@ -387,20 +515,17 @@
                 let lastIndex = 0;
 
                 data.forEach(n => {
-                    if (n.start_index < lastIndex) return; // Skip overlaps
+                    if (n.start_index < lastIndex) return; 
                     if (n.start_index >= rawText.length) return;
 
-                    // 1. Text before highlight
                     html += escapeHtml(rawText.substring(lastIndex, n.start_index));
                     
-                    // 2. Highlighted text
                     const exactText = rawText.substring(n.start_index, n.end_index);
                     const safeNote = n.note.replace(/'/g, "\\'").replace(/\n/g, " ");
                     html += `<span class="highlight" onclick="handleHighlightClick('${n.id}', '${safeNote}')">${escapeHtml(exactText)}</span>`;
                     
                     lastIndex = n.end_index;
 
-                    // 3. Sidebar Note
                     listDiv.innerHTML += `
                         <div class="note-card">
                             <div class="note-quote">"${escapeHtml(exactText)}"</div>
@@ -411,7 +536,7 @@
                         </div>
                     `;
                 });
-                html += escapeHtml(rawText.substring(lastIndex)); // Remaining text
+                html += escapeHtml(rawText.substring(lastIndex)); 
                 contentDiv.innerHTML = html;
             } else {
                 contentDiv.innerText = rawText;
@@ -419,9 +544,8 @@
             }
         }
 
-        // ================= INTERACTION HANDLERS (UPDATED) =================
         window.handleHighlightClick = (id, text) => {
-            event.stopPropagation(); // Stop bubbling
+            event.stopPropagation(); 
             if(confirm(`已存在笔记：\n"${text}"\n\n要删除它吗？`)) window.deleteNote(id); 
         };
 
@@ -430,9 +554,8 @@
             if(error) alert("删除失败: " + error.message); else loadAnnotations(currentDocId); 
         };
         
-        // Smart Selection Handler
         document.getElementById('reader-body').addEventListener('mouseup', (e) => {
-            if(e.target.classList.contains('highlight')) return; // Ignore click on existing highlights
+            if(e.target.classList.contains('highlight')) return; 
 
             const sel = window.getSelection();
             if (sel.rangeCount === 0) return;
@@ -441,14 +564,12 @@
 
             const range = sel.getRangeAt(0);
             
-            // Calculate Start Index relative to container
             const preCaretRange = range.cloneRange();
             preCaretRange.selectNodeContents(document.getElementById('reader-body'));
             preCaretRange.setEnd(range.startContainer, range.startOffset);
             const startIndex = preCaretRange.toString().length;
             const endIndex = startIndex + text.length;
 
-            // Check Duplicate / Overlap
             const overlap = activeNotes.find(n => 
                 (startIndex >= n.start_index && startIndex < n.end_index) || 
                 (endIndex > n.start_index && endIndex <= n.end_index) ||
@@ -456,7 +577,6 @@
             );
 
             if (overlap) {
-                // Prompt to edit if duplicate found
                 if(confirm(`该区域已有笔记：\n"${overlap.note}"\n\n是否修改？`)) {
                     const newNote = prompt("修改笔记:", overlap.note);
                     if (newNote && newNote !== overlap.note) {
@@ -467,7 +587,6 @@
                 return;
             }
 
-            // Create New
             setTimeout(async()=>{
                 const note = prompt("添加笔记:");
                 if(note) { 
@@ -490,11 +609,16 @@
             document.getElementById('save-status').innerText='准备就绪';
             if(id) { const {data}=await db.from('articles').select('*').eq('id',id).single(); document.getElementById('doc-title').value=data.title; document.getElementById('doc-body').value=data.content; }
         }
-        function closeEditor(){ document.getElementById('view-editor').classList.add('hidden'); showPage('dashboard'); }
+        function closeEditor(){ 
+            document.getElementById('view-editor').classList.add('hidden'); 
+            showPage('dashboard'); 
+        }
         function triggerAutoSave(){ document.getElementById('save-status').innerText="输入中..."; clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveDoc(false),2000); }
         async function saveDoc(close){
             const t=document.getElementById('doc-title').value, c=document.getElementById('doc-body').value;
-            if(!t&&!c&&close) return closeEditor();
+            // Allow closing empty new docs without saving
+            if(!t && !c && close) return closeEditor();
+
             document.getElementById('save-status').innerText="保存中...";
             const pl={title:t, content:c, user_id:currentUser.id};
             if(currentDocId) await db.from('articles').update(pl).eq('id',currentDocId);
@@ -533,8 +657,16 @@
 
             if(isDash) loadDocs();
         }
-        function closeReader(){ document.getElementById('view-reader').classList.add('hidden'); }
-        function switchToEdit(){ closeReader(); openEditor(currentDocId); }
+        function closeReader(){ 
+            stopReadingTimer(); // Stop timer on exit
+            document.getElementById('view-reader').classList.add('hidden'); 
+            showPage('dashboard');
+        }
+        function switchToEdit(){ 
+            stopReadingTimer(); 
+            document.getElementById('view-reader').classList.add('hidden'); 
+            openEditor(currentDocId); 
+        }
         async function signOut(){ await db.auth.signOut(); localStorage.removeItem('remember'); sessionStorage.removeItem('active'); location.reload(); }
         function setTheme(v){ document.body.setAttribute('data-theme', v==='dark'||(v==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light'); }
 
