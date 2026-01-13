@@ -8,35 +8,56 @@
 
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-<<<<<<< HEAD
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-=======
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link rel="shortcut icon" href="public/icons/icon.png" type="image/x-icon">
->>>>>>> 48d8a7b (,)
 
     <style>
         /* ================== Design System ================== */
         :root {
-            --primary: #007AFF;
-            --bg-body: #F2F2F7;
-            --bg-card: #FFFFFF;
-            --bg-sidebar: rgba(255, 255, 255, 0.95);
-            --text-main: #1C1C1E;
-            --text-sec: #8E8E93;
-            --separator: rgba(60, 60, 67, 0.12);
-            --shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-            --radius: 14px;
+            --primary: #0A84FF;
+            --bg-body: #E9EEF7;
+            --bg-card: rgba(255, 255, 255, 0.62);
+            --bg-sidebar: rgba(255, 255, 255, 0.6);
+            --text-main: #0F172A;
+            --text-sec: #5B6472;
+            --separator: rgba(255, 255, 255, 0);
+            --shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+            --radius: 18px;
             --font-stack: -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+            --btn-primary-bg: linear-gradient(135deg, rgba(10, 132, 255, 0.9), rgba(56, 189, 248, 0.9));
+            --btn-primary-text: #FFFFFF;
+            --btn-primary-shadow: 0 18px 35px rgba(10, 132, 255, 0.35);
+            --btn-surface: rgba(255, 255, 255, 0.45);
+            --btn-surface-hover: rgba(255, 255, 255, 0.65);
+            --glass-bg: rgba(255, 255, 255, 0.6);
+            --glass-strong: rgba(255, 255, 255, 0.8);
+            --glass-blur: blur(22px) saturate(180%);
+            --auth-surface: rgba(255, 255, 255, 0.35);
+            --auth-card: rgba(255, 255, 255, 0.75);
+            --auth-input-bg: rgba(255, 255, 255, 0.6);
+            --auth-input-focus: rgba(10, 132, 255, 0.2);
+            --cursor-glass: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='6.5' fill='rgba(255,255,255,0.35)' stroke='rgba(255,255,255,0.5)' stroke-width='1.2'/><circle cx='14' cy='14' r='2.5' fill='rgba(10,132,255,0.55)'/></svg>") 14 14, auto;
+            color-scheme: light dark;
         }
 
         [data-theme="dark"] {
-            --bg-body: #000000;
-            --bg-card: #1C1C1E;
-            --bg-sidebar: rgba(28, 28, 30, 0.95);
-            --text-main: #F2F2F7;
-            --text-sec: #8E8E93;
-            --separator: rgba(255, 255, 255, 0.15);
+            --bg-body: #07080C;
+            --bg-card: rgba(15, 16, 20, 0.6);
+            --bg-sidebar: rgba(12, 13, 17, 0.72);
+            --text-main: #E6EDF7;
+            --text-sec: #9AA4B2;
+            --separator: rgba(255, 255, 255, 0);
+            --btn-primary-bg: linear-gradient(135deg, rgba(56, 189, 248, 0.9), rgba(99, 102, 241, 0.9));
+            --btn-primary-shadow: 0 20px 40px rgba(56, 189, 248, 0.28);
+            --btn-surface: rgba(255, 255, 255, 0.08);
+            --btn-surface-hover: rgba(255, 255, 255, 0.16);
+            --glass-bg: rgba(20, 22, 28, 0.55);
+            --glass-strong: rgba(24, 26, 32, 0.7);
+            --glass-blur: blur(24px) saturate(170%);
+            --auth-surface: rgba(12, 14, 18, 0.6);
+            --auth-card: rgba(18, 20, 26, 0.75);
+            --auth-input-bg: rgba(18, 20, 26, 0.55);
+            --auth-input-focus: rgba(56, 189, 248, 0.22);
         }
 
         * {
@@ -53,6 +74,10 @@
             height: 100vh;
             overflow: hidden;
             transition: background 0.3s;
+            background-image: radial-gradient(circle at top, rgba(255, 255, 255, 0.6), transparent 45%),
+                radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.18), transparent 45%),
+                radial-gradient(circle at 90% 0%, rgba(56, 189, 248, 0.2), transparent 40%);
+            cursor: var(--cursor-glass);
         }
 
         .hidden {
@@ -73,17 +98,27 @@
             transition: 0.2s;
         }
 
+        button {
+            border: 0;
+            outline: none;
+        }
+
         .btn:active {
             transform: scale(0.96);
             opacity: 0.8;
         }
 
         .btn-primary {
-            background: var(--primary);
-            color: white;
-            border-radius: 10px;
+            background: var(--btn-primary-bg);
+            color: var(--btn-primary-text);
+            border-radius: 14px;
             padding: 10px 24px;
             font-size: 15px;
+            box-shadow: var(--btn-primary-shadow);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
         }
 
         .btn-text {
@@ -91,7 +126,8 @@
             color: var(--primary);
             padding: 6px 12px;
             font-size: 14px;
-            border-radius: 8px;
+            border-radius: 10px;
+            border: 0;
         }
 
         .btn-text.danger {
@@ -104,48 +140,56 @@
             font-size: 15px;
             padding: 8px 12px;
             border-radius: 8px;
+            border: 0;
         }
 
         .btn-circle {
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background: var(--bg-card);
+            background: var(--glass-bg);
             color: var(--primary);
             font-size: 22px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
             flex-shrink: 0;
+            backdrop-filter: var(--glass-blur);
+            border: 0;
         }
 
         .btn-icon-sm {
             background: transparent;
             padding: 8px;
-            border-radius: 8px;
+            border-radius: 10px;
             color: var(--text-sec);
             transition: 0.2s;
             cursor: pointer;
-            border: none;
+            border: 0;
         }
 
         .btn-icon-sm:hover {
-            background: rgba(0, 0, 0, 0.05);
+            background: var(--btn-surface);
             color: var(--text-main);
+        }
+
+        .btn-text:hover {
+            background: var(--btn-surface);
         }
 
         .input-clean {
             width: 100%;
             padding: 12px;
-            background: rgba(120, 120, 128, 0.12);
-            border: 1px solid transparent;
-            border-radius: 10px;
+            background: var(--glass-bg);
+            border: none;
+            border-radius: 12px;
             color: var(--text-main);
             font-size: 16px;
             transition: 0.2s;
+            backdrop-filter: var(--glass-blur);
         }
 
         .input-clean:focus {
-            background: var(--bg-card);
-            box-shadow: 0 0 0 2px var(--primary);
+            background: var(--glass-strong);
+            box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.4);
             outline: none;
         }
 
@@ -159,12 +203,13 @@
         .sidebar {
             width: 260px;
             background: var(--bg-sidebar);
-            border-right: 1px solid var(--separator);
+            border-right: none;
             padding: 20px 16px;
             display: flex;
             flex-direction: column;
             flex-shrink: 0;
-            backdrop-filter: blur(20px);
+            backdrop-filter: var(--glass-blur);
+            box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.08);
         }
 
         .main-content {
@@ -207,10 +252,11 @@
         }
 
         .nav-item.active {
-            background: var(--bg-card);
+            background: var(--glass-strong);
             color: var(--primary);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             font-weight: 600;
+            backdrop-filter: var(--glass-blur);
         }
 
         /* Dashboard */
@@ -236,10 +282,12 @@
         }
 
         .stat-card {
-            background: var(--bg-card);
+            background: var(--glass-bg);
             padding: 20px;
             border-radius: var(--radius);
-            border: 1px solid var(--separator);
+            border: none;
+            backdrop-filter: var(--glass-blur);
+            box-shadow: var(--shadow);
         }
 
         .stat-label {
@@ -264,7 +312,7 @@
         }
 
         .doc-item {
-            background: var(--bg-card);
+            background: var(--glass-bg);
             padding: 24px;
             border-radius: var(--radius);
             height: auto;
@@ -272,10 +320,12 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            border: 1px solid var(--separator);
+            border: none;
             cursor: pointer;
             transition: all 0.2s;
             position: relative;
+            backdrop-filter: var(--glass-blur);
+            box-shadow: var(--shadow);
         }
 
         .doc-item:hover {
@@ -303,77 +353,7 @@
             color: var(--text-sec);
         }
 
-<<<<<<< HEAD
         /* Overlays */
-=======
-        /* Reader Mode */
-        .reader-layout {
-            display: flex;
-            height: calc(100vh - 60px);
-        }
-
-        .reader-text-area {
-            flex: 2;
-            padding: 60px;
-            overflow-y: auto;
-            border-right: 1px solid var(--separator);
-            background: var(--bg-card);
-        }
-
-        .reader-notes-area {
-            flex: 1;
-            padding: 24px;
-            background: var(--bg-body);
-            overflow-y: auto;
-            min-width: 320px;
-        }
-
-        .reader-content {
-            white-space: pre-wrap;
-            color: var(--text-main);
-            line-height: 1.8;
-        }
-
-        .highlight {
-            background-color: rgba(255, 214, 10, 0.4);
-            border-bottom: 2px solid #FFD60A;
-            cursor: pointer;
-            border-radius: 2px;
-            transition: 0.2s;
-        }
-
-        .highlight:hover {
-            background-color: rgba(255, 214, 10, 0.7);
-        }
-
-        .note-card {
-            background: var(--bg-card);
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            border: 1px solid var(--separator);
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
-        }
-
-        .note-quote {
-            border-left: 3px solid #FFD60A;
-            padding-left: 8px;
-            color: var(--text-sec);
-            font-size: 12px;
-            margin-bottom: 8px;
-            font-weight: 600;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .note-text {
-            font-size: 14px;
-            color: var(--text-main);
-            line-height: 1.5;
-        }
-
         /* Share Sheet */
         .share-sheet {
             position: fixed;
@@ -396,13 +376,14 @@
         .share-card {
             width: min(560px, 94vw);
             margin: 0 auto 24px;
-            background: var(--bg-card);
+            background: var(--glass-bg);
             border-radius: 18px;
-            border: 1px solid var(--separator);
+            border: none;
             box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
             padding: 20px;
             transform: translateY(20px);
             transition: transform 0.2s ease;
+            backdrop-filter: var(--glass-blur);
         }
 
         .share-sheet.active .share-card {
@@ -436,7 +417,7 @@
 
         .share-action {
             background: linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.05));
-            border: 1px solid transparent;
+            border: none;
             border-radius: 12px;
             padding: 14px 10px;
             display: flex;
@@ -447,6 +428,7 @@
             transition: 0.2s;
             font-family: inherit;
             color: var(--text-main);
+            backdrop-filter: var(--glass-blur);
         }
 
         .share-action i {
@@ -459,8 +441,7 @@
         }
 
         .share-action:hover {
-            border-color: var(--primary);
-            background: rgba(0, 122, 255, 0.1);
+            background: rgba(10, 132, 255, 0.16);
         }
 
         .share-tip {
@@ -475,41 +456,11 @@
         /* Print Layout */
         #print-root {
             display: none;
-            color: #111;
-            font-family: "Times New Roman", "Noto Serif SC", "Songti SC", serif;
+            background: #fff;
         }
 
-        #print-title {
-            font-size: 20pt;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 6pt;
-        }
-
-        #print-meta {
-            font-size: 10pt;
-            color: #444;
-            text-align: center;
-            margin-bottom: 16pt;
-        }
-
-        #print-body {
-            font-size: 12pt;
-            line-height: 1.8;
-            text-align: justify;
-            word-break: break-word;
-        }
-
-        #print-body p {
-            text-indent: 2em;
-            margin: 0 0 12pt;
-        }
-
-        #print-footer {
-            margin-top: 18pt;
-            text-align: right;
-            font-size: 10pt;
-            color: #666;
+        #print-paper {
+            width: 100%;
         }
 
         @media print {
@@ -531,10 +482,14 @@
             #print-root {
                 display: block;
             }
+
+            .paper {
+                padding: 0;
+                min-height: auto;
+            }
         }
 
         /* Common */
->>>>>>> 3df7b13 (,。)
         .overlay {
             position: fixed;
             inset: 0;
@@ -546,13 +501,15 @@
 
         .toolbar {
             height: 60px;
-            background: var(--bg-card);
-            border-bottom: 1px solid var(--separator);
+            background: var(--glass-bg);
+            border-bottom: none;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0 20px;
             flex-shrink: 0;
+            backdrop-filter: var(--glass-blur);
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.12);
         }
 
         .editor-area {
@@ -655,14 +612,15 @@
         }
 
         .toolbar-control {
-            background: rgba(0, 0, 0, 0.05);
+            background: var(--glass-bg);
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             padding: 6px 12px;
             font-size: 14px;
             color: var(--text-main);
             margin-left: 8px;
             font-weight: 500;
+            backdrop-filter: var(--glass-blur);
         }
 
         .num-input {
@@ -671,9 +629,33 @@
         }
 
         /* Auth */
+        .auth-page {
+            min-height: 100vh;
+            width: 100vw;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            background: var(--bg-body);
+        }
+
+        .auth-frame {
+            width: min(96vw, calc(90vh * 16 / 9), 1400px);
+            aspect-ratio: 16 / 9;
+            max-width: 96vw;
+            max-height: 90vh;
+            background: var(--auth-surface);
+            border: none;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(15, 23, 42, 0.12);
+            backdrop-filter: var(--glass-blur);
+        }
+
         .auth-split {
             display: flex;
-            height: 100vh;
+            height: 100%;
+            width: 100%;
         }
 
         .auth-img {
@@ -699,20 +681,21 @@
             flex: 1;
             max-width: none;
             width: 100%;
-            background: var(--bg-body);
+            background: var(--auth-surface);
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding: 80px 8vw;
+            padding: 60px 6vw;
             align-items: flex-start;
-            gap: 20px;
+            gap: 24px;
+            overflow-y: auto;
         }
 
         .auth-inner {
-            width: min(520px, 100%);
+            width: min(480px, 100%);
             display: flex;
             flex-direction: column;
-            gap: 18px;
+            gap: 20px;
         }
 
         .auth-brand {
@@ -725,7 +708,7 @@
             width: 40px;
             height: 40px;
             border-radius: 12px;
-            background: linear-gradient(135deg, #0A84FF, #5AC8FA);
+            background: linear-gradient(135deg, #0EA5E9, #2563EB);
             color: #fff;
             display: flex;
             align-items: center;
@@ -761,10 +744,26 @@
             display: flex;
             flex-direction: column;
             gap: 14px;
+            background: var(--auth-card);
+            border: none;
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+            backdrop-filter: var(--glass-blur);
         }
 
         .auth-input {
             margin-top: 2px;
+            background: var(--auth-input-bg);
+            border: none;
+            border-radius: 14px;
+            padding: 12px 14px;
+        }
+
+        .auth-input:focus {
+            background: var(--auth-card);
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px var(--auth-input-focus);
         }
 
         .auth-row {
@@ -800,7 +799,10 @@
 
         .auth-submit {
             width: 100%;
-            height: 48px;
+            height: 52px;
+            border-radius: 14px;
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.22);
+            font-size: 16px;
         }
 
         .auth-msg {
@@ -822,8 +824,9 @@
             width: 120px;
             height: 40px;
             border-radius: 10px;
-            border: 1px solid var(--separator);
-            background: #f0f2f5;
+            border: none;
+            background: var(--glass-bg);
+            backdrop-filter: var(--glass-blur);
         }
 
         .captcha-input {
@@ -845,85 +848,227 @@
             background: rgba(0, 122, 255, 0.1);
         }
 
-        /* ================== PDF Generation Styles (Invisible on Screen) ================== */
+        /* ================== Paper Layout (PDF + Print) ================== */
         #pdf-staging-area {
             position: fixed;
-            top: -9999px;
-            left: -9999px;
-            width: 800px;
-            background: white;
-            padding: 40px;
-            font-family: 'Georgia', serif;
-            /* PDF 使用衬线体更易读 */
-            color: #000;
+            top: 0;
+            left: 0;
+            width: 794px;
+            background: #fff;
+            padding: 0;
+            color: #111;
+            font-family: "Times New Roman", "Noto Serif SC", "Songti SC", serif;
+            z-index: -1;
+            pointer-events: none;
         }
 
-        .pdf-header {
+        .paper {
+            position: relative;
+            background: #fff;
+            color: #111;
+            font-family: "Times New Roman", "Noto Serif SC", "Songti SC", serif;
+            padding: 64px 58px;
+            min-height: 1123px;
+            box-sizing: border-box;
+        }
+
+        .paper-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .paper-header {
             text-align: center;
-            margin-bottom: 40px;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 20px;
+            margin-bottom: 16pt;
         }
 
-        .pdf-title {
-            font-size: 28px;
-            font-weight: bold;
-            margin-bottom: 10px;
+        .paper-title {
+            font-size: 22pt;
+            font-weight: 700;
+            letter-spacing: 0.5px;
         }
 
-        .pdf-meta {
-            font-size: 12px;
+        .paper-author {
+            font-size: 11pt;
+            margin-top: 6pt;
+        }
+
+        .paper-meta {
+            font-size: 9pt;
             color: #666;
+            margin-top: 4pt;
         }
 
-        .pdf-body {
-            font-size: 14px;
-            line-height: 1.8;
+        .paper-divider {
+            border: none;
+            border-top: 1px solid #ddd;
+            margin: 12pt 0 16pt;
+        }
+
+        .paper-section-title {
+            font-size: 12pt;
+            font-weight: 700;
+            margin: 12pt 0 6pt;
+        }
+
+        .paper-abstract {
+            font-size: 11pt;
+            line-height: 1.7;
             text-align: justify;
-            margin-bottom: 40px;
-            white-space: pre-wrap;
+            text-indent: 2em;
+            margin: 0;
         }
 
-        .pdf-notes-section {
-            border-top: 1px solid #ccc;
-            padding-top: 20px;
-            margin-top: 20px;
-            page-break-before: always;
+        .paper-keywords {
+            font-size: 10pt;
+            color: #444;
+            margin-top: 6pt;
         }
 
-        .pdf-notes-title {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 15px;
+        .paper-body {
+            font-size: 12pt;
+            line-height: 1.9;
+            text-align: justify;
+            word-break: break-word;
         }
 
-        .pdf-note-item {
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-            page-break-inside: avoid;
+        .paper-body p {
+            text-indent: 2em;
+            margin: 0 0 10pt;
         }
 
-        .pdf-note-quote {
-            font-style: italic;
-            color: #555;
+        .paper-body h2,
+        .paper-body h3,
+        .paper-body h4 {
+            margin: 12pt 0 6pt;
+            font-weight: 700;
+            text-indent: 0;
+        }
+
+        .paper-body h2 {
+            font-size: 14pt;
+        }
+
+        .paper-body h3 {
+            font-size: 12.5pt;
+        }
+
+        .paper-body h4 {
+            font-size: 12pt;
+        }
+
+        .paper-notes {
+            margin-top: 16pt;
+            font-size: 10pt;
+            color: #333;
+        }
+
+        .paper-note-item {
+            margin-bottom: 6pt;
+        }
+
+        .paper-footer {
+            margin-top: 18pt;
+            text-align: right;
+            font-size: 9pt;
+            color: #777;
+        }
+
+        .paper-watermark {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            pointer-events: none;
+            opacity: 0.06;
+            z-index: 1;
+        }
+
+        .paper-watermark-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48pt;
+            color: #000;
+            letter-spacing: 6px;
+            transform: rotate(-24deg);
+            white-space: nowrap;
+        }
+
+        /* Share Preview */
+        .share-preview {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 130;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+        }
+
+        .share-preview.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .share-preview-card {
+            width: min(980px, 94vw);
+            max-height: 90vh;
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--separator);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .share-preview-header {
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--separator);
+        }
+
+        .share-preview-title {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .share-preview-subtitle {
             font-size: 12px;
-            border-left: 3px solid #ccc;
-            padding-left: 8px;
-            margin-bottom: 5px;
+            color: var(--text-sec);
+            margin-top: 4px;
         }
 
-        .pdf-note-content {
-            font-size: 13px;
+        .share-preview-body {
+            padding: 16px;
+            background: var(--bg-body);
+            overflow: auto;
+            display: flex;
+            justify-content: center;
         }
 
-        .pdf-watermark {
-            text-align: center;
-            color: #ccc;
-            font-size: 10px;
-            margin-top: 50px;
-            border-top: 1px solid #eee;
-            padding-top: 10px;
+        .share-preview-canvas {
+            width: 794px;
+            transform: scale(0.74);
+            transform-origin: top center;
+            margin: 0 auto;
+        }
+
+        .share-preview-canvas .paper {
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+        }
+
+        .share-preview-actions {
+            padding: 16px 20px;
+            border-top: 1px solid var(--separator);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
         }
 
         /* Mobile */
@@ -932,7 +1077,22 @@
         }
 
         @media (max-width: 768px) {
+            .auth-page {
+                padding: 0;
+                align-items: stretch;
+            }
+
+            .auth-frame {
+                width: 100%;
+                min-height: 100vh;
+                aspect-ratio: auto;
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+            }
+
             .auth-split {
+                height: auto;
                 flex-direction: column;
             }
 
@@ -951,8 +1111,8 @@
             }
 
             .auth-card {
-                background: var(--bg-card);
-                border: 1px solid var(--separator);
+                background: var(--auth-card);
+                border: none;
                 border-radius: 16px;
                 padding: 22px;
                 box-shadow: 0 16px 34px rgba(0, 0, 0, 0.08);
@@ -968,6 +1128,18 @@
 
             .share-card {
                 margin-bottom: 90px;
+            }
+
+            .share-preview-card {
+                width: 96vw;
+            }
+
+            .share-preview-body {
+                padding: 12px;
+            }
+
+            .share-preview-canvas {
+                transform: scale(0.56);
             }
 
             .sidebar {
@@ -1041,40 +1213,46 @@
 
     <div id="pdf-staging-area"></div>
 
-    <div id="view-auth" class="auth-split">
-        <div class="auth-img">
-            <div id="bg-1" class="active"></div>
-            <div id="bg-2"></div>
-        </div>
-        <div class="auth-form">
-            <div class="auth-inner">
-                <div class="auth-brand">
-                    <div class="auth-mark">SR</div>
-                    <div>
-                        <div class="auth-brand-title">Smart Reader</div>
-                        <div class="auth-brand-sub">极简创作与沉浸阅读</div>
-                    </div>
+    <div id="view-auth" class="auth-page">
+        <div class="auth-frame">
+            <div class="auth-split">
+                <div class="auth-img">
+                    <div id="bg-1" class="active"></div>
+                    <div id="bg-2"></div>
                 </div>
-                <div>
-                    <h1 id="auth-title" class="auth-title">欢迎回来</h1>
-                    <p id="auth-subtitle" class="auth-subtitle">继续你的阅读进度</p>
-                </div>
-                <div class="auth-card">
-                    <input type="email" id="email" class="input-clean auth-input" placeholder="邮箱">
-                    <input type="password" id="password" class="input-clean auth-input" placeholder="密码">
-                    <div class="captcha-row">
-                        <canvas id="captcha-canvas" class="captcha-canvas" width="120" height="40"></canvas>
-                        <input type="text" id="captcha-input" class="input-clean captcha-input" placeholder="输入验证码">
-                        <button class="captcha-refresh" type="button" onclick="refreshCaptcha()" title="换一题">
-                            <i class="ph ph-arrow-clockwise"></i>
-                        </button>
+                <div class="auth-form">
+                    <div class="auth-inner">
+                        <div class="auth-brand">
+                            <div class="auth-mark">SR</div>
+                            <div>
+                                <div class="auth-brand-title">Smart Reader</div>
+                                <div class="auth-brand-sub">极简创作与沉浸阅读</div>
+                            </div>
+                        </div>
+                        <div>
+                            <h1 id="auth-title" class="auth-title">欢迎回来</h1>
+                            <p id="auth-subtitle" class="auth-subtitle">继续你的阅读进度</p>
+                        </div>
+                        <div class="auth-card">
+                            <input type="email" id="email" class="input-clean auth-input" placeholder="邮箱">
+                            <input type="password" id="password" class="input-clean auth-input" placeholder="密码">
+                            <div class="captcha-row">
+                                <canvas id="captcha-canvas" class="captcha-canvas" width="120" height="40"></canvas>
+                                <input type="text" id="captcha-input"
+                                    class="input-clean auth-input captcha-input" placeholder="输入验证码">
+                                <button class="captcha-refresh" type="button" onclick="refreshCaptcha()" title="换一题">
+                                    <i class="ph ph-arrow-clockwise"></i>
+                                </button>
+                            </div>
+                            <div class="auth-row">
+                                <label class="auth-remember"><input type="checkbox" id="remember"> 14天免登录</label>
+                                <button class="auth-switch" type="button" onclick="toggleAuth()"
+                                    id="auth-switch">没有账号？去注册</button>
+                            </div>
+                            <button class="btn-primary auth-submit" onclick="handleAuth()" id="auth-btn">登录</button>
+                            <div id="auth-msg" class="auth-msg"></div>
+                        </div>
                     </div>
-                    <div class="auth-row">
-                        <label class="auth-remember"><input type="checkbox" id="remember"> 14天免登录</label>
-                        <button class="auth-switch" type="button" onclick="toggleAuth()" id="auth-switch">没有账号？去注册</button>
-                    </div>
-                    <button class="btn-primary auth-submit" onclick="handleAuth()" id="auth-btn">登录</button>
-                    <div id="auth-msg" class="auth-msg"></div>
                 </div>
             </div>
         </div>
@@ -1152,7 +1330,8 @@
                     <div
                         style="background:var(--bg-card); border-radius:12px; border:1px solid var(--separator); overflow:hidden;">
                         <div style="padding:16px; display:flex; justify-content:space-between; align-items:center;">
-                            <span>深色模式</span><select class="toolbar-control" onchange="setTheme(this.value)">
+                            <span>深色模式</span><select id="theme-select" class="toolbar-control"
+                                onchange="setTheme(this.value)">
                                 <option value="system">系统</option>
                                 <option value="light">浅色</option>
                                 <option value="dark">深色</option>
@@ -1216,15 +1395,9 @@
                 <input type="number" id="reader-size-input" class="toolbar-control num-input" value="18"
                     onchange="validateFontSize(this)" oninput="syncReaderFont()">
             </div>
-<<<<<<< HEAD
-
             <div style="display:flex; align-items:center; gap:8px;">
-                <button class="btn-icon-sm" onclick="exportToPDF()" title="导出PDF"><i class="ph ph-share-network"
+                <button class="btn-icon-sm" onclick="openShare()" title="分享/导出"><i class="ph ph-share-network"
                         style="font-size:20px;"></i></button>
-=======
-            <div style="display:flex; gap:8px; align-items:center;">
-                <button class="btn-text" onclick="openShare()"><i class="ph ph-share-network"></i> 分享</button>
->>>>>>> 3df7b13 (,。)
                 <button class="btn-text" onclick="switchToEdit()">编辑</button>
             </div>
         </div>
@@ -1254,7 +1427,7 @@
             </div>
             <div class="share-actions">
                 <button class="share-action" onclick="shareDoc('pdf')">
-                    <i class="ph ph-file-pdf"></i><span>系统分享 PDF</span>
+                    <i class="ph ph-file-pdf"></i><span>预览并导出</span>
                 </button>
                 <button class="share-action" onclick="shareDoc('copy-title')">
                     <i class="ph ph-text-aa"></i><span>复制标题</span>
@@ -1266,26 +1439,218 @@
                     <i class="ph ph-file-text"></i><span>下载 TXT</span>
                 </button>
             </div>
-            <div id="share-tip" class="share-tip">系统分享会打开论文排版打印，选择“保存为 PDF”。</div>
+            <div id="share-tip" class="share-tip">将生成论文排版 PDF（含水印），可直接分享或下载。</div>
+        </div>
+    </div>
+
+    <div id="share-preview" class="share-preview hidden" onclick="closeSharePreview(true)">
+        <div class="share-preview-card" onclick="event.stopPropagation()">
+            <div class="share-preview-header">
+                <div>
+                    <div class="share-preview-title">论文排版预览</div>
+                    <div id="share-preview-subtitle" class="share-preview-subtitle">未命名</div>
+                </div>
+                <button class="btn-text" onclick="closeSharePreview()">关闭</button>
+            </div>
+            <div class="share-preview-body">
+                <div id="share-preview-canvas" class="share-preview-canvas"></div>
+            </div>
+            <div class="share-preview-actions">
+                <button class="btn-text" onclick="closeSharePreview('back')">返回分享</button>
+                <button class="btn-primary" onclick="exportToPDF()">导出 PDF</button>
+            </div>
         </div>
     </div>
 
     <div id="print-root">
-        <div id="print-title"></div>
-        <div id="print-meta"></div>
-        <div id="print-body"></div>
-        <div id="print-footer"></div>
+        <div id="print-paper"></div>
     </div>
 
     <script>
         const supabaseUrl = 'https://oktgxeukllgglharkutf.supabase.co';
-        const supabaseKey = 'sb_publishable_T98_plQu34_E_dqLCztSjw_AeDL1Fq0'
-        // const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9rdGd4ZXVrbGxnZ2xoYXJrdXRmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwNzI1MTAsImV4cCI6MjA4MDY0ODUxMH0.R-XORb7qYMZPGLj4ZdPt3bIrI61TgOs7vCyxwGmnCpg';
+        const supabaseKey = 'sb_publishable_T98_plQu34_E_dqLCztSjw_AeDL1Fq0';
         const db = supabase.createClient(supabaseUrl, supabaseKey);
 
-        const bgImages = ['https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000', 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2000', 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2000'];
-        let currentUser = null, isSignup = false, currentDocId = null, saveTimer = null, bgIdx = 0;
+        const bgImages = [
+            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000',
+            'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2000',
+            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2000'
+        ];
+        const CACHE_KEYS = {
+            docs: 'sr_docs_cache',
+            notes: 'sr_notes_cache',
+            meta: 'sr_cache_meta'
+        };
+
+        let currentUser = null;
+        let isSignup = false;
+        let currentDocId = null;
+        let saveTimer = null;
+        let bgIdx = 0;
         let activeNotes = [];
+        let captchaAnswer = '';
+        let editorHistory = null;
+        let realtimeChannel = null;
+        let readingTimer = null;
+        let sessionSeconds = 0;
+        let docTotalSeconds = 0;
+
+        class HistoryManager {
+            constructor(textareaId) {
+                this.textarea = document.getElementById(textareaId);
+                this.stack = [];
+                this.pointer = -1;
+                this.max = 80;
+                if (!this.textarea) return;
+
+                this.textarea.addEventListener('input', () => {
+                    this.save(this.textarea.value);
+                });
+
+                this.textarea.addEventListener('keydown', (e) => {
+                    if (!(e.metaKey || e.ctrlKey)) return;
+                    if (e.key.toLowerCase() !== 'z') return;
+                    e.preventDefault();
+                    if (e.shiftKey) this.redo();
+                    else this.undo();
+                });
+            }
+
+            save(value) {
+                if (this.pointer >= 0 && this.stack[this.pointer] === value) return;
+                this.stack = this.stack.slice(0, this.pointer + 1);
+                this.stack.push(value);
+                if (this.stack.length > this.max) this.stack.shift();
+                this.pointer = this.stack.length - 1;
+            }
+
+            undo() {
+                if (!this.textarea || this.pointer <= 0) return;
+                this.pointer -= 1;
+                this.textarea.value = this.stack[this.pointer];
+            }
+
+            redo() {
+                if (!this.textarea || this.pointer >= this.stack.length - 1) return;
+                this.pointer += 1;
+                this.textarea.value = this.stack[this.pointer];
+            }
+        }
+
+        function readCache(key) {
+            try {
+                const raw = localStorage.getItem(key);
+                return raw ? JSON.parse(raw) : null;
+            } catch (e) {
+                return null;
+            }
+        }
+
+        function writeCache(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (e) {
+                return;
+            }
+        }
+
+        function getDocsCache() {
+            const docs = readCache(CACHE_KEYS.docs);
+            return Array.isArray(docs) ? docs : null;
+        }
+
+        function setDocsCache(docs) {
+            writeCache(CACHE_KEYS.docs, sortDocs(docs || []));
+            writeCache(CACHE_KEYS.meta, { updatedAt: Date.now() });
+        }
+
+        function getDocCache(id) {
+            const docs = getDocsCache();
+            if (!docs) return null;
+            return docs.find((doc) => doc.id === id) || null;
+        }
+
+        function setDocCache(doc) {
+            if (!doc) return;
+            updateDocsCache(doc);
+        }
+
+        function getNotesCache(docId) {
+            const notesMap = readCache(CACHE_KEYS.notes);
+            if (!notesMap || typeof notesMap !== 'object') return null;
+            return Array.isArray(notesMap[docId]) ? notesMap[docId] : null;
+        }
+
+        function setNotesCache(docId, notes) {
+            const notesMap = readCache(CACHE_KEYS.notes) || {};
+            notesMap[docId] = Array.isArray(notes) ? notes : [];
+            writeCache(CACHE_KEYS.notes, notesMap);
+        }
+
+        function sortDocs(docs) {
+            return [...docs].sort((a, b) => {
+                const aDate = new Date(a.updated_at || a.created_at || 0).getTime();
+                const bDate = new Date(b.updated_at || b.created_at || 0).getTime();
+                return bDate - aDate;
+            });
+        }
+
+        function docsEqual(a, b) {
+            if (!Array.isArray(a) || !Array.isArray(b)) return false;
+            if (a.length !== b.length) return false;
+            for (let i = 0; i < a.length; i += 1) {
+                const docA = a[i];
+                const docB = b[i];
+                if (!docA || !docB) return false;
+                if (docA.id !== docB.id) return false;
+                if ((docA.updated_at || docA.created_at || '') !== (docB.updated_at || docB.created_at || '')) return false;
+                if ((docA.title || '') !== (docB.title || '')) return false;
+                if ((docA.content || '') !== (docB.content || '')) return false;
+                if ((docA.reading_seconds || 0) !== (docB.reading_seconds || 0)) return false;
+            }
+            return true;
+        }
+
+        function notesEqual(a, b) {
+            if (!Array.isArray(a) || !Array.isArray(b)) return false;
+            if (a.length !== b.length) return false;
+            for (let i = 0; i < a.length; i += 1) {
+                const na = a[i];
+                const nb = b[i];
+                if (!na || !nb) return false;
+                if (na.id !== nb.id) return false;
+                if ((na.note || '') !== (nb.note || '')) return false;
+                if ((na.highlight_text || '') !== (nb.highlight_text || '')) return false;
+                if ((na.start_index || 0) !== (nb.start_index || 0)) return false;
+                if ((na.end_index || 0) !== (nb.end_index || 0)) return false;
+            }
+            return true;
+        }
+
+        function updateDocsCache(doc) {
+            const docs = getDocsCache() || [];
+            const idx = docs.findIndex((item) => item.id === doc.id);
+            if (idx >= 0) docs[idx] = { ...docs[idx], ...doc };
+            else docs.push(doc);
+            setDocsCache(docs);
+        }
+
+        function removeDocFromCache(id) {
+            const docs = getDocsCache() || [];
+            const next = docs.filter((doc) => doc.id !== id);
+            setDocsCache(next);
+            const notesMap = readCache(CACHE_KEYS.notes) || {};
+            if (notesMap && notesMap[id]) {
+                delete notesMap[id];
+                writeCache(CACHE_KEYS.notes, notesMap);
+            }
+        }
+
+        function clearDocCache() {
+            localStorage.removeItem(CACHE_KEYS.docs);
+            localStorage.removeItem(CACHE_KEYS.notes);
+            localStorage.removeItem(CACHE_KEYS.meta);
+        }
 
         async function init() {
             setInterval(() => {
@@ -1293,49 +1658,84 @@
                 const active = document.querySelector('.auth-img div.active');
                 if (active) {
                     const next = active.id === 'bg-1' ? document.getElementById('bg-2') : document.getElementById('bg-1');
-                    next.style.backgroundImage = `url('${bgImages[bgIdx]}')`; next.classList.add('active'); active.classList.remove('active');
+                    next.style.backgroundImage = `url('${bgImages[bgIdx]}')`;
+                    next.classList.add('active');
+                    active.classList.remove('active');
                 }
             }, 6000);
-            if (document.getElementById('bg-1')) document.getElementById('bg-1').style.backgroundImage = `url('${bgImages[0]}')`;
+            const bg = document.getElementById('bg-1');
+            if (bg) bg.style.backgroundImage = `url('${bgImages[0]}')`;
 
-            const font = localStorage.getItem('pref_font') || 'system', size = localStorage.getItem('pref_size') || '18';
-            document.getElementById('editor-font').value = font; document.getElementById('editor-size').value = size;
-            document.getElementById('reader-font-select').value = font; document.getElementById('reader-size-input').value = size;
+            const font = localStorage.getItem('pref_font') || 'system';
+            const size = localStorage.getItem('pref_size') || '18';
+            document.getElementById('editor-font').value = font;
+            document.getElementById('editor-size').value = size;
+            document.getElementById('reader-font-select').value = font;
+            document.getElementById('reader-size-input').value = size;
             applyFontStyle(font, size);
+
+            const theme = localStorage.getItem('pref_theme') || 'system';
+            const themeSelect = document.getElementById('theme-select');
+            if (themeSelect) themeSelect.value = theme;
+            setTheme(theme);
+
+            const media = window.matchMedia('(prefers-color-scheme: dark)');
+            const handleSystemTheme = () => {
+                if ((localStorage.getItem('pref_theme') || 'system') === 'system') setTheme('system');
+            };
+            if (media && media.addEventListener) media.addEventListener('change', handleSystemTheme);
+            else if (media && media.addListener) media.addListener(handleSystemTheme);
 
             const { data: { session } } = await db.auth.getSession();
             if (session && (localStorage.getItem('remember') || sessionStorage.getItem('active'))) {
-                sessionStorage.setItem('active', 'true'); updateUser(session.user);
+                sessionStorage.setItem('active', 'true');
+                updateUser(session.user);
             }
-            if (window.innerWidth < 768) document.getElementById('mobile-logout').style.display = 'block';
-<<<<<<< HEAD
 
-            // Init History Manager
-            editorHistory = new HistoryManager('doc-body');
-=======
+            if (window.innerWidth < 768) {
+                const mobileLogout = document.getElementById('mobile-logout');
+                if (mobileLogout) mobileLogout.style.display = 'block';
+            }
+
             updateAuthCopy();
+            refreshCaptcha();
+
+            editorHistory = new HistoryManager('doc-body');
+            const readerBody = document.getElementById('reader-body');
+            if (readerBody) readerBody.addEventListener('mouseup', handleSelection);
+
+            window.addEventListener('beforeunload', () => stopReadingTimer());
         }
 
-        // --- Reading Time Logic ---
         function startReadingTimer(initialSeconds) {
             stopReadingTimer();
+            const base = Number(initialSeconds);
             sessionSeconds = 0;
-            docTotalSeconds = initialSeconds || 0;
+            docTotalSeconds = Number.isFinite(base) ? base : 0;
             updateTimerDisplay();
             readingTimer = setInterval(() => {
                 if (document.visibilityState === 'visible') {
-                    sessionSeconds++;
+                    sessionSeconds += 1;
                     updateTimerDisplay();
                 }
             }, 1000);
         }
 
         function stopReadingTimer() {
-            if (readingTimer) { clearInterval(readingTimer); readingTimer = null; }
+            if (readingTimer) {
+                clearInterval(readingTimer);
+                readingTimer = null;
+            }
             if (currentDocId && sessionSeconds > 0) {
                 const newTotal = docTotalSeconds + sessionSeconds;
                 db.from('articles').update({ reading_seconds: newTotal }).eq('id', currentDocId).then();
+                updateDocsCache({ id: currentDocId, reading_seconds: newTotal });
+                docTotalSeconds = newTotal;
                 sessionSeconds = 0;
+                const docs = getDocsCache();
+                if (docs && !document.getElementById('page-dashboard').classList.contains('hidden')) {
+                    renderDocs(docs);
+                }
             }
         }
 
@@ -1344,82 +1744,51 @@
             const h = Math.floor(total / 3600);
             const m = Math.floor((total % 3600) / 60);
             const s = total % 60;
-            let text = h > 0 ? `${h}h ${m}m` : `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            const text = h > 0 ? `${h}h ${m}m` : `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
             document.getElementById('reader-timer-display').innerText = text;
         }
 
-        // --- PDF Generation Logic (Rebuilt for Layout) ---
-        async function exportToPDF() {
-            const title = document.getElementById('reader-title').innerText || 'Document';
-            const content = document.getElementById('reader-body').dataset.raw || "";
-
-            // 1. Build Virtual DOM for PDF
-            const container = document.getElementById('pdf-staging-area');
-            container.innerHTML = `
-                <div class="pdf-header">
-                    <div class="pdf-title">${title}</div>
-                    <div class="pdf-meta">Created by ${currentUser.email} | Smart Reader Pro</div>
-                </div>
-                <div class="pdf-body">${escapeHtml(content)}</div>
-                ${activeNotes.length > 0 ? `
-                    <div class="pdf-notes-section">
-                        <div class="pdf-notes-title">Annotation Summary</div>
-                        ${activeNotes.map(n => `
-                            <div class="pdf-note-item">
-                                <div class="pdf-note-quote">"${n.highlight_text}"</div>
-                                <div class="pdf-note-content">${n.note}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                ` : ''}
-                <div class="pdf-watermark">
-                    Copyright © 2025–2025 Chen Letian 保留一切权利。
-                </div>
-            `;
-
-            // 2. Generate
-            const opt = {
-                margin: 15,
-                filename: `${title}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } // Fix paragraph splitting
-            };
-
-            try {
-                const worker = html2pdf().set(opt).from(container).toPdf();
-                const pdfBlob = await worker.output('blob');
-
-                // 3. Share
-                const file = new File([pdfBlob], `${title}.pdf`, { type: 'application/pdf' });
-                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-                    await navigator.share({ files: [file], title: title });
-                } else {
-                    const url = URL.createObjectURL(pdfBlob);
-                    const a = document.createElement('a');
-                    a.href = url; a.download = `${title}.pdf`; a.click();
-                }
-            } catch (err) { alert("生成失败: " + err.message); }
-        }
-
-        // --- Standard Logic ---
         function validateFontSize(input) {
-            let val = parseInt(input.value); if (isNaN(val) || val < 16) val = 16; if (val > 42) val = 42; input.value = val;
+            let val = parseInt(input.value, 10);
+            if (Number.isNaN(val) || val < 16) val = 16;
+            if (val > 42) val = 42;
+            input.value = val;
             input.id === 'editor-size' ? syncFont() : syncReaderFont();
         }
-        function syncFont() { saveAndApply(document.getElementById('editor-font').value, document.getElementById('editor-size').value); }
-        function syncReaderFont() { saveAndApply(document.getElementById('reader-font-select').value, document.getElementById('reader-size-input').value); }
+
+        function syncFont() {
+            saveAndApply(document.getElementById('editor-font').value, document.getElementById('editor-size').value);
+        }
+
+        function syncReaderFont() {
+            saveAndApply(document.getElementById('reader-font-select').value, document.getElementById('reader-size-input').value);
+        }
+
         function saveAndApply(f, s) {
-            localStorage.setItem('pref_font', f); localStorage.setItem('pref_size', s);
-            ['editor-font', 'reader-font-select'].forEach(id => document.getElementById(id).value = f);
-            ['editor-size', 'reader-size-input'].forEach(id => document.getElementById(id).value = s);
+            localStorage.setItem('pref_font', f);
+            localStorage.setItem('pref_size', s);
+            ['editor-font', 'reader-font-select'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.value = f;
+            });
+            ['editor-size', 'reader-size-input'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.value = s;
+            });
             applyFontStyle(f, s);
         }
+
         function applyFontStyle(f, s) {
-            const fonts = { 'system': '-apple-system, sans-serif', 'serif': 'Georgia, serif', 'mono': 'Menlo, monospace' };
-            const cssF = fonts[f], cssS = s + 'px';
-            ['doc-body', 'reader-body'].forEach(id => { const el = document.getElementById(id); if (el) { el.style.fontFamily = cssF; el.style.fontSize = cssS; } });
+            const fonts = { system: '-apple-system, sans-serif', serif: 'Georgia, serif', mono: 'Menlo, monospace' };
+            const cssF = fonts[f] || fonts.system;
+            const cssS = `${s}px`;
+            ['doc-body', 'reader-body'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.style.fontFamily = cssF;
+                    el.style.fontSize = cssS;
+                }
+            });
         }
 
         function updateAuthCopy() {
@@ -1501,10 +1870,13 @@
         }
 
         async function handleAuth() {
-            const email = document.getElementById('email').value, password = document.getElementById('password').value;
-            const btn = document.getElementById('auth-btn'), msg = document.getElementById('auth-msg');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('auth-btn');
+            const msg = document.getElementById('auth-msg');
             msg.innerText = "";
             if (!email || !password) return msg.innerText = "请填写完整";
+
             const captchaInput = document.getElementById('captcha-input').value.trim();
             if (!captchaInput) return msg.innerText = "请填写验证码";
             if (captchaInput.toLowerCase() !== captchaAnswer.toLowerCase()) {
@@ -1512,20 +1884,30 @@
                 refreshCaptcha();
                 return;
             }
+
             btn.innerText = "处理中...";
             let res;
             if (isSignup) res = await db.auth.signUp({ email, password });
             else res = await db.auth.signInWithPassword({ email, password });
 
-            if (res.error) { msg.innerText = res.error.message; btn.innerText = isSignup ? "注册" : "登录"; refreshCaptcha(); }
-            else {
-                if (isSignup && !res.data.session) { msg.innerText = "验证邮件已发送"; isSignup = false; updateAuthCopy(); refreshCaptcha(); }
-                else {
+            if (res.error) {
+                msg.innerText = res.error.message;
+                btn.innerText = isSignup ? "注册" : "登录";
+                refreshCaptcha();
+            } else {
+                if (isSignup && !res.data.session) {
+                    msg.innerText = "验证邮件已发送";
+                    isSignup = false;
+                    updateAuthCopy();
+                    refreshCaptcha();
+                } else {
                     if (document.getElementById('remember').checked) localStorage.setItem('remember', 'true');
-                    sessionStorage.setItem('active', 'true'); updateUser(res.data.user);
+                    sessionStorage.setItem('active', 'true');
+                    updateUser(res.data.user);
                 }
             }
         }
+
         function toggleAuth() {
             isSignup = !isSignup;
             const msg = document.getElementById('auth-msg');
@@ -1533,15 +1915,31 @@
             updateAuthCopy();
             refreshCaptcha();
         }
+
         function updateUser(user) {
-            currentUser = user; document.getElementById('view-auth').classList.add('hidden'); document.getElementById('view-app').classList.remove('hidden');
-            const name = user.user_metadata?.full_name || user.email.split('@')[0], avatar = user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${name}`;
-            document.getElementById('nav-name').innerText = name; document.getElementById('nav-avatar').src = avatar;
-            document.getElementById('setting-avatar-preview').src = avatar; document.getElementById('set-name').value = name;
+            currentUser = user;
+            document.getElementById('view-auth').classList.add('hidden');
+            document.getElementById('view-app').classList.remove('hidden');
+            const name = user.user_metadata?.full_name || user.email.split('@')[0];
+            const avatar = user.user_metadata?.avatar_url || `https://api.dicebear.com/7.x/initials/svg?seed=${name}`;
+            document.getElementById('nav-name').innerText = name;
+            document.getElementById('nav-avatar').src = avatar;
+            document.getElementById('setting-avatar-preview').src = avatar;
+            document.getElementById('set-name').value = name;
+            subscribeRealtime();
             showPage('dashboard');
         }
 
-        function countWords(s) { return s ? s.trim().split(/\s+/).length : 0; }
+        function countWords(s) {
+            return s ? s.trim().split(/\s+/).length : 0;
+        }
+
+        function formatDuration(totalSeconds) {
+            const seconds = Math.max(0, Math.floor(totalSeconds || 0));
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            return `${h}h ${m}m`;
+        }
 
         async function copyToClipboard(text) {
             if (navigator.clipboard && window.isSecureContext) {
@@ -1558,53 +1956,173 @@
             try { document.execCommand('copy'); } finally { area.remove(); }
         }
 
-        async function loadDocs() {
-            const list = document.getElementById('doc-list'); list.innerHTML = 'Loading...';
-            const { data } = await db.from('articles').select('*').order('created_at', { ascending: false });
-            let c = 0, w = 0;
-            if (data && data.length) { c = data.length; data.forEach(d => w += countWords(d.content || "")); }
-            document.getElementById('stat-count').innerText = c; document.getElementById('stat-words').innerText = w.toLocaleString();
-            document.getElementById('stat-time').innerText = Math.ceil(w / 250) + "m";
-            if (!data || !data.length) return list.innerHTML = '<div style="color:var(--text-sec);padding:20px;text-align:center;">暂无文档</div>';
-            list.innerHTML = data.map(d => `
-                <div class="doc-item" onclick="openReader('${d.id}')">
-                    <div><h3 style="margin-top:0;font-size:18px;">${d.title || '无标题'}</h3><div class="doc-preview">${d.content}</div></div>
-                    <div class="doc-footer">
-                        <span>${new Date(d.created_at).toLocaleDateString()}</span>
-                        <button class="btn-icon-danger" onclick="event.stopPropagation(); deleteDoc('${d.id}')" title="删除文章"><i class="ph ph-trash"></i></button>
-                    </div>
-                </div>`).join('');
-        }
-
-        window.deleteDoc = async (id) => {
-            if (confirm("确定删除这篇文章吗？")) {
-                const { error } = await db.from('articles').delete().eq('id', id);
-                if (error) alert("删除失败，请检查 RLS 策略");
-                else loadDocs();
-            }
-        };
-
-        async function openReader(id) {
-            currentDocId = id; document.getElementById('view-reader').classList.remove('hidden');
-            const { data } = await db.from('articles').select('*').eq('id', id).single();
-            if (!data) return alert("Error");
-            document.getElementById('reader-title').innerText = data.title;
-            const div = document.getElementById('reader-body'); div.innerText = data.content; div.dataset.raw = data.content;
-            applyFontStyle(localStorage.getItem('pref_font') || 'system', localStorage.getItem('pref_size') || '18');
-            loadAnnotations(id);
-        }
-
-<<<<<<< HEAD
         function escapeHtml(text) {
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-=======
+            return String(text || '')
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function getAuthorName() {
+            if (!currentUser) return 'Smart Reader';
+            return currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0] || 'Smart Reader';
+        }
+
+        function sanitizeFileName(name) {
+            const safe = (name || '').replace(/[\\/:*?"<>|]/g, '').trim();
+            return safe || 'document';
+        }
+
+        function extractPaperSections(content) {
+            const text = (content || '').trim();
+            const paragraphs = text ? text.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean) : [];
+            let abstract = '';
+            let bodyParagraphs = paragraphs;
+
+            const abstractMatch = text.match(/(?:^|\n)(摘要|Abstract)[:：]\s*([\s\S]*?)(?=\n{2,}|$)/i);
+            if (abstractMatch) {
+                abstract = abstractMatch[2].trim();
+                bodyParagraphs = paragraphs.filter((p) => p !== abstractMatch[0].trim());
+            } else if (paragraphs.length > 0) {
+                abstract = paragraphs[0];
+                bodyParagraphs = paragraphs.slice(1);
+            }
+
+            const keywordMatch = text.match(/(?:关键词|Keywords)[:：]\s*([^\n]+)/i);
+            let keywords = [];
+            if (keywordMatch) {
+                keywords = keywordMatch[1].split(/[，,;；]/).map((k) => k.trim()).filter(Boolean);
+            }
+            if (!keywords.length) keywords = ['智能阅读', '论文排版', '协作写作'];
+
+            return {
+                abstract,
+                keywords,
+                body: bodyParagraphs.length ? bodyParagraphs.join('\n\n') : text
+            };
+        }
+
+        function estimatePaperPages(content) {
+            const len = (content || '').replace(/\s/g, '').length;
+            return Math.max(1, Math.ceil(len / 1800));
+        }
+
+        function buildWatermarkMarkup(text) {
+            const mark = escapeHtml(text || '');
+            const items = Array.from({ length: 12 }, () => `<div class="paper-watermark-item">${mark}</div>`).join('');
+            return `<div class="paper-watermark">${items}</div>`;
+        }
+
+        function buildPaperBody(body) {
+            const chunks = (body || '').split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+            if (!chunks.length) return '<p>（正文空白）</p>';
+            return chunks.map((p) => {
+                if (/^#{1,3}\s+/.test(p)) {
+                    const level = p.match(/^#{1,3}/)[0].length;
+                    const text = p.replace(/^#{1,3}\s+/, '');
+                    const tag = level === 1 ? 'h2' : level === 2 ? 'h3' : 'h4';
+                    return `<${tag}>${escapeHtml(text)}</${tag}>`;
+                }
+                return `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`;
+            }).join('');
+        }
+
+        function buildPaperMarkup(payload) {
+            const title = escapeHtml(payload.title || '未命名');
+            const author = escapeHtml(payload.author || '');
+            const meta = escapeHtml(payload.meta || '');
+            const abstract = escapeHtml(payload.abstract || '').replace(/\n/g, '<br>');
+            const keywords = payload.keywords && payload.keywords.length ? escapeHtml(payload.keywords.join('，')) : '';
+            const notes = payload.notes || [];
+            const notesHtml = notes.length ? `
+                <div class="paper-notes">
+                    <div class="paper-section-title">批注摘要</div>
+                    ${notes.map((note) => `
+                        <div class="paper-note-item">
+                            <strong>${escapeHtml(note.highlight || '')}</strong>：${escapeHtml(note.note || '')}
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '';
+            const footer = escapeHtml(payload.footer || '');
+
+            return `
+                <div class="paper">
+                    ${buildWatermarkMarkup(payload.watermark || 'Smart Reader')}
+                    <div class="paper-content">
+                        <div class="paper-header">
+                            <div class="paper-title">${title}</div>
+                            ${author ? `<div class="paper-author">${author}</div>` : ''}
+                            ${meta ? `<div class="paper-meta">${meta}</div>` : ''}
+                        </div>
+                        <hr class="paper-divider">
+                        <div class="paper-section-title">摘要</div>
+                        <p class="paper-abstract">${abstract || '（无摘要）'}</p>
+                        ${keywords ? `<div class="paper-keywords">关键词：${keywords}</div>` : ''}
+                        <div class="paper-section-title">正文</div>
+                        <div class="paper-body">${buildPaperBody(payload.body || '')}</div>
+                        ${notesHtml}
+                        ${footer ? `<div class="paper-footer">${footer}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function getPaperPayload(title, content) {
+            const safeTitle = (title || '').trim() || '未命名';
+            const safeContent = content || '';
+            const sections = extractPaperSections(safeContent);
+            const wordCount = countWords(safeContent);
+            const pages = estimatePaperPages(safeContent);
+            const date = new Date().toLocaleDateString();
+            const author = getAuthorName();
+            const notes = (activeNotes || []).map((note) => {
+                let highlight = note.highlight_text || '';
+                if (!highlight && typeof note.start_index === 'number' && typeof note.end_index === 'number') {
+                    highlight = safeContent.substring(note.start_index, note.end_index);
+                }
+                return { highlight, note: note.note || '' };
+            });
+
+            return {
+                title: safeTitle,
+                author,
+                meta: `字数 ${wordCount.toLocaleString()} · 约 ${pages} 页 · ${date}`,
+                abstract: sections.abstract,
+                keywords: sections.keywords,
+                body: sections.body,
+                notes,
+                watermark: 'Smart Reader',
+                footer: `Generated by Smart Reader · ${date}`,
+                pages,
+                wordCount
+            };
+        }
+
+        function renderPaperTo(container, payload) {
+            if (!container) return;
+            container.innerHTML = buildPaperMarkup(payload);
+        }
+
+        function renderPrintContent(title, content) {
+            const payload = getPaperPayload(title, content);
+            renderPaperTo(document.getElementById('print-paper'), payload);
+        }
+
         function openShare() {
             const sheet = document.getElementById('share-sheet');
+            if (!sheet) return;
             const title = document.getElementById('reader-title').innerText || '未命名';
+            const bodyEl = document.getElementById('reader-body');
+            const content = bodyEl?.dataset?.raw || bodyEl?.innerText || '';
+            const payload = getPaperPayload(title, content);
+            document.getElementById('share-doc-title').innerText = payload.title;
             const meta = document.getElementById('share-doc-meta');
-            document.getElementById('share-doc-title').innerText = title;
-            if (meta) meta.innerText = "论文排版 · PDF";
-            document.getElementById('share-tip').innerText = "系统分享会打开论文排版打印，选择“保存为 PDF”。";
+            if (meta) meta.innerText = `论文排版 · 约 ${payload.pages} 页`;
+            const tip = document.getElementById('share-tip');
+            if (tip) tip.innerText = "系统分享会打开论文排版打印，选择“保存为 PDF”。";
             sheet.classList.remove('hidden');
             requestAnimationFrame(() => sheet.classList.add('active'));
         }
@@ -1621,31 +2139,57 @@
             setTimeout(() => sheet.classList.add('hidden'), 200);
         }
 
+        function openSharePreview() {
+            const preview = document.getElementById('share-preview');
+            if (!preview) return;
+            const title = document.getElementById('reader-title').innerText || '未命名';
+            const bodyEl = document.getElementById('reader-body');
+            const content = bodyEl?.dataset?.raw || bodyEl?.innerText || '';
+            const payload = getPaperPayload(title, content);
+            document.getElementById('share-preview-subtitle').innerText = payload.title;
+            renderPaperTo(document.getElementById('share-preview-canvas'), payload);
+            closeShare(true);
+            preview.classList.remove('hidden');
+            requestAnimationFrame(() => preview.classList.add('active'));
+        }
+
+        function closeSharePreview(action) {
+            const preview = document.getElementById('share-preview');
+            if (!preview || preview.classList.contains('hidden')) return;
+            if (action === true) {
+                preview.classList.add('hidden');
+                preview.classList.remove('active');
+                return;
+            }
+            preview.classList.remove('active');
+            setTimeout(() => preview.classList.add('hidden'), 200);
+            if (action === 'back') setTimeout(() => openShare(), 220);
+        }
+
         async function shareDoc(type) {
             const title = document.getElementById('reader-title').innerText || '未命名';
             const bodyEl = document.getElementById('reader-body');
             const content = bodyEl?.dataset?.raw || bodyEl?.innerText || '';
             const tip = document.getElementById('share-tip');
             const text = `${title}\n\n${content}`.trim();
+
             try {
                 if (type === 'pdf') {
-                    renderPrintContent(title, content);
-                    closeShare(true);
-                    setTimeout(() => window.print(), 100);
+                    openSharePreview();
                     return;
                 }
                 if (type === 'copy-title') {
                     await copyToClipboard(title);
-                    tip.innerText = "标题已复制";
+                    if (tip) tip.innerText = "标题已复制";
                     return;
                 }
                 if (type === 'copy-all') {
                     await copyToClipboard(text);
-                    tip.innerText = "全文已复制";
+                    if (tip) tip.innerText = "全文已复制";
                     return;
                 }
                 if (type === 'download') {
-                    const safeTitle = title.replace(/[\\/:*?"<>|]/g, '').trim() || 'note';
+                    const safeTitle = sanitizeFileName(title);
                     const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
@@ -1655,95 +2199,293 @@
                     link.click();
                     link.remove();
                     URL.revokeObjectURL(url);
-                    tip.innerText = "已生成 TXT 文件";
+                    if (tip) tip.innerText = "已生成 TXT 文件";
                 }
             } catch (e) {
                 if (tip) tip.innerText = "操作失败，请再试一次";
             }
         }
 
-        async function loadDocs() {
-            const list = document.getElementById('doc-list'); list.innerHTML = 'Loading...';
-            const { data } = await db.from('articles').select('*').order('created_at', { ascending: false });
-            let c = 0, w = 0;
-            if (data && data.length) { c = data.length; data.forEach(d => w += countWords(d.content || "")); }
-            document.getElementById('stat-count').innerText = c; document.getElementById('stat-words').innerText = w.toLocaleString();
-            document.getElementById('stat-time').innerText = Math.ceil(w / 250) + "m";
-            if (!data || !data.length) return list.innerHTML = '<div style="color:var(--text-sec);padding:20px;text-align:center;">暂无文档</div>';
-            list.innerHTML = data.map(d => `
-                <div class="doc-item" onclick="openReader('${d.id}')">
-                    <div><h3 style="margin-top:0;font-size:18px;">${d.title || '无标题'}</h3><div class="doc-preview">${d.content}</div></div>
-                    <div class="doc-footer">
-                        <span>${new Date(d.created_at).toLocaleDateString()}</span>
-                        <button class="btn-icon-danger" onclick="event.stopPropagation(); deleteDoc('${d.id}')" title="删除文章"><i class="ph ph-trash"></i></button>
+        async function exportToPDF() {
+            const title = document.getElementById('reader-title').innerText || 'Document';
+            const bodyEl = document.getElementById('reader-body');
+            const content = bodyEl?.dataset?.raw || bodyEl?.innerText || '';
+            const payload = getPaperPayload(title, content);
+            const container = document.getElementById('pdf-staging-area');
+
+            if (!content || !container || typeof html2pdf === 'undefined') {
+                renderPrintContent(payload.title, content);
+                closeSharePreview(true);
+                setTimeout(() => window.print(), 100);
+                return;
+            }
+
+            renderPaperTo(container, payload);
+            const fileName = `${sanitizeFileName(payload.title)}.pdf`;
+            const opt = {
+                margin: 0,
+                filename: fileName,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['css', 'legacy'] }
+            };
+
+            try {
+                const worker = html2pdf().set(opt).from(container).toPdf();
+                const pdfBlob = await worker.output('blob');
+                if (!pdfBlob || pdfBlob.size < 5000) throw new Error('empty');
+
+                const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({ files: [file], title: payload.title });
+                } else {
+                    const url = URL.createObjectURL(pdfBlob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                    URL.revokeObjectURL(url);
+                }
+            } catch (err) {
+                renderPrintContent(payload.title, content);
+                closeSharePreview(true);
+                setTimeout(() => window.print(), 120);
+            }
+        }
+
+        function renderDocs(docs) {
+            const list = document.getElementById('doc-list');
+            if (!list) return;
+            const items = Array.isArray(docs) ? docs : [];
+            const count = items.length;
+            const words = items.reduce((sum, doc) => sum + countWords(doc.content || ""), 0);
+            const readSeconds = items.reduce((sum, doc) => sum + (doc.reading_seconds || 0), 0);
+            const approxSeconds = Math.ceil(words / 250) * 60;
+            const totalSeconds = Math.max(readSeconds, approxSeconds);
+
+            document.getElementById('stat-count').innerText = count;
+            document.getElementById('stat-words').innerText = words.toLocaleString();
+            document.getElementById('stat-time').innerText = formatDuration(totalSeconds);
+
+            if (!count) {
+                list.innerHTML = '<div style="color:var(--text-sec);padding:20px;text-align:center;">暂无文档</div>';
+                return;
+            }
+
+            list.innerHTML = items.map((doc) => {
+                const title = escapeHtml(doc.title || '无标题');
+                const rawPreview = (doc.content || '').replace(/\s+/g, ' ').trim();
+                const previewText = rawPreview.length > 180 ? `${rawPreview.slice(0, 180)}...` : rawPreview;
+                const preview = escapeHtml(previewText);
+                const date = doc.created_at ? new Date(doc.created_at).toLocaleDateString() : '';
+                return `
+                    <div class="doc-item" onclick="openReader('${doc.id}')">
+                        <div>
+                            <h3 style="margin-top:0;font-size:18px;">${title}</h3>
+                            <div class="doc-preview">${preview}</div>
+                        </div>
+                        <div class="doc-footer">
+                            <span>${date}</span>
+                            <button class="btn-icon-danger" onclick="event.stopPropagation(); deleteDoc('${doc.id}')" title="删除文章">
+                                <i class="ph ph-trash"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>`).join('');
+                `;
+            }).join('');
+        }
+
+        async function loadDocs(options = {}) {
+            const { useCache = true } = options;
+            const list = document.getElementById('doc-list');
+            const cached = useCache ? getDocsCache() : null;
+
+            if (cached && cached.length) renderDocs(cached);
+            else if (list) list.innerHTML = '加载中...';
+
+            const { data, error } = await db.from('articles').select('*').order('created_at', { ascending: false });
+            if (error) {
+                if ((!cached || !cached.length) && list) {
+                    list.innerHTML = '<div style="color:var(--text-sec);padding:20px;text-align:center;">加载失败</div>';
+                }
+                return;
+            }
+
+            const docs = data || [];
+            if (!cached || !docsEqual(docs, cached)) {
+                setDocsCache(docs);
+                renderDocs(docs);
+            }
         }
 
         window.deleteDoc = async (id) => {
             if (confirm("确定删除这篇文章吗？")) {
                 const { error } = await db.from('articles').delete().eq('id', id);
-                if (error) alert("删除失败，请检查 RLS 策略");
-                else loadDocs();
+                if (error) {
+                    alert("删除失败，请检查 RLS 策略");
+                } else {
+                    removeDocFromCache(id);
+                    renderDocs(getDocsCache() || []);
+                    if (currentDocId === id) closeReader();
+                }
             }
         };
 
-        async function openReader(id) {
-            currentDocId = id; document.getElementById('view-reader').classList.remove('hidden');
-            const { data } = await db.from('articles').select('*').eq('id', id).single();
-            if (!data) return alert("Error");
-            document.getElementById('reader-title').innerText = data.title;
-            const div = document.getElementById('reader-body'); div.innerText = data.content; div.dataset.raw = data.content;
+        function applyReaderData(data, options = {}) {
+            if (!data) return;
+            document.getElementById('reader-title').innerText = data.title || '未命名';
+            const div = document.getElementById('reader-body');
+            div.innerText = data.content || '';
+            div.dataset.raw = data.content || '';
             applyFontStyle(localStorage.getItem('pref_font') || 'system', localStorage.getItem('pref_size') || '18');
-            loadAnnotations(id);
+            if (options.resetTimer) {
+                startReadingTimer(data.reading_seconds || 0);
+            } else if (typeof data.reading_seconds === 'number') {
+                docTotalSeconds = data.reading_seconds;
+                updateTimerDisplay();
+            }
         }
 
-        async function loadAnnotations(id) {
-            const { data } = await db.from('annotations').select('*').eq('article_id', id).order('created_at', { ascending: true });
-            activeNotes = data || [];
-            const div = document.getElementById('reader-body'), list = document.getElementById('reader-notes-list'); list.innerHTML = '';
-            let html = div.dataset.raw;
-            if (data && data.length) {
-                data.forEach(n => {
-                    if (html.includes(n.highlight_text)) {
-                        html = html.split(n.highlight_text).join(`<span class="highlight" onclick="showNoteAction('${n.id}', '${n.note.replace(/'/g, "\\'").replace(/\n/g, " ")}')">${n.highlight_text}</span>`);
-                    }
-                    list.innerHTML += `<div class="note-card"><div class="note-quote">"${n.highlight_text}"</div><div class="note-text">${n.note}</div><div style="text-align:right;margin-top:8px;"><button class="btn-text danger" style="padding:0;font-size:12px;" onclick="window.deleteNote('${n.id}')">删除</button></div></div>`;
-                });
-                div.innerHTML = html;
-            } else list.innerHTML = '<div style="color:var(--text-sec);text-align:center;">暂无笔记</div>';
->>>>>>> 3df7b13 (,。)
+        async function openReader(id) {
+            if (!id) return;
+            stopReadingTimer();
+            currentDocId = id;
+            activeNotes = [];
+            document.getElementById('view-reader').classList.remove('hidden');
+            const notesList = document.getElementById('reader-notes-list');
+            if (notesList) notesList.innerHTML = '';
+
+            const cached = getDocCache(id);
+            if (cached) {
+                applyReaderData(cached, { resetTimer: true });
+                loadAnnotations(id, { useCache: true });
+            } else {
+                document.getElementById('reader-title').innerText = '加载中...';
+                const readerBody = document.getElementById('reader-body');
+                readerBody.innerText = '';
+                readerBody.dataset.raw = '';
+            }
+
+            const { data } = await db.from('articles').select('*').eq('id', id).single();
+            if (!data) return;
+            setDocCache(data);
+            applyReaderData(data, { resetTimer: !cached });
+            loadAnnotations(id, { useCache: false });
         }
 
-        async function loadAnnotations(id) {
-            const { data } = await db.from('annotations').select('*').eq('article_id', id).order('start_index', { ascending: true });
-            activeNotes = data || [];
+        function renderAnnotations(notes) {
             const contentDiv = document.getElementById('reader-body');
             const listDiv = document.getElementById('reader-notes-list');
+            if (!contentDiv || !listDiv) return;
+
+            const rawText = contentDiv.dataset.raw || '';
+            activeNotes = Array.isArray(notes) ? notes : [];
             listDiv.innerHTML = '';
 
-            const rawText = contentDiv.dataset.raw;
-            if (!rawText) return;
+            if (!rawText) {
+                contentDiv.innerText = '';
+                listDiv.innerHTML = '<div style="color:var(--text-sec);text-align:center;">暂无笔记</div>';
+                return;
+            }
 
-            if (data && data.length > 0) {
-                let html = "";
-                let lastIndex = 0;
-                data.forEach(n => {
-                    if (n.start_index < lastIndex) return;
-                    if (n.start_index >= rawText.length) return;
-                    html += escapeHtml(rawText.substring(lastIndex, n.start_index));
-                    const exactText = rawText.substring(n.start_index, n.end_index);
-                    const safeNote = n.note.replace(/'/g, "\\'").replace(/\n/g, " ");
-                    html += `<span class="highlight" onclick="handleHighlightClick('${n.id}', '${safeNote}')">${escapeHtml(exactText)}</span>`;
-                    lastIndex = n.end_index;
-                    listDiv.innerHTML += `<div class="note-card"><div class="note-quote">"${escapeHtml(exactText)}"</div><div class="note-text">${escapeHtml(n.note)}</div><div style="text-align:right;margin-top:8px;"><button class="btn-text danger" style="padding:0;font-size:12px;" onclick="window.deleteNote('${n.id}')">删除</button></div></div>`;
-                });
-                html += escapeHtml(rawText.substring(lastIndex));
-                contentDiv.innerHTML = html;
-            } else {
+            if (!activeNotes.length) {
                 contentDiv.innerText = rawText;
                 listDiv.innerHTML = '<div style="color:var(--text-sec);text-align:center;">暂无笔记</div>';
+                return;
             }
+
+            let html = "";
+            let lastIndex = 0;
+            activeNotes.forEach((n) => {
+                const start = Math.max(0, n.start_index || 0);
+                const end = Math.min(rawText.length, n.end_index || 0);
+                if (start < lastIndex || end <= start) return;
+                html += escapeHtml(rawText.substring(lastIndex, start));
+                const exactText = rawText.substring(start, end);
+                const safeNote = (n.note || '').replace(/'/g, "\\'").replace(/\n/g, " ");
+                html += `<span class="highlight" onclick="handleHighlightClick('${n.id}', '${safeNote}')">${escapeHtml(exactText)}</span>`;
+                lastIndex = end;
+                listDiv.innerHTML += `
+                    <div class="note-card">
+                        <div class="note-quote">"${escapeHtml(exactText)}"</div>
+                        <div class="note-text">${escapeHtml(n.note || '')}</div>
+                        <div style="text-align:right;margin-top:8px;">
+                            <button class="btn-text danger" style="padding:0;font-size:12px;" onclick="window.deleteNote('${n.id}')">删除</button>
+                        </div>
+                    </div>
+                `;
+            });
+            html += escapeHtml(rawText.substring(lastIndex));
+            contentDiv.innerHTML = html;
+        }
+
+        async function loadAnnotations(id, options = {}) {
+            const { useCache = true, silent = false } = options;
+            const cached = useCache ? getNotesCache(id) : null;
+            if (cached) renderAnnotations(cached);
+
+            const { data, error } = await db.from('annotations').select('*').eq('article_id', id).order('start_index', { ascending: true });
+            if (error) {
+                if (!silent) console.warn(error);
+                return;
+            }
+
+            const notes = data || [];
+            if (!cached || !notesEqual(notes, cached)) {
+                setNotesCache(id, notes);
+                if (id === currentDocId) renderAnnotations(notes);
+            }
+        }
+
+        function handleSelection(e) {
+            if (e.target.classList.contains('highlight')) return;
+            if (!currentDocId) return;
+            const sel = window.getSelection();
+            if (!sel || sel.rangeCount === 0) return;
+            const text = sel.toString().trim();
+            if (!text) return;
+
+            const range = sel.getRangeAt(0);
+            const preCaretRange = range.cloneRange();
+            preCaretRange.selectNodeContents(document.getElementById('reader-body'));
+            preCaretRange.setEnd(range.startContainer, range.startOffset);
+            const startIndex = preCaretRange.toString().length;
+            const endIndex = startIndex + text.length;
+
+            const overlap = activeNotes.find((n) =>
+                (startIndex >= n.start_index && startIndex < n.end_index) ||
+                (endIndex > n.start_index && endIndex <= n.end_index) ||
+                (startIndex <= n.start_index && endIndex >= n.end_index)
+            );
+
+            if (overlap) {
+                if (confirm(`该区域已有笔记：\n"${overlap.note}"\n\n是否修改？`)) {
+                    const newNote = prompt("修改笔记:", overlap.note);
+                    if (newNote && newNote !== overlap.note) {
+                        db.from('annotations').update({ note: newNote }).eq('id', overlap.id).then(() => loadAnnotations(currentDocId, { useCache: false }));
+                    }
+                }
+                sel.removeAllRanges();
+                return;
+            }
+
+            setTimeout(async () => {
+                const note = prompt("添加笔记:");
+                if (note) {
+                    await db.from('annotations').insert({
+                        article_id: currentDocId,
+                        highlight_text: text,
+                        start_index: startIndex,
+                        end_index: endIndex,
+                        note
+                    });
+                    loadAnnotations(currentDocId, { useCache: false });
+                }
+                sel.removeAllRanges();
+            }, 10);
         }
 
         window.handleHighlightClick = (id, text) => {
@@ -1753,104 +2495,212 @@
 
         window.deleteNote = async (id) => {
             const { error } = await db.from('annotations').delete().eq('id', id);
-            if (error) alert("删除失败: " + error.message); else loadAnnotations(currentDocId);
+            if (error) alert("删除失败: " + error.message);
+            else loadAnnotations(currentDocId, { useCache: false });
         };
 
-        document.getElementById('reader-body').addEventListener('mouseup', (e) => {
-            if (e.target.classList.contains('highlight')) return;
-            const sel = window.getSelection();
-            if (sel.rangeCount === 0) return;
-            const text = sel.toString().trim();
-            if (!text) return;
-            const range = sel.getRangeAt(0);
-            const preCaretRange = range.cloneRange();
-            preCaretRange.selectNodeContents(document.getElementById('reader-body'));
-            preCaretRange.setEnd(range.startContainer, range.startOffset);
-            const startIndex = preCaretRange.toString().length;
-            const endIndex = startIndex + text.length;
-
-            const overlap = activeNotes.find(n => (startIndex >= n.start_index && startIndex < n.end_index) || (endIndex > n.start_index && endIndex <= n.end_index) || (startIndex <= n.start_index && endIndex >= n.end_index));
-
-            if (overlap) {
-                if (confirm(`该区域已有笔记：\n"${overlap.note}"\n\n是否修改？`)) {
-                    const newNote = prompt("修改笔记:", overlap.note);
-                    if (newNote && newNote !== overlap.note) db.from('annotations').update({ note: newNote }).eq('id', overlap.id).then(() => loadAnnotations(currentDocId));
-                }
-                sel.removeAllRanges();
-                return;
-            }
-
-            setTimeout(async () => {
-                const note = prompt("添加笔记:");
-                if (note) {
-                    await db.from('annotations').insert({ article_id: currentDocId, highlight_text: text, start_index: startIndex, end_index: endIndex, note: note });
-                    loadAnnotations(currentDocId);
-                }
-                sel.removeAllRanges();
-            }, 10);
-        });
-
         async function openEditor(id) {
-            currentDocId = id; document.getElementById('view-editor').classList.remove('hidden');
-            document.getElementById('doc-title').value = ''; document.getElementById('doc-body').value = '';
+            currentDocId = id;
+            document.getElementById('view-editor').classList.remove('hidden');
+            document.getElementById('doc-title').value = '';
+            document.getElementById('doc-body').value = '';
             document.getElementById('save-status').innerText = '准备就绪';
 
-            // Re-init history for new doc
-            editorHistory.stack = [];
-            editorHistory.pointer = -1;
+            if (editorHistory) {
+                editorHistory.stack = [];
+                editorHistory.pointer = -1;
+            }
 
             if (id) {
+                const cached = getDocCache(id);
+                if (cached) {
+                    document.getElementById('doc-title').value = cached.title || '';
+                    document.getElementById('doc-body').value = cached.content || '';
+                    if (editorHistory) editorHistory.save(cached.content || '');
+                }
                 const { data } = await db.from('articles').select('*').eq('id', id).single();
-                document.getElementById('doc-title').value = data.title;
-                document.getElementById('doc-body').value = data.content;
-                editorHistory.save(data.content); // Init history
+                if (data) {
+                    setDocCache(data);
+                    document.getElementById('doc-title').value = data.title || '';
+                    document.getElementById('doc-body').value = data.content || '';
+                    if (editorHistory) {
+                        editorHistory.stack = [];
+                        editorHistory.pointer = -1;
+                        editorHistory.save(data.content || '');
+                    }
+                }
             }
         }
-        function closeEditor() { document.getElementById('view-editor').classList.add('hidden'); showPage('dashboard'); }
-        function triggerAutoSave() { document.getElementById('save-status').innerText = "输入中..."; clearTimeout(saveTimer); saveTimer = setTimeout(() => saveDoc(false), 2000); }
-        async function saveDoc(close) {
-            const t = document.getElementById('doc-title').value, c = document.getElementById('doc-body').value;
-            if (!t && !c && close) return closeEditor();
-            document.getElementById('save-status').innerText = "保存中...";
-            const pl = { title: t, content: c, user_id: currentUser.id };
-            if (currentDocId) await db.from('articles').update(pl).eq('id', currentDocId);
-            else { const res = await db.from('articles').insert(pl).select(); if (res.data) currentDocId = res.data[0].id; }
-            document.getElementById('save-status').innerText = "已保存"; if (close) { closeEditor(); loadDocs(); }
+
+        function closeEditor() {
+            document.getElementById('view-editor').classList.add('hidden');
+            showPage('dashboard');
         }
 
-        async function updateName() { const n = document.getElementById('set-name').value; if (n) { await db.auth.updateUser({ data: { full_name: n } }); document.getElementById('nav-name').innerText = n; alert("已更新"); } }
-        async function sendPasswordReset() { if (currentUser) { const { error } = await db.auth.resetPasswordForEmail(currentUser.email, { redirectTo: window.location.href }); alert(error ? error.message : "邮件已发送"); } }
+        function triggerAutoSave() {
+            document.getElementById('save-status').innerText = "输入中...";
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(() => saveDoc(false), 2000);
+        }
+
+        async function saveDoc(close) {
+            const t = document.getElementById('doc-title').value;
+            const c = document.getElementById('doc-body').value;
+            if (!t && !c && close) return closeEditor();
+            document.getElementById('save-status').innerText = "保存中...";
+            const payload = { title: t, content: c, user_id: currentUser.id };
+            let saved = null;
+
+            if (currentDocId) {
+                const { data } = await db.from('articles').update(payload).eq('id', currentDocId).select().single();
+                saved = data;
+            } else {
+                const res = await db.from('articles').insert(payload).select();
+                if (res.data) {
+                    currentDocId = res.data[0].id;
+                    saved = res.data[0];
+                }
+            }
+
+            if (saved) setDocCache(saved);
+            else updateDocsCache({ ...payload, id: currentDocId });
+
+            document.getElementById('save-status').innerText = "已保存";
+            if (close) {
+                closeEditor();
+                loadDocs({ useCache: true });
+            }
+        }
+
+        async function updateName() {
+            const n = document.getElementById('set-name').value;
+            if (n) {
+                await db.auth.updateUser({ data: { full_name: n } });
+                document.getElementById('nav-name').innerText = n;
+                alert("已更新");
+            }
+        }
+
+        async function sendPasswordReset() {
+            if (currentUser) {
+                const { error } = await db.auth.resetPasswordForEmail(currentUser.email, { redirectTo: window.location.href });
+                alert(error ? error.message : "邮件已发送");
+            }
+        }
+
         async function uploadAvatar(inp) {
-            const f = inp.files[0]; if (!f) return;
+            const f = inp.files[0];
+            if (!f) return;
             document.getElementById('setting-avatar-preview').src = URL.createObjectURL(f);
             try {
                 const path = `${currentUser.id}/${Date.now()}`;
                 await db.storage.from('avatars').upload(path, f);
                 const { data } = db.storage.from('avatars').getPublicUrl(path);
                 await db.auth.updateUser({ data: { avatar_url: data.publicUrl } });
-                document.getElementById('nav-avatar').src = data.publicUrl; alert("头像更新成功");
-            } catch (e) { alert("上传失败"); }
+                document.getElementById('nav-avatar').src = data.publicUrl;
+                alert("头像更新成功");
+            } catch (e) {
+                alert("上传失败");
+            }
         }
 
         function showPage(id) {
-            ['dashboard', 'settings'].forEach(p => document.getElementById('page-' + p).classList.add('hidden'));
+            ['dashboard', 'settings'].forEach((p) => document.getElementById('page-' + p).classList.add('hidden'));
             document.getElementById('page-' + id).classList.remove('hidden');
             const isDash = id === 'dashboard';
             document.getElementById('tab-dash-pc').classList.toggle('active', isDash);
             document.getElementById('tab-set-pc').classList.toggle('active', !isDash);
             document.getElementById('tab-dash-mb').classList.toggle('active', isDash);
             document.getElementById('tab-set-mb').classList.toggle('active', !isDash);
-            if (isDash) loadDocs();
+            if (isDash) loadDocs({ useCache: true });
         }
-<<<<<<< HEAD
-        function closeReader() { stopReadingTimer(); document.getElementById('view-reader').classList.add('hidden'); showPage('dashboard'); }
-        function switchToEdit() { stopReadingTimer(); document.getElementById('view-reader').classList.add('hidden'); openEditor(currentDocId); }
-=======
-        function closeReader() { closeShare(true); document.getElementById('view-reader').classList.add('hidden'); }
-        function switchToEdit() { closeReader(); openEditor(currentDocId); }
->>>>>>> 3df7b13 (,。)
-        async function signOut() { await db.auth.signOut(); localStorage.removeItem('remember'); sessionStorage.removeItem('active'); location.reload(); }
-        function setTheme(v) { document.body.setAttribute('data-theme', v === 'dark' || (v === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'); }
+
+        function closeReader() {
+            closeShare(true);
+            closeSharePreview(true);
+            stopReadingTimer();
+            currentDocId = null;
+            activeNotes = [];
+            document.getElementById('view-reader').classList.add('hidden');
+            showPage('dashboard');
+        }
+
+        function switchToEdit() {
+            closeShare(true);
+            closeSharePreview(true);
+            stopReadingTimer();
+            document.getElementById('view-reader').classList.add('hidden');
+            openEditor(currentDocId);
+        }
+
+        async function signOut() {
+            stopReadingTimer();
+            unsubscribeRealtime();
+            clearDocCache();
+            await db.auth.signOut();
+            localStorage.removeItem('remember');
+            sessionStorage.removeItem('active');
+            location.reload();
+        }
+
+        function setTheme(v) {
+            const value = v || 'system';
+            localStorage.setItem('pref_theme', value);
+            const isDark = value === 'dark' || (value === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            document.body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+        }
+
+        function subscribeRealtime() {
+            if (realtimeChannel) return;
+            realtimeChannel = db.channel('sr-realtime')
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'articles' }, handleArticleChange)
+                .on('postgres_changes', { event: '*', schema: 'public', table: 'annotations' }, handleAnnotationChange)
+                .subscribe();
+        }
+
+        function unsubscribeRealtime() {
+            if (!realtimeChannel) return;
+            db.removeChannel(realtimeChannel);
+            realtimeChannel = null;
+        }
+
+        function handleArticleChange(payload) {
+            if (!payload) return;
+            if (payload.eventType === 'DELETE') {
+                removeDocFromCache(payload.old.id);
+                if (currentDocId === payload.old.id) closeReader();
+            } else {
+                updateDocsCache(payload.new);
+                if (currentDocId && payload.new.id === currentDocId) {
+                    applyReaderData(payload.new, { resetTimer: false });
+                    const cachedNotes = getNotesCache(currentDocId);
+                    if (cachedNotes) renderAnnotations(cachedNotes);
+                }
+            }
+            const dashboard = document.getElementById('page-dashboard');
+            if (dashboard && !dashboard.classList.contains('hidden')) {
+                renderDocs(getDocsCache() || []);
+            }
+        }
+
+        function handleAnnotationChange(payload) {
+            if (!payload) return;
+            const docId = (payload.new || payload.old || {}).article_id;
+            if (!docId) return;
+
+            let notes = getNotesCache(docId) || [];
+            if (payload.eventType === 'DELETE') {
+                notes = notes.filter((note) => note.id !== payload.old.id);
+            } else {
+                const row = payload.new;
+                const idx = notes.findIndex((note) => note.id === row.id);
+                if (idx >= 0) notes[idx] = row;
+                else notes.push(row);
+            }
+            notes = notes.sort((a, b) => (a.start_index || 0) - (b.start_index || 0));
+            setNotesCache(docId, notes);
+            if (docId === currentDocId) renderAnnotations(notes);
+        }
 
         init();
     </script>
