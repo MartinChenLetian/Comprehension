@@ -9,6 +9,9 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://unpkg.com/yjs@13.6.15/dist/yjs.js"></script>
+    <script src="https://unpkg.com/y-webrtc@10.2.5/dist/y-webrtc.js"></script>
+    <script src="https://unpkg.com/y-indexeddb@9.0.10/dist/y-indexeddb.js"></script>
     <link rel="shortcut icon" href="public/icons/icon.png" type="image/x-icon">
 
     <style>
@@ -36,6 +39,12 @@
             --auth-card: rgba(255, 255, 255, 0.75);
             --auth-input-bg: rgba(255, 255, 255, 0.6);
             --auth-input-focus: rgba(10, 132, 255, 0.2);
+            --editor-paper: rgba(255, 255, 255, 0.92);
+            --editor-paper-border: rgba(15, 23, 42, 0.08);
+            --editor-paper-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+            --cursor-glow: rgba(56, 189, 248, 0.22);
+            --cursor-x: 50%;
+            --cursor-y: 18%;
             --cursor-glass: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='6.5' fill='rgba(255,255,255,0.35)' stroke='rgba(255,255,255,0.5)' stroke-width='1.2'/><circle cx='14' cy='14' r='2.5' fill='rgba(10,132,255,0.55)'/></svg>") 14 14, auto;
             color-scheme: light dark;
         }
@@ -58,6 +67,10 @@
             --auth-card: rgba(18, 20, 26, 0.75);
             --auth-input-bg: rgba(18, 20, 26, 0.55);
             --auth-input-focus: rgba(56, 189, 248, 0.22);
+            --editor-paper: rgba(17, 19, 24, 0.92);
+            --editor-paper-border: rgba(148, 163, 184, 0.14);
+            --editor-paper-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+            --cursor-glow: rgba(56, 189, 248, 0.16);
         }
 
         * {
@@ -74,10 +87,17 @@
             height: 100vh;
             overflow: hidden;
             transition: background 0.3s;
-            background-image: radial-gradient(circle at top, rgba(255, 255, 255, 0.6), transparent 45%),
+            background-image: radial-gradient(600px circle at var(--cursor-x) var(--cursor-y), var(--cursor-glow), transparent 65%),
+                radial-gradient(circle at top, rgba(255, 255, 255, 0.6), transparent 45%),
                 radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.18), transparent 45%),
                 radial-gradient(circle at 90% 0%, rgba(56, 189, 248, 0.2), transparent 40%);
-            cursor: var(--cursor-glass);
+            cursor: none;
+        }
+
+        html,
+        body,
+        body * {
+            cursor: none !important;
         }
 
         .hidden {
@@ -169,6 +189,24 @@
         .btn-icon-sm:hover {
             background: var(--btn-surface);
             color: var(--text-main);
+        }
+
+        .btn-icon-danger {
+            background: transparent;
+            border: 0;
+            color: #FF3B30;
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .btn-icon-danger:hover {
+            background: rgba(255, 59, 48, 0.14);
         }
 
         .btn-text:hover {
@@ -514,21 +552,46 @@
 
         .editor-area {
             flex: 1;
-            max-width: 800px;
+            max-width: 960px;
             width: 100%;
             margin: 0 auto;
-            padding: 40px;
+            padding: 32px 24px 60px;
             overflow-y: auto;
+        }
+
+        .editor-sheet {
+            background: var(--editor-paper);
+            border-radius: 20px;
+            border: 1px solid var(--editor-paper-border);
+            box-shadow: var(--editor-paper-shadow);
+            padding: 48px 56px 72px;
+            min-height: 70vh;
+        }
+
+        .editor-body-wrap {
+            position: relative;
+            min-height: 60vh;
         }
 
         #doc-title {
             font-size: 36px;
             font-weight: 800;
+            line-height: 1.2;
             border: none;
             background: transparent;
             width: 100%;
             margin-bottom: 20px;
             color: var(--text-main);
+            white-space: pre-wrap;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            outline: none;
+            min-height: 44px;
+        }
+
+        #doc-title:empty::before {
+            content: attr(data-placeholder);
+            color: var(--text-sec);
         }
 
         #doc-body {
@@ -539,6 +602,49 @@
             resize: none;
             outline: none;
             color: var(--text-main);
+            line-height: 1.7;
+            white-space: pre-wrap;
+            font-size: 18px;
+            position: relative;
+            z-index: 2;
+        }
+
+        #doc-body:focus {
+            outline: none;
+        }
+
+        #doc-body:empty::before {
+            content: attr(data-placeholder);
+            color: var(--text-sec);
+        }
+
+        .collab-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .collab-selection {
+            position: absolute;
+            border-radius: 4px;
+            opacity: 0.3;
+        }
+
+        .collab-caret {
+            position: absolute;
+            width: 2px;
+            border-radius: 2px;
+        }
+
+        .collab-label {
+            position: absolute;
+            padding: 2px 6px;
+            font-size: 10px;
+            color: #fff;
+            border-radius: 6px;
+            transform: translateY(-100%);
+            white-space: nowrap;
         }
 
         /* Reader */
@@ -1179,6 +1285,19 @@
                 padding: 20px 16px 100px 16px;
             }
 
+            .editor-area {
+                padding: 20px 14px 90px;
+            }
+
+            .editor-sheet {
+                padding: 28px 20px 48px;
+                border-radius: 16px;
+            }
+
+            #doc-title {
+                font-size: 28px;
+            }
+
             .reader-layout {
                 flex-direction: column;
             }
@@ -1374,8 +1493,15 @@
                     style="font-weight:600;" onclick="saveDoc(true)">完成</button></div>
         </div>
         <div class="editor-area">
-            <input type="text" id="doc-title" placeholder="输入标题" onkeyup="triggerAutoSave()">
-            <textarea id="doc-body" placeholder="输入正文..." onkeyup="triggerAutoSave()"></textarea>
+            <div class="editor-sheet">
+                <div id="doc-title" contenteditable="plaintext-only" spellcheck="false" data-placeholder="输入标题"
+                    oninput="triggerAutoSave()"></div>
+                <div class="editor-body-wrap">
+                    <div id="doc-body" contenteditable="plaintext-only" spellcheck="false" data-placeholder="输入正文..."
+                        oninput="triggerAutoSave()"></div>
+                    <div id="collab-layer" class="collab-layer"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1472,9 +1598,9 @@
         const db = supabase.createClient(supabaseUrl, supabaseKey);
 
         const bgImages = [
-            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2000',
-            'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2000',
-            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=2000'
+            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1400&q=60',
+            'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1400&q=60',
+            'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1400&q=60'
         ];
         const CACHE_KEYS = {
             docs: 'sr_docs_cache',
@@ -1494,20 +1620,40 @@
         let readingTimer = null;
         let sessionSeconds = 0;
         let docTotalSeconds = 0;
+        let collabDoc = null;
+        let collabProvider = null;
+        let collabText = null;
+        let collabTitle = null;
+        let collabAwareness = null;
+        let collabRoomId = null;
+        let collabOrigin = null;
+        let collabSaveTimer = null;
+        let collabSelectionTimer = null;
+        let collabTextObserver = null;
+        let collabTitleObserver = null;
+        let collabAwarenessObserver = null;
+        let collabSelectionListener = null;
+        let collabInputListener = null;
+        let collabTitleInputListener = null;
+        let collabPasteListener = null;
+        let collabScrollListener = null;
+        let suppressEditorSync = false;
+        const collabColors = ['#0A84FF', '#34D399', '#F97316', '#A855F7', '#14B8A6', '#F43F5E', '#FACC15'];
+        const bgPreload = new Map();
 
         class HistoryManager {
             constructor(textareaId) {
-                this.textarea = document.getElementById(textareaId);
+                this.editor = document.getElementById(textareaId);
                 this.stack = [];
                 this.pointer = -1;
                 this.max = 80;
-                if (!this.textarea) return;
+                if (!this.editor) return;
 
-                this.textarea.addEventListener('input', () => {
-                    this.save(this.textarea.value);
+                this.editor.addEventListener('input', () => {
+                    this.save(getEditorValue(this.editor));
                 });
 
-                this.textarea.addEventListener('keydown', (e) => {
+                this.editor.addEventListener('keydown', (e) => {
                     if (!(e.metaKey || e.ctrlKey)) return;
                     if (e.key.toLowerCase() !== 'z') return;
                     e.preventDefault();
@@ -1525,16 +1671,71 @@
             }
 
             undo() {
-                if (!this.textarea || this.pointer <= 0) return;
+                if (!this.editor || this.pointer <= 0) return;
                 this.pointer -= 1;
-                this.textarea.value = this.stack[this.pointer];
+                setEditorValue(this.editor, this.stack[this.pointer]);
             }
 
             redo() {
-                if (!this.textarea || this.pointer >= this.stack.length - 1) return;
+                if (!this.editor || this.pointer >= this.stack.length - 1) return;
                 this.pointer += 1;
-                this.textarea.value = this.stack[this.pointer];
+                setEditorValue(this.editor, this.stack[this.pointer]);
             }
+        }
+
+        function getEditorEl() {
+            return document.getElementById('doc-body');
+        }
+
+        function getTitleEl() {
+            return document.getElementById('doc-title');
+        }
+
+        function normalizeTitleText(text) {
+            return normalizeEditorText(text || '').replace(/\s*\n+\s*/g, ' ').trim();
+        }
+
+        function normalizeEditorText(text) {
+            return (text || '').replace(/\r\n/g, '\n');
+        }
+
+        function getEditorValue(el) {
+            if (!el) return '';
+            if (el.isContentEditable) return normalizeEditorText(el.innerText);
+            return normalizeEditorText(el.value);
+        }
+
+        function setEditorValue(el, value) {
+            if (!el) return;
+            const text = normalizeEditorText(value || '');
+            if (el.isContentEditable) {
+                el.textContent = text;
+            } else {
+                el.value = text;
+            }
+        }
+
+        function getEditorContent() {
+            return getEditorValue(getEditorEl());
+        }
+
+        function getTitleValue() {
+            const el = getTitleEl();
+            return el ? normalizeTitleText(getEditorValue(el)) : '';
+        }
+
+        function setEditorContent(value, options = {}) {
+            const el = getEditorEl();
+            if (!el) return;
+            const { silent = false } = options;
+            setEditorValue(el, value);
+            if (!silent && editorHistory) editorHistory.save(getEditorValue(el));
+        }
+
+        function setTitleValue(value, options = {}) {
+            const el = getTitleEl();
+            if (!el) return;
+            setEditorValue(el, value || '');
         }
 
         function readCache(key) {
@@ -1652,19 +1853,425 @@
             localStorage.removeItem(CACHE_KEYS.meta);
         }
 
-        async function init() {
-            setInterval(() => {
-                bgIdx = (bgIdx + 1) % bgImages.length;
-                const active = document.querySelector('.auth-img div.active');
-                if (active) {
-                    const next = active.id === 'bg-1' ? document.getElementById('bg-2') : document.getElementById('bg-1');
-                    next.style.backgroundImage = `url('${bgImages[bgIdx]}')`;
-                    next.classList.add('active');
-                    active.classList.remove('active');
+        function setupPointerGlow() {
+            let raf = null;
+            let latest = { x: window.innerWidth * 0.5, y: window.innerHeight * 0.2 };
+            const update = (x, y) => {
+                const px = Math.max(0, Math.min(100, (x / window.innerWidth) * 100));
+                const py = Math.max(0, Math.min(100, (y / window.innerHeight) * 100));
+                document.body.style.setProperty('--cursor-x', `${px}%`);
+                document.body.style.setProperty('--cursor-y', `${py}%`);
+            };
+            const handle = (e) => {
+                latest = { x: e.clientX, y: e.clientY };
+                if (raf) return;
+                raf = requestAnimationFrame(() => {
+                    update(latest.x, latest.y);
+                    raf = null;
+                });
+            };
+            document.addEventListener('pointermove', handle, { passive: true });
+            document.addEventListener('pointerdown', handle, { passive: true });
+            update(latest.x, latest.y);
+        }
+
+        function shouldUseAuthImages() {
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            if (!connection) return true;
+            if (connection.saveData) return false;
+            return !/2g/.test(connection.effectiveType || '');
+        }
+
+        function preloadBgImage(url) {
+            if (bgPreload.has(url)) return bgPreload.get(url);
+            const img = new Image();
+            img.decoding = 'async';
+            img.loading = 'eager';
+            img.src = url;
+            const promise = img.decode ? img.decode().catch(() => { }) : new Promise((resolve) => {
+                img.onload = resolve;
+                img.onerror = resolve;
+            });
+            bgPreload.set(url, promise);
+            return promise;
+        }
+
+        async function rotateAuthBackground() {
+            if (!bgImages.length) return;
+            bgIdx = (bgIdx + 1) % bgImages.length;
+            const active = document.querySelector('.auth-img div.active');
+            if (!active) return;
+            const next = active.id === 'bg-1' ? document.getElementById('bg-2') : document.getElementById('bg-1');
+            const nextUrl = bgImages[bgIdx];
+            await preloadBgImage(nextUrl);
+            next.style.backgroundImage = `url('${nextUrl}')`;
+            next.classList.add('active');
+            active.classList.remove('active');
+        }
+
+        function getCollabColor() {
+            const seed = currentUser?.id || currentUser?.email || String(Math.random());
+            let hash = 0;
+            for (let i = 0; i < seed.length; i += 1) {
+                hash = (hash << 5) - hash + seed.charCodeAt(i);
+                hash |= 0;
+            }
+            const index = Math.abs(hash) % collabColors.length;
+            return collabColors[index];
+        }
+
+        function applyTextDiff(ytext, nextValue, origin) {
+            const next = normalizeEditorText(nextValue || '');
+            const prev = ytext.toString();
+            if (prev === next) return;
+            let start = 0;
+            while (start < prev.length && start < next.length && prev[start] === next[start]) start += 1;
+            let endPrev = prev.length - 1;
+            let endNext = next.length - 1;
+            while (endPrev >= start && endNext >= start && prev[endPrev] === next[endNext]) {
+                endPrev -= 1;
+                endNext -= 1;
+            }
+            const deleteCount = endPrev - start + 1;
+            const insertText = next.slice(start, endNext + 1);
+            ytext.doc.transact(() => {
+                if (deleteCount > 0) ytext.delete(start, deleteCount);
+                if (insertText) ytext.insert(start, insertText);
+            }, origin);
+        }
+
+        function getSelectionOffsets(root) {
+            const selection = window.getSelection();
+            if (!selection || selection.rangeCount === 0) return null;
+            const range = selection.getRangeAt(0);
+            if (!root.contains(range.startContainer)) return null;
+            const preStart = range.cloneRange();
+            preStart.selectNodeContents(root);
+            preStart.setEnd(range.startContainer, range.startOffset);
+            const start = preStart.toString().length;
+            const preEnd = range.cloneRange();
+            preEnd.selectNodeContents(root);
+            preEnd.setEnd(range.endContainer, range.endOffset);
+            const end = preEnd.toString().length;
+            return { anchor: start, head: end };
+        }
+
+        function getRangeFromOffsets(root, start, end) {
+            const range = document.createRange();
+            if (!root) {
+                range.setStart(document.body, 0);
+                range.collapse(true);
+                return range;
+            }
+            if (!root.textContent) {
+                range.selectNodeContents(root);
+                range.collapse(true);
+                return range;
+            }
+            const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+            let current = 0;
+            let startNode = null;
+            let endNode = null;
+            let startOffset = 0;
+            let endOffset = 0;
+            let node = walker.nextNode();
+            while (node) {
+                const len = node.textContent.length;
+                if (!startNode && start <= current + len) {
+                    startNode = node;
+                    startOffset = Math.max(0, start - current);
                 }
-            }, 6000);
-            const bg = document.getElementById('bg-1');
-            if (bg) bg.style.backgroundImage = `url('${bgImages[0]}')`;
+                if (!endNode && end <= current + len) {
+                    endNode = node;
+                    endOffset = Math.max(0, end - current);
+                    break;
+                }
+                current += len;
+                node = walker.nextNode();
+            }
+            if (!startNode) {
+                range.selectNodeContents(root);
+                range.collapse(false);
+                return range;
+            }
+            if (!endNode) {
+                endNode = startNode;
+                endOffset = startOffset;
+            }
+            range.setStart(startNode, startOffset);
+            range.setEnd(endNode, endOffset);
+            return range;
+        }
+
+        function restoreSelectionOffsets(root, anchor, head) {
+            const selection = window.getSelection();
+            if (!selection || !root) return;
+            const start = Math.min(anchor, head);
+            const end = Math.max(anchor, head);
+            const range = getRangeFromOffsets(root, start, end);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+
+        function focusBodyAtStart() {
+            const editorEl = getEditorEl();
+            if (!editorEl) return;
+            editorEl.focus();
+            const range = document.createRange();
+            range.selectNodeContents(editorEl);
+            range.collapse(true);
+            const selection = window.getSelection();
+            if (!selection) return;
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+
+        function handleTitleKeydown(e) {
+            if (e.key !== 'Enter') return;
+            e.preventDefault();
+            focusBodyAtStart();
+        }
+
+        function scheduleAwarenessUpdate() {
+            if (collabSelectionTimer) return;
+            collabSelectionTimer = requestAnimationFrame(() => {
+                collabSelectionTimer = null;
+                updateLocalAwareness();
+            });
+        }
+
+        function updateLocalAwareness() {
+            if (!collabAwareness) return;
+            const editorEl = getEditorEl();
+            if (!editorEl) return;
+            const selection = getSelectionOffsets(editorEl);
+            collabAwareness.setLocalStateField('cursor', selection);
+        }
+
+        function renderRemoteCursors() {
+            const layer = document.getElementById('collab-layer');
+            const editorEl = getEditorEl();
+            if (!layer || !editorEl || !collabAwareness) return;
+            layer.innerHTML = '';
+            const editorRect = editorEl.getBoundingClientRect();
+            const lineHeight = parseFloat(getComputedStyle(editorEl).lineHeight) || 20;
+
+            collabAwareness.getStates().forEach((state, clientId) => {
+                if (clientId === collabAwareness.clientID) return;
+                const cursor = state.cursor;
+                if (!cursor) return;
+                const color = state.user?.color || '#0A84FF';
+                const name = state.user?.name || '协作者';
+                const start = Math.min(cursor.anchor, cursor.head);
+                const end = Math.max(cursor.anchor, cursor.head);
+                const range = getRangeFromOffsets(editorEl, start, end);
+                const rects = Array.from(range.getClientRects());
+                if (!rects.length) return;
+
+                if (end > start) {
+                    rects.forEach((rect) => {
+                        const sel = document.createElement('div');
+                        sel.className = 'collab-selection';
+                        sel.style.background = color;
+                        sel.style.left = `${rect.left - editorRect.left}px`;
+                        sel.style.top = `${rect.top - editorRect.top}px`;
+                        sel.style.width = `${rect.width}px`;
+                        sel.style.height = `${rect.height || lineHeight}px`;
+                        layer.appendChild(sel);
+                    });
+                }
+
+                const caretRect = rects[rects.length - 1];
+                const caret = document.createElement('div');
+                caret.className = 'collab-caret';
+                caret.style.background = color;
+                caret.style.left = `${caretRect.right - editorRect.left}px`;
+                caret.style.top = `${caretRect.top - editorRect.top}px`;
+                caret.style.height = `${caretRect.height || lineHeight}px`;
+                layer.appendChild(caret);
+
+                const label = document.createElement('div');
+                label.className = 'collab-label';
+                label.style.background = color;
+                label.style.left = `${caretRect.right - editorRect.left + 4}px`;
+                label.style.top = `${caretRect.top - editorRect.top}px`;
+                label.textContent = name;
+                layer.appendChild(label);
+            });
+        }
+
+        function scheduleCollabSave() {
+            clearTimeout(collabSaveTimer);
+            collabSaveTimer = setTimeout(() => {
+                if (currentDocId) saveDoc(false, { silent: true, fromCollab: true });
+            }, 2000);
+        }
+
+        function setupCollaboration(docId, initialContent = '', initialTitle = '') {
+            if (!docId) return;
+            if (!window.Y || !window.WebrtcProvider) return;
+            if (collabRoomId === docId) {
+                if (collabText && !collabText.length && initialContent) {
+                    applyTextDiff(collabText, initialContent, collabOrigin);
+                }
+                if (collabTitle && !collabTitle.length && initialTitle) {
+                    applyTextDiff(collabTitle, initialTitle, collabOrigin);
+                }
+                return;
+            }
+            teardownCollaboration();
+
+            collabRoomId = docId;
+            collabOrigin = Symbol(`collab-${docId}`);
+            collabDoc = new Y.Doc();
+            collabProvider = new WebrtcProvider(`sr-doc-${docId}`, collabDoc, {
+                signaling: ['wss://signaling.yjs.dev']
+            });
+            if (window.IndexeddbPersistence) {
+                new IndexeddbPersistence(`sr-doc-${docId}`, collabDoc);
+            }
+            collabText = collabDoc.getText('content');
+            collabTitle = collabDoc.getText('title');
+            collabAwareness = collabProvider.awareness;
+            collabAwareness.setLocalStateField('user', {
+                name: getAuthorName(),
+                color: getCollabColor()
+            });
+
+            const editorEl = getEditorEl();
+            if (editorEl) {
+                collabInputListener = () => {
+                    if (suppressEditorSync || !collabText) return;
+                    const value = getEditorValue(editorEl);
+                    applyTextDiff(collabText, value, collabOrigin);
+                    scheduleAwarenessUpdate();
+                };
+                editorEl.addEventListener('input', collabInputListener);
+                editorEl.addEventListener('keyup', scheduleAwarenessUpdate);
+                editorEl.addEventListener('mouseup', scheduleAwarenessUpdate);
+                collabPasteListener = (e) => {
+                    e.preventDefault();
+                    const text = e.clipboardData?.getData('text/plain') || '';
+                    document.execCommand('insertText', false, text);
+                };
+                editorEl.addEventListener('paste', collabPasteListener);
+            }
+
+            const titleEl = getTitleEl();
+            if (titleEl) {
+                collabTitleInputListener = () => {
+                    if (suppressEditorSync || !collabTitle) return;
+                    const value = getEditorValue(titleEl);
+                    applyTextDiff(collabTitle, value, collabOrigin);
+                };
+                titleEl.addEventListener('input', collabTitleInputListener);
+            }
+
+            const editorArea = document.querySelector('.editor-area');
+            if (editorArea) {
+                collabScrollListener = () => renderRemoteCursors();
+                editorArea.addEventListener('scroll', collabScrollListener, { passive: true });
+            }
+
+            collabSelectionListener = () => scheduleAwarenessUpdate();
+            document.addEventListener('selectionchange', collabSelectionListener);
+
+            collabTextObserver = (event) => {
+                if (event.transaction.origin === collabOrigin) return;
+                const editorEl = getEditorEl();
+                const selection = editorEl && document.activeElement === editorEl ? getSelectionOffsets(editorEl) : null;
+                suppressEditorSync = true;
+                setEditorContent(collabText.toString(), { silent: true });
+                suppressEditorSync = false;
+                if (selection && editorEl) restoreSelectionOffsets(editorEl, selection.anchor, selection.head);
+                renderRemoteCursors();
+                scheduleCollabSave();
+            };
+            collabText.observe(collabTextObserver);
+
+            collabTitleObserver = (event) => {
+                if (event.transaction.origin === collabOrigin) return;
+                if (!collabTitle) return;
+                suppressEditorSync = true;
+                setTitleValue(collabTitle.toString(), { silent: true });
+                suppressEditorSync = false;
+                scheduleCollabSave();
+            };
+            collabTitle.observe(collabTitleObserver);
+
+            collabAwarenessObserver = () => renderRemoteCursors();
+            collabAwareness.on('change', collabAwarenessObserver);
+
+            const applyInitial = () => {
+                const yTitle = collabTitle ? collabTitle.toString() : '';
+                if (yTitle) {
+                    setTitleValue(yTitle, { silent: true });
+                } else if (initialTitle && collabTitle) {
+                    applyTextDiff(collabTitle, initialTitle, collabOrigin);
+                }
+                const yContent = collabText.toString();
+                if (yContent) {
+                    setEditorContent(yContent, { silent: true });
+                } else if (initialContent) {
+                    applyTextDiff(collabText, initialContent, collabOrigin);
+                }
+                scheduleAwarenessUpdate();
+                renderRemoteCursors();
+            };
+            if (collabProvider.on) collabProvider.on('synced', applyInitial);
+            setTimeout(applyInitial, 800);
+        }
+
+        function teardownCollaboration() {
+            if (collabText && collabTextObserver) collabText.unobserve(collabTextObserver);
+            if (collabTitle && collabTitleObserver) collabTitle.unobserve(collabTitleObserver);
+            if (collabAwareness && collabAwarenessObserver) collabAwareness.off('change', collabAwarenessObserver);
+            if (collabSelectionListener) document.removeEventListener('selectionchange', collabSelectionListener);
+
+            const editorEl = getEditorEl();
+            if (editorEl && collabInputListener) editorEl.removeEventListener('input', collabInputListener);
+            if (editorEl && collabPasteListener) editorEl.removeEventListener('paste', collabPasteListener);
+            if (editorEl) {
+                editorEl.removeEventListener('keyup', scheduleAwarenessUpdate);
+                editorEl.removeEventListener('mouseup', scheduleAwarenessUpdate);
+            }
+            const titleEl = getTitleEl();
+            if (titleEl && collabTitleInputListener) titleEl.removeEventListener('input', collabTitleInputListener);
+            const editorArea = document.querySelector('.editor-area');
+            if (editorArea && collabScrollListener) editorArea.removeEventListener('scroll', collabScrollListener);
+
+            if (collabProvider) collabProvider.destroy();
+            if (collabDoc) collabDoc.destroy();
+            const layer = document.getElementById('collab-layer');
+            if (layer) layer.innerHTML = '';
+
+            collabDoc = null;
+            collabProvider = null;
+            collabText = null;
+            collabTitle = null;
+            collabAwareness = null;
+            collabRoomId = null;
+            collabOrigin = null;
+            collabTextObserver = null;
+            collabTitleObserver = null;
+            collabAwarenessObserver = null;
+            collabSelectionListener = null;
+            collabInputListener = null;
+            collabTitleInputListener = null;
+            collabPasteListener = null;
+            collabScrollListener = null;
+        }
+
+        async function init() {
+            const authImg = document.querySelector('.auth-img');
+            if (authImg && shouldUseAuthImages()) {
+                const bg = document.getElementById('bg-1');
+                if (bg) bg.style.backgroundImage = `url('${bgImages[0]}')`;
+                bgImages.forEach((url) => preloadBgImage(url));
+                setInterval(rotateAuthBackground, 7000);
+            } else if (authImg) {
+                authImg.style.display = 'none';
+            }
 
             const font = localStorage.getItem('pref_font') || 'system';
             const size = localStorage.getItem('pref_size') || '18';
@@ -1699,8 +2306,11 @@
 
             updateAuthCopy();
             refreshCaptcha();
+            setupPointerGlow();
 
             editorHistory = new HistoryManager('doc-body');
+            const titleEl = getTitleEl();
+            if (titleEl) titleEl.addEventListener('keydown', handleTitleKeydown);
             const readerBody = document.getElementById('reader-body');
             if (readerBody) readerBody.addEventListener('mouseup', handleSelection);
 
@@ -1789,6 +2399,9 @@
                     el.style.fontSize = cssS;
                 }
             });
+            const titleEl = document.getElementById('doc-title');
+            if (titleEl) titleEl.style.fontFamily = cssF;
+            if (collabAwareness) renderRemoteCursors();
         }
 
         function updateAuthCopy() {
@@ -1926,6 +2539,12 @@
             document.getElementById('nav-avatar').src = avatar;
             document.getElementById('setting-avatar-preview').src = avatar;
             document.getElementById('set-name').value = name;
+            if (collabAwareness) {
+                collabAwareness.setLocalStateField('user', {
+                    name: getAuthorName(),
+                    color: getCollabColor()
+                });
+            }
             subscribeRealtime();
             showPage('dashboard');
         }
@@ -2499,11 +3118,43 @@
             else loadAnnotations(currentDocId, { useCache: false });
         };
 
+        function isEditorOpen() {
+            const editor = document.getElementById('view-editor');
+            return editor && !editor.classList.contains('hidden');
+        }
+
+        function applyEditorData(data, options = {}) {
+            if (!data) return;
+            const { preserveSelection = false } = options;
+            const editorEl = getEditorEl();
+            const selection = preserveSelection && editorEl && document.activeElement === editorEl
+                ? getSelectionOffsets(editorEl)
+                : null;
+            setTitleValue(data.title || '', { silent: true });
+            setEditorContent(data.content || '', { silent: true });
+            if (selection && editorEl) restoreSelectionOffsets(editorEl, selection.anchor, selection.head);
+        }
+
+        function syncEditorFromRealtime(data) {
+            if (!isEditorOpen()) return;
+            const editorEl = getEditorEl();
+            const titleEl = getTitleEl();
+            if (!editorEl || !titleEl) return;
+            const incomingTitle = normalizeTitleText(data.title || '');
+            const incomingContent = normalizeEditorText(data.content || '');
+            const localTitle = normalizeTitleText(getEditorValue(titleEl));
+            const localContent = normalizeEditorText(getEditorValue(editorEl));
+            if (incomingTitle === localTitle && incomingContent === localContent) return;
+            const active = document.activeElement;
+            if (active === editorEl || active === titleEl) return;
+            applyEditorData(data, { preserveSelection: true });
+        }
+
         async function openEditor(id) {
             currentDocId = id;
             document.getElementById('view-editor').classList.remove('hidden');
-            document.getElementById('doc-title').value = '';
-            document.getElementById('doc-body').value = '';
+            setTitleValue('', { silent: true });
+            setEditorContent('', { silent: true });
             document.getElementById('save-status').innerText = '准备就绪';
 
             if (editorHistory) {
@@ -2512,28 +3163,40 @@
             }
 
             if (id) {
+                let initialTitle = '';
+                let initialContent = '';
                 const cached = getDocCache(id);
                 if (cached) {
-                    document.getElementById('doc-title').value = cached.title || '';
-                    document.getElementById('doc-body').value = cached.content || '';
-                    if (editorHistory) editorHistory.save(cached.content || '');
+                    initialTitle = cached.title || '';
+                    setTitleValue(initialTitle, { silent: true });
+                    initialContent = cached.content || '';
+                    setEditorContent(initialContent, { silent: true });
+                    if (editorHistory) editorHistory.save(initialContent);
                 }
+                setupCollaboration(id, initialContent, initialTitle);
+
                 const { data } = await db.from('articles').select('*').eq('id', id).single();
                 if (data) {
                     setDocCache(data);
-                    document.getElementById('doc-title').value = data.title || '';
-                    document.getElementById('doc-body').value = data.content || '';
+                    initialTitle = data.title || '';
+                    setTitleValue(initialTitle, { silent: true });
+                    initialContent = data.content || '';
+                    setEditorContent(initialContent, { silent: true });
                     if (editorHistory) {
                         editorHistory.stack = [];
                         editorHistory.pointer = -1;
-                        editorHistory.save(data.content || '');
+                        editorHistory.save(initialContent);
                     }
+                    setupCollaboration(id, initialContent, initialTitle);
                 }
+            } else {
+                teardownCollaboration();
             }
         }
 
         function closeEditor() {
             document.getElementById('view-editor').classList.add('hidden');
+            teardownCollaboration();
             showPage('dashboard');
         }
 
@@ -2541,13 +3204,15 @@
             document.getElementById('save-status').innerText = "输入中...";
             clearTimeout(saveTimer);
             saveTimer = setTimeout(() => saveDoc(false), 2000);
+            scheduleAwarenessUpdate();
         }
 
-        async function saveDoc(close) {
-            const t = document.getElementById('doc-title').value;
-            const c = document.getElementById('doc-body').value;
+        async function saveDoc(close, options = {}) {
+            const { silent = false } = options;
+            const t = getTitleValue();
+            const c = getEditorContent();
             if (!t && !c && close) return closeEditor();
-            document.getElementById('save-status').innerText = "保存中...";
+            if (!silent) document.getElementById('save-status').innerText = "保存中...";
             const payload = { title: t, content: c, user_id: currentUser.id };
             let saved = null;
 
@@ -2565,7 +3230,9 @@
             if (saved) setDocCache(saved);
             else updateDocsCache({ ...payload, id: currentDocId });
 
-            document.getElementById('save-status').innerText = "已保存";
+            if (!collabRoomId && currentDocId) setupCollaboration(currentDocId, c, t);
+
+            if (!silent) document.getElementById('save-status').innerText = "已保存";
             if (close) {
                 closeEditor();
                 loadDocs({ useCache: true });
@@ -2577,6 +3244,12 @@
             if (n) {
                 await db.auth.updateUser({ data: { full_name: n } });
                 document.getElementById('nav-name').innerText = n;
+                if (collabAwareness) {
+                    collabAwareness.setLocalStateField('user', {
+                        name: n,
+                        color: getCollabColor()
+                    });
+                }
                 alert("已更新");
             }
         }
@@ -2636,6 +3309,7 @@
         async function signOut() {
             stopReadingTimer();
             unsubscribeRealtime();
+            teardownCollaboration();
             clearDocCache();
             await db.auth.signOut();
             localStorage.removeItem('remember');
@@ -2673,6 +3347,7 @@
                 updateDocsCache(payload.new);
                 if (currentDocId && payload.new.id === currentDocId) {
                     applyReaderData(payload.new, { resetTimer: false });
+                    syncEditorFromRealtime(payload.new);
                     const cachedNotes = getNotesCache(currentDocId);
                     if (cachedNotes) renderAnnotations(cachedNotes);
                 }
