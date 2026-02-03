@@ -46,8 +46,10 @@
             --cursor-x: 50%;
             --cursor-y: 18%;
             --cursor-glass: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='6.5' fill='rgba(255,255,255,0.35)' stroke='rgba(255,255,255,0.5)' stroke-width='1.2'/><circle cx='14' cy='14' r='2.5' fill='rgba(10,132,255,0.55)'/></svg>") 14 14, auto;
-            --selection-bg: rgba(10, 132, 255, 0.28);
+            --selection-bg: rgba(10, 132, 255, 0.36);
             --caret-color: #0A84FF;
+            --text-cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><rect x='12' y='3' width='8' height='26' fill='rgba(0,0,0,0.25)'/><rect x='13' y='4' width='6' height='24' fill='rgb(255,255,255)'/><rect x='10' y='3' width='12' height='2' fill='rgb(255,255,255)'/><rect x='10' y='27' width='12' height='2' fill='rgb(255,255,255)'/></svg>") 16 16, text;
+            --pointer-cursor: auto;
             color-scheme: light dark;
         }
 
@@ -73,8 +75,10 @@
             --editor-paper-border: rgba(148, 163, 184, 0.14);
             --editor-paper-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
             --cursor-glow: rgba(56, 189, 248, 0.16);
-            --selection-bg: rgba(56, 189, 248, 0.35);
-            --caret-color: #5AC8FA;
+            --selection-bg: rgba(56, 189, 248, 0.42);
+            --caret-color: #7DD3FC;
+            --text-cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'><rect x='12' y='3' width='8' height='26' fill='rgba(255,255,255,0.22)'/><rect x='13' y='4' width='6' height='24' fill='rgb(255,255,255)'/><rect x='10' y='3' width='12' height='2' fill='rgb(255,255,255)'/><rect x='10' y='27' width='12' height='2' fill='rgb(255,255,255)'/></svg>") 16 16, text;
+            --pointer-cursor: auto;
         }
 
         * {
@@ -95,7 +99,7 @@
                 radial-gradient(circle at top, rgba(255, 255, 255, 0.6), transparent 45%),
                 radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.18), transparent 45%),
                 radial-gradient(circle at 90% 0%, rgba(56, 189, 248, 0.2), transparent 40%);
-            cursor: var(--cursor-glass);
+            cursor: var(--pointer-cursor, auto);
         }
 
         .hidden {
@@ -119,6 +123,16 @@
         button {
             border: 0;
             outline: none;
+        }
+
+        button:disabled,
+        .btn[disabled],
+        .btn-text[disabled],
+        .btn-icon-sm[disabled],
+        .btn-icon-danger[disabled] {
+            opacity: 0.45;
+            cursor: not-allowed;
+            pointer-events: none;
         }
 
         .btn:active {
@@ -611,7 +625,7 @@
         #doc-body,
         .reader-text-area,
         .reader-content {
-            cursor: text;
+            cursor: var(--text-cursor, text);
             caret-color: var(--caret-color);
         }
 
@@ -1199,6 +1213,74 @@
             gap: 10px;
         }
 
+        .cursor-tip {
+            position: fixed;
+            right: 24px;
+            top: 24px;
+            z-index: 140;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 16px 18px;
+            background: linear-gradient(135deg, rgba(255, 214, 10, 0.24), rgba(10, 132, 255, 0.18)), var(--glass-bg);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 214, 10, 0.5);
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.2), 0 0 0 1px rgba(255, 214, 10, 0.2);
+            backdrop-filter: var(--glass-blur);
+            max-width: min(92vw, 440px);
+            animation: cursorTipPulse 2.6s ease-in-out infinite;
+        }
+
+        .cursor-tip-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .cursor-tip-title {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .cursor-tip-desc {
+            font-size: 13px;
+            color: var(--text-sec);
+        }
+
+        .cursor-tip-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .cursor-tip-action {
+            background: var(--btn-primary-bg);
+            color: #fff;
+            border-radius: 10px;
+            padding: 7px 12px;
+            font-size: 13px;
+            box-shadow: var(--btn-primary-shadow);
+        }
+
+        .cursor-tip-dismiss {
+            font-size: 13px;
+            padding: 7px 10px;
+        }
+
+        @keyframes cursorTipPulse {
+            0%,
+            100% {
+                box-shadow: 0 18px 45px rgba(15, 23, 42, 0.2), 0 0 0 1px rgba(255, 214, 10, 0.2);
+                transform: translateY(0);
+            }
+            50% {
+                box-shadow: 0 22px 55px rgba(15, 23, 42, 0.26), 0 0 0 1px rgba(255, 214, 10, 0.35);
+                transform: translateY(-2px);
+            }
+        }
+
         /* Mobile */
         .mobile-tab-bar {
             display: none;
@@ -1268,6 +1350,13 @@
 
             .share-preview-canvas {
                 transform: scale(0.56);
+            }
+
+            .cursor-tip {
+                left: 14px;
+                right: 14px;
+                top: calc(env(safe-area-inset-top) + 12px);
+                padding: 14px 14px;
             }
 
             .sidebar {
@@ -1465,7 +1554,7 @@
                                     onclick="document.getElementById('avatar-upload').click()">更换</button></div>
                         </div>
                         <div style="padding:16px; display:flex; justify-content:space-between; align-items:center;">
-                            <span>重置密码</span><button class="btn-text danger" onclick="sendPasswordReset()">发送邮件</button>
+                            <span>重置密码</span><button class="btn-text danger" disabled title="暂不可用">暂不可用</button>
                         </div>
                     </div>
                     <div
@@ -1477,6 +1566,39 @@
                                 <option value="light">浅色</option>
                                 <option value="dark">深色</option>
                             </select>
+                        </div>
+                    </div>
+                    <div
+                        style="background:var(--bg-card); border-radius:12px; border:1px solid var(--separator); overflow:hidden; margin-top:16px;">
+                        <div style="padding:16px; display:flex; justify-content:space-between; align-items:center;">
+                            <span>文本光标颜色</span>
+                            <select id="caret-style" class="toolbar-control" onchange="applyCaretPreset(this.value)">
+                                <option value="blue">蓝色（默认）</option>
+                                <option value="orange">高亮橙</option>
+                                <option value="green">荧光绿</option>
+                                <option value="pink">玫红</option>
+                            </select>
+                        </div>
+                        <div style="padding:0 16px 14px; font-size:12px; color:var(--text-sec);">
+                            影响插入光标与选区颜色
+                        </div>
+                    </div>
+                    <div
+                        style="background:var(--bg-card); border-radius:12px; border:1px solid var(--separator); overflow:hidden; margin-top:16px;">
+                        <div style="padding:16px; display:flex; justify-content:space-between; align-items:center;">
+                            <span>指针颜色</span>
+                            <select id="pointer-style" class="toolbar-control" onchange="applyPointerPreset(this.value)">
+                                <option value="system">系统默认</option>
+                                <option value="dark">深色</option>
+                                <option value="blue">蓝色</option>
+                                <option value="orange">橙色</option>
+                                <option value="green">绿色</option>
+                                <option value="pink">玫红</option>
+                                <option value="white">白色</option>
+                            </select>
+                        </div>
+                        <div style="padding:0 16px 14px; font-size:12px; color:var(--text-sec);">
+                            影响箭头指针颜色
                         </div>
                     </div>
                     <div class="settings-group"
@@ -1614,6 +1736,17 @@
         <div id="print-paper"></div>
     </div>
 
+    <div id="cursor-tip" class="cursor-tip hidden">
+        <div class="cursor-tip-text">
+            <div class="cursor-tip-title">光标不明显？</div>
+            <div class="cursor-tip-desc">去设置里更换光标样式</div>
+        </div>
+        <div class="cursor-tip-actions">
+            <button class="btn cursor-tip-action" onclick="openCursorSettings()">去设置</button>
+            <button class="btn-text cursor-tip-dismiss" onclick="dismissCursorTip()">知道了</button>
+        </div>
+    </div>
+
     <script>
         const supabaseUrl = 'https://oktgxeukllgglharkutf.supabase.co';
         const supabaseKey = 'sb_publishable_T98_plQu34_E_dqLCztSjw_AeDL1Fq0';
@@ -1628,6 +1761,21 @@
             docs: 'sr_docs_cache',
             notes: 'sr_notes_cache',
             meta: 'sr_cache_meta'
+        };
+        const CARET_PRESETS = {
+            blue: { caret: '#0A84FF', selection: 'rgba(10, 132, 255, 0.36)' },
+            orange: { caret: '#FF9F0A', selection: 'rgba(255, 159, 10, 0.38)' },
+            green: { caret: '#34C759', selection: 'rgba(52, 199, 89, 0.34)' },
+            pink: { caret: '#FF2D55', selection: 'rgba(255, 45, 85, 0.34)' }
+        };
+        const POINTER_PRESETS = {
+            system: { cursor: 'auto' },
+            dark: { color: '#0F172A' },
+            blue: { color: '#0A84FF' },
+            orange: { color: '#FF9F0A' },
+            green: { color: '#34C759' },
+            pink: { color: '#FF2D55' },
+            white: { color: '#FFFFFF' }
         };
 
         let currentUser = null;
@@ -2302,6 +2450,10 @@
             document.getElementById('reader-font-select').value = font;
             document.getElementById('reader-size-input').value = size;
             applyFontStyle(font, size);
+            const caretStyle = localStorage.getItem('pref_caret') || 'blue';
+            applyCaretPreset(caretStyle, { persist: false });
+            const pointerStyle = localStorage.getItem('pref_pointer') || 'system';
+            applyPointerPreset(pointerStyle, { persist: false });
 
             const theme = localStorage.getItem('pref_theme') || 'system';
             const themeSelect = document.getElementById('theme-select');
@@ -2424,6 +2576,59 @@
             const titleEl = document.getElementById('doc-title');
             if (titleEl) titleEl.style.fontFamily = cssF;
             if (collabAwareness) renderRemoteCursors();
+        }
+
+        function applyCaretPreset(key, options = {}) {
+            const presetKey = CARET_PRESETS[key] ? key : 'blue';
+            const preset = CARET_PRESETS[presetKey];
+            document.documentElement.style.setProperty('--caret-color', preset.caret);
+            document.documentElement.style.setProperty('--selection-bg', preset.selection);
+            document.body.style.setProperty('--caret-color', preset.caret);
+            document.body.style.setProperty('--selection-bg', preset.selection);
+            const select = document.getElementById('caret-style');
+            if (select) select.value = presetKey;
+            if (options.persist !== false) localStorage.setItem('pref_caret', presetKey);
+        }
+
+        function applyPointerPreset(key, options = {}) {
+            const presetKey = POINTER_PRESETS[key] ? key : 'system';
+            const preset = POINTER_PRESETS[presetKey];
+            const cursorValue = preset.cursor ? preset.cursor : buildArrowCursor(preset.color || '#0F172A');
+            document.documentElement.style.setProperty('--pointer-cursor', cursorValue);
+            document.body.style.setProperty('--pointer-cursor', cursorValue);
+            const select = document.getElementById('pointer-style');
+            if (select) select.value = presetKey;
+            if (options.persist !== false) localStorage.setItem('pref_pointer', presetKey);
+        }
+
+        function buildArrowCursor(color) {
+            const svg = `
+                <svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'>
+                    <path d='M4 2 L22 20 L15 20 L19 28 L15 30 L11 22 L6 27 Z' fill='${color}'/>
+                </svg>
+            `.trim();
+            const encoded = encodeURIComponent(svg);
+            return `url("data:image/svg+xml,${encoded}") 4 2, auto`;
+        }
+
+        function maybeShowCursorTip() {
+            const tip = document.getElementById('cursor-tip');
+            if (!tip) return;
+            if (localStorage.getItem('cursor_tip_seen')) return;
+            tip.classList.remove('hidden');
+            localStorage.setItem('cursor_tip_seen', 'true');
+        }
+
+        function dismissCursorTip() {
+            const tip = document.getElementById('cursor-tip');
+            if (tip) tip.classList.add('hidden');
+        }
+
+        function openCursorSettings() {
+            showPage('settings');
+            dismissCursorTip();
+            const select = document.getElementById('caret-style');
+            if (select) select.focus();
         }
 
         function updateAuthCopy() {
@@ -2569,6 +2774,7 @@
             }
             subscribeRealtime();
             showPage('dashboard');
+            maybeShowCursorTip();
         }
 
         function countWords(s) {
