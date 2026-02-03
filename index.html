@@ -46,6 +46,8 @@
             --cursor-x: 50%;
             --cursor-y: 18%;
             --cursor-glass: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='6.5' fill='rgba(255,255,255,0.35)' stroke='rgba(255,255,255,0.5)' stroke-width='1.2'/><circle cx='14' cy='14' r='2.5' fill='rgba(10,132,255,0.55)'/></svg>") 14 14, auto;
+            --selection-bg: rgba(10, 132, 255, 0.28);
+            --caret-color: #0A84FF;
             color-scheme: light dark;
         }
 
@@ -71,6 +73,8 @@
             --editor-paper-border: rgba(148, 163, 184, 0.14);
             --editor-paper-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
             --cursor-glow: rgba(56, 189, 248, 0.16);
+            --selection-bg: rgba(56, 189, 248, 0.35);
+            --caret-color: #5AC8FA;
         }
 
         * {
@@ -601,6 +605,30 @@
             font-size: 18px;
             position: relative;
             z-index: 2;
+        }
+
+        #doc-title,
+        #doc-body,
+        .reader-text-area,
+        .reader-content {
+            cursor: text;
+            caret-color: var(--caret-color);
+        }
+
+        #doc-title::selection,
+        #doc-body::selection,
+        .reader-text-area ::selection,
+        .reader-content::selection {
+            background: var(--selection-bg);
+            color: var(--text-main);
+        }
+
+        #doc-title::-moz-selection,
+        #doc-body::-moz-selection,
+        .reader-text-area ::-moz-selection,
+        .reader-content::-moz-selection {
+            background: var(--selection-bg);
+            color: var(--text-main);
         }
 
         #doc-body:focus {
