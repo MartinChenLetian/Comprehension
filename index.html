@@ -1239,7 +1239,33 @@
             margin: 0 auto;
         }
 
+        .share-preview-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .paper-preview-page {
+            position: relative;
+            width: 794px;
+            height: 1123px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+        }
+
+        .paper-preview-sheet {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 794px;
+        }
+
         .share-preview-canvas .paper {
+            box-shadow: none;
+        }
+
+        .share-preview-canvas > .paper {
             box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
         }
 
@@ -2860,6 +2886,9 @@
             return safe || 'document';
         }
 
+        const PAPER_WIDTH_PX = 794;
+        const PAPER_HEIGHT_PX = 1123;
+
         function extractPaperSections(content) {
             const text = (content || '').trim();
             const paragraphs = text ? text.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean) : [];
@@ -2880,11 +2909,6 @@
                 abstract,
                 body: bodyParagraphs.length ? bodyParagraphs.join('\n\n') : text
             };
-        }
-
-        function estimatePaperPages(content) {
-            const len = (content || '').replace(/\s/g, '').length;
-            return Math.max(1, Math.ceil(len / 1800));
         }
 
         function buildWatermarkMarkup(text) {
@@ -2908,7 +2932,7 @@
         }
 
         function resolvePaperLayout(payload) {
-            const resolved = { ...payload, longTitle: false, showEndMark: false };
+            const resolved = { ...payload, longTitle: false, showEndMark: false, pages: 1, layoutResolved: false };
             if (!document?.body) return resolved;
 
             const probe = document.createElement('div');
@@ -2916,7 +2940,7 @@
             probe.style.position = 'fixed';
             probe.style.left = '-99999px';
             probe.style.top = '0';
-            probe.style.width = '794px';
+            probe.style.width = `${PAPER_WIDTH_PX}px`;
             probe.style.visibility = 'hidden';
             probe.style.pointerEvents = 'none';
             probe.style.zIndex = '-1';
@@ -2934,17 +2958,23 @@
                 }
 
                 const paperEl = probe.querySelector('.paper');
-                const pageHeight = 1123;
                 const endMarkReserve = 54;
-                const contentHeight = paperEl?.scrollHeight || 0;
-                const remainder = contentHeight % pageHeight;
-                const freeSpace = remainder === 0 ? 0 : pageHeight - remainder;
+                const contentHeight = paperEl?.scrollHeight || PAPER_HEIGHT_PX;
+                const pages = Math.max(1, Math.ceil(contentHeight / PAPER_HEIGHT_PX));
+                const freeSpace = pages * PAPER_HEIGHT_PX - contentHeight;
+                resolved.renderHeight = contentHeight;
+                resolved.pages = pages;
                 resolved.showEndMark = freeSpace >= endMarkReserve;
+                resolved.layoutResolved = true;
             } finally {
                 probe.remove();
             }
 
             return resolved;
+        }
+
+        function ensurePaperLayout(payload) {
+            return payload?.layoutResolved ? payload : resolvePaperLayout(payload);
         }
 
         function buildPaperMarkup(payload) {
@@ -2986,7 +3016,6 @@
             const safeTitle = (title || '').trim() || '未命名';
             const safeContent = content || '';
             const sections = extractPaperSections(safeContent);
-            const pages = estimatePaperPages(safeContent);
             const notes = (activeNotes || []).map((note) => {
                 let highlight = note.highlight_text || '';
                 if (!highlight && typeof note.start_index === 'number' && typeof note.end_index === 'number') {
@@ -3000,18 +3029,33 @@
                 abstract: sections.abstract,
                 body: sections.body,
                 notes,
-                watermark: 'Smart Reader',
-                pages
+                watermark: 'Smart Reader'
             };
         }
 
         function renderPaperTo(container, payload) {
             if (!container) return;
-            container.innerHTML = buildPaperMarkup(resolvePaperLayout(payload));
+            const resolved = ensurePaperLayout(payload);
+            container.innerHTML = buildPaperMarkup(resolved);
+        }
+
+        function renderPaperPreviewTo(container, payload) {
+            if (!container) return;
+            const resolved = ensurePaperLayout(payload);
+            const markup = buildPaperMarkup(resolved);
+            const pages = Array.from({ length: resolved.pages }, (_, index) => `
+                <div class="paper-preview-page">
+                    <div class="paper-preview-sheet" style="transform: translateY(-${index * PAPER_HEIGHT_PX}px);">
+                        ${markup}
+                    </div>
+                </div>
+            `).join('');
+
+            container.innerHTML = `<div class="share-preview-stack">${pages}</div>`;
         }
 
         function renderPrintContent(title, content) {
-            const payload = getPaperPayload(title, content);
+            const payload = ensurePaperLayout(getPaperPayload(title, content));
             renderPaperTo(document.getElementById('print-paper'), payload);
         }
 
@@ -3037,10 +3081,10 @@
             const title = document.getElementById('reader-title').innerText || '未命名';
             const bodyEl = document.getElementById('reader-body');
             const content = bodyEl?.dataset?.raw || bodyEl?.innerText || '';
-            const payload = getPaperPayload(title, content);
+            const payload = ensurePaperLayout(getPaperPayload(title, content));
             document.getElementById('share-doc-title').innerText = payload.title;
             const meta = document.getElementById('share-doc-meta');
-            if (meta) meta.innerText = `例文排版 · 约 ${payload.pages} 页`;
+            if (meta) meta.innerText = `例文排版 · ${payload.pages} 页`;
             const tip = document.getElementById('share-tip');
             if (tip) tip.innerText = "系统分享会打开正式例文排版打印，选择“保存为 PDF”。";
             sheet.classList.remove('hidden');
@@ -3065,9 +3109,9 @@
             const title = document.getElementById('reader-title').innerText || '未命名';
             const bodyEl = document.getElementById('reader-body');
             const content = bodyEl?.dataset?.raw || bodyEl?.innerText || '';
-            const payload = getPaperPayload(title, content);
+            const payload = ensurePaperLayout(getPaperPayload(title, content));
             document.getElementById('share-preview-subtitle').innerText = payload.title;
-            renderPaperTo(document.getElementById('share-preview-canvas'), payload);
+            renderPaperPreviewTo(document.getElementById('share-preview-canvas'), payload);
             closeShare(true);
             preview.classList.remove('hidden');
             requestAnimationFrame(() => preview.classList.add('active'));
@@ -3130,7 +3174,7 @@
             const title = document.getElementById('reader-title').innerText || 'Document';
             const bodyEl = document.getElementById('reader-body');
             const content = bodyEl?.dataset?.raw || bodyEl?.innerText || '';
-            const payload = getPaperPayload(title, content);
+            const payload = ensurePaperLayout(getPaperPayload(title, content));
             const container = document.getElementById('pdf-staging-area');
 
             if (!content || !container || typeof html2pdf === 'undefined') {
