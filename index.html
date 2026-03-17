@@ -1051,15 +1051,9 @@
             z-index: 2;
         }
 
-        .paper-flow-sheet {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-        }
-
         .paper-content {
             position: relative;
+            display: flow-root;
         }
 
         .paper-header {
@@ -1107,7 +1101,7 @@
             border-bottom: 1px solid rgba(199, 184, 163, 0.5);
         }
 
-        .paper-body {
+        .paper-body-paragraph {
             font-size: 12.5pt;
             line-height: 2.02;
             text-align: justify;
@@ -1115,29 +1109,28 @@
             letter-spacing: 0.25px;
         }
 
-        .paper-body p {
+        .paper-body-paragraph {
             text-indent: 0;
             margin: 0 0 11pt;
         }
 
-        .paper-body h2,
-        .paper-body h3,
-        .paper-body h4 {
+        .paper-body-heading {
             margin: 18pt 0 8pt;
             font-weight: 700;
             text-indent: 0;
             letter-spacing: 0.8px;
+            word-break: break-word;
         }
 
-        .paper-body h2 {
+        h2.paper-body-heading {
             font-size: 14pt;
         }
 
-        .paper-body h3 {
+        h3.paper-body-heading {
             font-size: 13pt;
         }
 
-        .paper-body h4 {
+        h4.paper-body-heading {
             font-size: 12pt;
         }
 
@@ -2935,27 +2928,79 @@
             return `<div class="paper-watermark">${items}</div>`;
         }
 
-        function buildPaperBody(body) {
-            const chunks = (body || '').split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
-            if (!chunks.length) return '<p>（正文空白）</p>';
-            return chunks.map((p) => {
-                if (/^#{1,3}\s+/.test(p)) {
-                    const level = p.match(/^#{1,3}/)[0].length;
-                    const text = p.replace(/^#{1,3}\s+/, '');
-                    const tag = level === 1 ? 'h2' : level === 2 ? 'h3' : 'h4';
-                    return `<${tag}>${escapeHtml(text)}</${tag}>`;
-                }
-                return `<p>${escapeHtml(p).replace(/\n/g, '<br>')}</p>`;
-            }).join('');
+        function splitTextTokens(text) {
+            const lines = String(text || '').split('\n');
+            const tokens = [];
+            lines.forEach((line, index) => {
+                const words = line.trim().split(/\s+/).filter(Boolean);
+                words.forEach((word) => tokens.push(word));
+                if (index < lines.length - 1) tokens.push({ type: 'br' });
+            });
+            return tokens;
         }
 
-        function buildPaperContentMarkup(payload) {
+        function trimTextTokens(tokens) {
+            const trimmed = [...tokens];
+            while (trimmed[0]?.type === 'br') trimmed.shift();
+            while (trimmed[trimmed.length - 1]?.type === 'br') trimmed.pop();
+            return trimmed;
+        }
+
+        function hasWordToken(tokens) {
+            return tokens.some((token) => typeof token === 'string');
+        }
+
+        function renderTextTokens(tokens) {
+            const lines = [[]];
+            tokens.forEach((token) => {
+                if (token?.type === 'br') {
+                    lines.push([]);
+                    return;
+                }
+                lines[lines.length - 1].push(escapeHtml(token));
+            });
+            return lines.map((line) => line.join(' ')).join('<br>');
+        }
+
+        function buildTextBlockHtml(tag, className, tokens) {
+            const attrs = className ? ` class="${className}"` : '';
+            return `<${tag}${attrs}>${renderTextTokens(tokens)}</${tag}>`;
+        }
+
+        function extractPaperBodyBlocks(body) {
+            const chunks = (body || '').split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+            if (!chunks.length) return [{ html: '<p class="paper-body-paragraph">（正文空白）</p>', splittable: false }];
+            return chunks.map((chunk) => {
+                if (/^#{1,3}\s+/.test(chunk)) {
+                    const level = chunk.match(/^#{1,3}/)[0].length;
+                    const text = chunk.replace(/^#{1,3}\s+/, '');
+                    const tag = level === 1 ? 'h2' : level === 2 ? 'h3' : 'h4';
+                    return { html: `<${tag} class="paper-body-heading">${escapeHtml(text)}</${tag}>`, splittable: false };
+                }
+                return {
+                    tag: 'p',
+                    className: 'paper-body-paragraph',
+                    tokens: splitTextTokens(chunk),
+                    splittable: true
+                };
+            });
+        }
+
+        function buildHeaderBlockHtml(payload, forceLongTitle) {
             const title = escapeHtml(payload.title || '未命名');
-            const abstract = escapeHtml(payload.abstract || '').replace(/\n/g, '<br>');
-            const notes = payload.notes || [];
-            const headerClass = payload.longTitle ? 'paper-header paper-header-long' : 'paper-header';
-            const leadHtml = abstract ? `<p class="paper-lead">${abstract}</p>` : '';
-            const notesHtml = notes.length ? `
+            const longTitle = typeof forceLongTitle === 'boolean' ? forceLongTitle : !!payload.longTitle;
+            const headerClass = longTitle ? 'paper-header paper-header-long' : 'paper-header';
+            return `
+                <div class="${headerClass}">
+                    <div class="paper-title">${title}</div>
+                </div>
+                <hr class="paper-divider">
+            `;
+        }
+
+        function buildNotesBlockHtml(notes) {
+            if (!notes.length) return '';
+            return `
                 <div class="paper-notes">
                     <div class="paper-notes-title">附注</div>
                     ${notes.map((note) => `
@@ -2964,25 +3009,132 @@
                         </div>
                     `).join('')}
                 </div>
-            ` : '';
-            const endMarkHtml = payload.showEndMark ? `<div class="paper-endmark">-----End------</div>` : '';
-
-            return `
-                <div class="paper-content">
-                    <div class="${headerClass}">
-                        <div class="paper-title">${title}</div>
-                    </div>
-                    <hr class="paper-divider">
-                    ${leadHtml}
-                    <div class="paper-body">${buildPaperBody(payload.body || '')}</div>
-                    ${notesHtml}
-                    ${endMarkHtml}
-                </div>
             `;
         }
 
+        function buildPaperBlocks(payload) {
+            const blocks = [{ html: buildHeaderBlockHtml(payload), splittable: false }];
+            if ((payload.abstract || '').trim()) {
+                blocks.push({
+                    tag: 'p',
+                    className: 'paper-lead',
+                    tokens: splitTextTokens(payload.abstract),
+                    splittable: true
+                });
+            }
+
+            blocks.push(...extractPaperBodyBlocks(payload.body || ''));
+
+            const notesHtml = buildNotesBlockHtml(payload.notes || []);
+            if (notesHtml) blocks.push({ html: notesHtml, splittable: false });
+            return blocks;
+        }
+
+        function measurePageHeight(probe, htmlParts) {
+            probe.innerHTML = `<div class="paper-content">${htmlParts.join('')}</div>`;
+            return probe.firstElementChild?.scrollHeight || 0;
+        }
+
+        function fitsPage(probe, htmlParts, candidateHtml) {
+            return measurePageHeight(probe, [...htmlParts, candidateHtml]) <= PAPER_CONTENT_HEIGHT_PX;
+        }
+
+        function splitBlockToFit(block, currentPageParts, probe) {
+            const sourceTokens = trimTextTokens(block.tokens || []);
+            if (!hasWordToken(sourceTokens)) return { fittedHtml: '', remainingBlock: null };
+
+            let low = 1;
+            let high = sourceTokens.length;
+            let bestTokens = [];
+
+            while (low <= high) {
+                const mid = Math.floor((low + high) / 2);
+                const candidateTokens = trimTextTokens(sourceTokens.slice(0, mid));
+                if (!hasWordToken(candidateTokens)) {
+                    low = mid + 1;
+                    continue;
+                }
+
+                const candidateHtml = buildTextBlockHtml(block.tag, block.className, candidateTokens);
+                if (fitsPage(probe, currentPageParts, candidateHtml)) {
+                    bestTokens = candidateTokens;
+                    low = mid + 1;
+                } else {
+                    high = mid - 1;
+                }
+            }
+
+            if (!bestTokens.length) return { fittedHtml: '', remainingBlock: block };
+
+            const fittedHtml = buildTextBlockHtml(block.tag, block.className, bestTokens);
+            const remainingTokens = trimTextTokens(sourceTokens.slice(bestTokens.length));
+            return {
+                fittedHtml,
+                remainingBlock: hasWordToken(remainingTokens)
+                    ? { ...block, tokens: remainingTokens }
+                    : null
+            };
+        }
+
+        function paginatePaperBlocks(blocks, probe) {
+            const pages = [];
+            let currentPage = [];
+
+            const pushCurrentPage = () => {
+                if (!currentPage.length) return;
+                pages.push(currentPage);
+                currentPage = [];
+            };
+
+            for (const originalBlock of blocks) {
+                let block = originalBlock;
+
+                while (block) {
+                    if (!block.splittable) {
+                        if (!fitsPage(probe, currentPage, block.html) && currentPage.length) pushCurrentPage();
+                        currentPage.push(block.html);
+                        block = null;
+                        continue;
+                    }
+
+                    const fullHtml = buildTextBlockHtml(block.tag, block.className, trimTextTokens(block.tokens));
+                    if (fitsPage(probe, currentPage, fullHtml)) {
+                        currentPage.push(fullHtml);
+                        block = null;
+                        continue;
+                    }
+
+                    const splitResult = splitBlockToFit(block, currentPage, probe);
+                    if (splitResult.fittedHtml) {
+                        currentPage.push(splitResult.fittedHtml);
+                        pushCurrentPage();
+                        block = splitResult.remainingBlock;
+                        continue;
+                    }
+
+                    if (currentPage.length) {
+                        pushCurrentPage();
+                        continue;
+                    }
+
+                    currentPage.push(fullHtml);
+                    block = null;
+                }
+            }
+
+            if (!pages.length || currentPage.length) pages.push(currentPage);
+            return pages;
+        }
+
         function resolvePaperLayout(payload) {
-            const resolved = { ...payload, longTitle: false, showEndMark: false, pages: 1, layoutResolved: false };
+            const resolved = {
+                ...payload,
+                longTitle: false,
+                showEndMark: false,
+                pages: 1,
+                pageContents: [],
+                layoutResolved: false
+            };
             if (!document?.body) return resolved;
 
             const probe = document.createElement('div');
@@ -2997,33 +3149,23 @@
             document.body.appendChild(probe);
 
             try {
-                const measureContent = (candidate) => {
-                    probe.innerHTML = buildPaperContentMarkup(candidate);
-                    return {
-                        titleEl: probe.querySelector('.paper-title'),
-                        contentEl: probe.querySelector('.paper-content')
-                    };
-                };
-
-                let measured = measureContent(resolved);
-                const titleEl = measured.titleEl;
+                probe.innerHTML = `<div class="paper-content">${buildHeaderBlockHtml(resolved, false)}</div>`;
+                const titleEl = probe.querySelector('.paper-title');
                 if (titleEl) {
                     const lineHeight = parseFloat(getComputedStyle(titleEl).lineHeight) || 0;
-                    if (lineHeight && titleEl.scrollHeight > lineHeight * 1.6) {
-                        resolved.longTitle = true;
-                        measured = measureContent(resolved);
-                    }
+                    resolved.longTitle = !!(lineHeight && titleEl.scrollHeight > lineHeight * 1.6);
                 }
 
-                const baseHeight = measured.contentEl?.scrollHeight || PAPER_CONTENT_HEIGHT_PX;
-                const basePages = Math.max(1, Math.ceil(baseHeight / PAPER_CONTENT_HEIGHT_PX));
-                const measuredWithEnd = measureContent({ ...resolved, showEndMark: true });
-                const endHeight = measuredWithEnd.contentEl?.scrollHeight || baseHeight;
-                const endPages = Math.max(1, Math.ceil(endHeight / PAPER_CONTENT_HEIGHT_PX));
+                const pages = paginatePaperBlocks(buildPaperBlocks(resolved), probe);
+                const endMarkHtml = '<div class="paper-endmark">-----End------</div>';
+                const lastPage = pages[pages.length - 1] || [];
+                if (fitsPage(probe, lastPage, endMarkHtml)) {
+                    lastPage.push(endMarkHtml);
+                    resolved.showEndMark = true;
+                }
 
-                resolved.showEndMark = endPages === basePages;
-                resolved.contentHeight = resolved.showEndMark ? endHeight : baseHeight;
-                resolved.pages = resolved.showEndMark ? endPages : basePages;
+                resolved.pageContents = pages.map((parts) => parts.join(''));
+                resolved.pages = resolved.pageContents.length || 1;
                 resolved.layoutResolved = true;
             } finally {
                 probe.remove();
@@ -3037,14 +3179,12 @@
         }
 
         function buildPaperPagesMarkup(payload, wrapperClass = 'paper-pages') {
-            const contentMarkup = buildPaperContentMarkup(payload);
-            const pagesMarkup = Array.from({ length: payload.pages }, (_, index) => `
+            const pageContents = payload.pageContents?.length ? payload.pageContents : [''];
+            const pagesMarkup = pageContents.map((pageContent) => `
                 <div class="paper">
                     ${buildWatermarkMarkup(payload.watermark || 'Smart Reader')}
                     <div class="paper-viewport">
-                        <div class="paper-flow-sheet" style="transform: translateY(-${index * PAPER_CONTENT_HEIGHT_PX}px);">
-                            ${contentMarkup}
-                        </div>
+                        <div class="paper-content">${pageContent}</div>
                     </div>
                 </div>
             `).join('');
