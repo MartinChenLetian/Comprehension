@@ -1007,11 +1007,20 @@
         .paper {
             position: relative;
             background: #fff;
-            color: #111;
-            font-family: "Times New Roman", "Noto Serif SC", "Songti SC", serif;
-            padding: 64px 58px;
+            color: #181411;
+            font-family: "STSong", "Songti SC", "Noto Serif SC", "SimSun", serif;
+            padding: 82px 76px 88px;
             min-height: 1123px;
             box-sizing: border-box;
+        }
+
+        .paper::before {
+            content: "";
+            position: absolute;
+            inset: 30px 28px;
+            border: 1px solid rgba(140, 117, 84, 0.18);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .paper-content {
@@ -1021,70 +1030,56 @@
 
         .paper-header {
             text-align: center;
-            margin-bottom: 16pt;
+            margin-bottom: 24pt;
         }
 
         .paper-title {
-            font-size: 22pt;
+            font-size: 24pt;
             font-weight: 700;
-            letter-spacing: 0.5px;
-        }
-
-        .paper-author {
-            font-size: 11pt;
-            margin-top: 6pt;
-        }
-
-        .paper-meta {
-            font-size: 9pt;
-            color: #666;
-            margin-top: 4pt;
+            letter-spacing: 1.5px;
+            line-height: 1.45;
         }
 
         .paper-divider {
             border: none;
-            border-top: 1px solid #ddd;
-            margin: 12pt 0 16pt;
+            border-top: 1px solid #c7b8a3;
+            border-bottom: 1px solid #e8dfd2;
+            height: 6px;
+            width: 72%;
+            margin: 0 auto 24pt;
         }
 
-        .paper-section-title {
-            font-size: 12pt;
-            font-weight: 700;
-            margin: 12pt 0 6pt;
-        }
-
-        .paper-abstract {
+        .paper-lead {
             font-size: 11pt;
-            line-height: 1.7;
+            line-height: 1.95;
             text-align: justify;
             text-indent: 2em;
-            margin: 0;
-        }
-
-        .paper-keywords {
-            font-size: 10pt;
-            color: #444;
-            margin-top: 6pt;
+            color: #4d4032;
+            margin: 0 0 18pt;
+            padding-bottom: 14pt;
+            border-bottom: 1px solid rgba(199, 184, 163, 0.5);
         }
 
         .paper-body {
-            font-size: 12pt;
-            line-height: 1.9;
+            font-size: 12.5pt;
+            line-height: 2.02;
             text-align: justify;
             word-break: break-word;
+            letter-spacing: 0.25px;
         }
 
         .paper-body p {
             text-indent: 2em;
-            margin: 0 0 10pt;
+            margin: 0 0 11pt;
         }
 
         .paper-body h2,
         .paper-body h3,
         .paper-body h4 {
-            margin: 12pt 0 6pt;
+            margin: 18pt 0 8pt;
             font-weight: 700;
             text-indent: 0;
+            letter-spacing: 0.8px;
         }
 
         .paper-body h2 {
@@ -1092,7 +1087,7 @@
         }
 
         .paper-body h3 {
-            font-size: 12.5pt;
+            font-size: 13pt;
         }
 
         .paper-body h4 {
@@ -1100,28 +1095,36 @@
         }
 
         .paper-notes {
-            margin-top: 16pt;
-            font-size: 10pt;
-            color: #333;
+            margin-top: 26pt;
+            padding-top: 14pt;
+            border-top: 1px solid rgba(199, 184, 163, 0.55);
+            font-size: 10.5pt;
+            color: #4c4034;
+            line-height: 1.8;
+        }
+
+        .paper-notes-title {
+            margin-bottom: 8pt;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 1.2px;
         }
 
         .paper-note-item {
-            margin-bottom: 6pt;
-        }
-
-        .paper-footer {
-            margin-top: 18pt;
-            text-align: right;
-            font-size: 9pt;
-            color: #777;
+            margin-bottom: 8pt;
         }
 
         .paper-watermark {
             position: absolute;
             inset: 0;
             display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-auto-rows: 88px;
+            padding: 36px 20px;
+            align-content: space-between;
+            justify-items: center;
             pointer-events: none;
-            opacity: 0.06;
+            opacity: 0.035;
             z-index: 1;
         }
 
@@ -1129,11 +1132,15 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48pt;
+            font-size: 16pt;
             color: #000;
-            letter-spacing: 6px;
-            transform: rotate(-24deg);
+            letter-spacing: 3px;
+            transform: rotate(-28deg);
             white-space: nowrap;
+        }
+
+        .paper-watermark-item:nth-child(even) {
+            transform: rotate(-28deg) translateY(10px);
         }
 
         /* Share Preview */
@@ -1691,7 +1698,7 @@
                 <div>
                     <div class="share-title">分享文章</div>
                     <div id="share-doc-title" class="share-subtitle">未命名</div>
-                    <div id="share-doc-meta" class="share-subtitle">论文排版 · PDF</div>
+                    <div id="share-doc-meta" class="share-subtitle">例文排版 · PDF</div>
                 </div>
                 <button class="btn-text" onclick="closeShare()">关闭</button>
             </div>
@@ -1709,7 +1716,7 @@
                     <i class="ph ph-file-text"></i><span>下载 TXT</span>
                 </button>
             </div>
-            <div id="share-tip" class="share-tip">将生成论文排版 PDF（含水印），可直接分享或下载。</div>
+            <div id="share-tip" class="share-tip">将生成正式例文排版 PDF（含浅色水印），可直接分享或下载。</div>
         </div>
     </div>
 
@@ -1717,7 +1724,7 @@
         <div class="share-preview-card" onclick="event.stopPropagation()">
             <div class="share-preview-header">
                 <div>
-                    <div class="share-preview-title">论文排版预览</div>
+                    <div class="share-preview-title">例文排版预览</div>
                     <div id="share-preview-subtitle" class="share-preview-subtitle">未命名</div>
                 </div>
                 <button class="btn-text" onclick="closeSharePreview()">关闭</button>
@@ -2831,22 +2838,15 @@
             const abstractMatch = text.match(/(?:^|\n)(摘要|Abstract)[:：]\s*([\s\S]*?)(?=\n{2,}|$)/i);
             if (abstractMatch) {
                 abstract = abstractMatch[2].trim();
-                bodyParagraphs = paragraphs.filter((p) => p !== abstractMatch[0].trim());
-            } else if (paragraphs.length > 0) {
-                abstract = paragraphs[0];
-                bodyParagraphs = paragraphs.slice(1);
+                const matchedBlock = abstractMatch[0].trim();
+                const matchedIndex = paragraphs.findIndex((p) => p === matchedBlock);
+                bodyParagraphs = matchedIndex >= 0
+                    ? paragraphs.filter((_, index) => index !== matchedIndex)
+                    : paragraphs;
             }
-
-            const keywordMatch = text.match(/(?:关键词|Keywords)[:：]\s*([^\n]+)/i);
-            let keywords = [];
-            if (keywordMatch) {
-                keywords = keywordMatch[1].split(/[，,;；]/).map((k) => k.trim()).filter(Boolean);
-            }
-            if (!keywords.length) keywords = ['智能阅读', '论文排版', '协作写作'];
 
             return {
                 abstract,
-                keywords,
                 body: bodyParagraphs.length ? bodyParagraphs.join('\n\n') : text
             };
         }
@@ -2858,7 +2858,7 @@
 
         function buildWatermarkMarkup(text) {
             const mark = escapeHtml(text || '');
-            const items = Array.from({ length: 12 }, () => `<div class="paper-watermark-item">${mark}</div>`).join('');
+            const items = Array.from({ length: 40 }, () => `<div class="paper-watermark-item">${mark}</div>`).join('');
             return `<div class="paper-watermark">${items}</div>`;
         }
 
@@ -2878,14 +2878,12 @@
 
         function buildPaperMarkup(payload) {
             const title = escapeHtml(payload.title || '未命名');
-            const author = escapeHtml(payload.author || '');
-            const meta = escapeHtml(payload.meta || '');
             const abstract = escapeHtml(payload.abstract || '').replace(/\n/g, '<br>');
-            const keywords = payload.keywords && payload.keywords.length ? escapeHtml(payload.keywords.join('，')) : '';
             const notes = payload.notes || [];
+            const leadHtml = abstract ? `<p class="paper-lead">${abstract}</p>` : '';
             const notesHtml = notes.length ? `
                 <div class="paper-notes">
-                    <div class="paper-section-title">批注摘要</div>
+                    <div class="paper-notes-title">附注</div>
                     ${notes.map((note) => `
                         <div class="paper-note-item">
                             <strong>${escapeHtml(note.highlight || '')}</strong>：${escapeHtml(note.note || '')}
@@ -2893,7 +2891,6 @@
                     `).join('')}
                 </div>
             ` : '';
-            const footer = escapeHtml(payload.footer || '');
 
             return `
                 <div class="paper">
@@ -2901,17 +2898,11 @@
                     <div class="paper-content">
                         <div class="paper-header">
                             <div class="paper-title">${title}</div>
-                            ${author ? `<div class="paper-author">${author}</div>` : ''}
-                            ${meta ? `<div class="paper-meta">${meta}</div>` : ''}
                         </div>
                         <hr class="paper-divider">
-                        <div class="paper-section-title">摘要</div>
-                        <p class="paper-abstract">${abstract || '（无摘要）'}</p>
-                        ${keywords ? `<div class="paper-keywords">关键词：${keywords}</div>` : ''}
-                        <div class="paper-section-title">正文</div>
+                        ${leadHtml}
                         <div class="paper-body">${buildPaperBody(payload.body || '')}</div>
                         ${notesHtml}
-                        ${footer ? `<div class="paper-footer">${footer}</div>` : ''}
                     </div>
                 </div>
             `;
@@ -2921,10 +2912,7 @@
             const safeTitle = (title || '').trim() || '未命名';
             const safeContent = content || '';
             const sections = extractPaperSections(safeContent);
-            const wordCount = countWords(safeContent);
             const pages = estimatePaperPages(safeContent);
-            const date = new Date().toLocaleDateString();
-            const author = getAuthorName();
             const notes = (activeNotes || []).map((note) => {
                 let highlight = note.highlight_text || '';
                 if (!highlight && typeof note.start_index === 'number' && typeof note.end_index === 'number') {
@@ -2935,16 +2923,11 @@
 
             return {
                 title: safeTitle,
-                author,
-                meta: `字数 ${wordCount.toLocaleString()} · 约 ${pages} 页 · ${date}`,
                 abstract: sections.abstract,
-                keywords: sections.keywords,
                 body: sections.body,
                 notes,
                 watermark: 'Smart Reader',
-                footer: `Generated by Smart Reader · ${date}`,
-                pages,
-                wordCount
+                pages
             };
         }
 
@@ -2967,9 +2950,9 @@
             const payload = getPaperPayload(title, content);
             document.getElementById('share-doc-title').innerText = payload.title;
             const meta = document.getElementById('share-doc-meta');
-            if (meta) meta.innerText = `论文排版 · 约 ${payload.pages} 页`;
+            if (meta) meta.innerText = `例文排版 · 约 ${payload.pages} 页`;
             const tip = document.getElementById('share-tip');
-            if (tip) tip.innerText = "系统分享会打开论文排版打印，选择“保存为 PDF”。";
+            if (tip) tip.innerText = "系统分享会打开正式例文排版打印，选择“保存为 PDF”。";
             sheet.classList.remove('hidden');
             requestAnimationFrame(() => sheet.classList.add('active'));
         }
