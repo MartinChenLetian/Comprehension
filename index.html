@@ -542,6 +542,8 @@
             }
 
             .paper {
+                width: 210mm;
+                height: 297mm;
                 min-height: 297mm;
             }
         }
@@ -1016,9 +1018,18 @@
             background: #fff;
             color: #181411;
             font-family: "STSong", "Songti SC", "Noto Serif SC", "SimSun", serif;
-            padding: 82px 76px 88px;
+            width: 794px;
+            height: 1123px;
             min-height: 1123px;
+            overflow: hidden;
             box-sizing: border-box;
+            break-after: page;
+            page-break-after: always;
+        }
+
+        .paper:last-child {
+            break-after: auto;
+            page-break-after: auto;
         }
 
         .paper::before {
@@ -1030,9 +1041,25 @@
             z-index: 0;
         }
 
+        .paper-viewport {
+            position: absolute;
+            top: 82px;
+            right: 76px;
+            bottom: 88px;
+            left: 76px;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .paper-flow-sheet {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+        }
+
         .paper-content {
             position: relative;
-            z-index: 2;
         }
 
         .paper-header {
@@ -1239,33 +1266,19 @@
             margin: 0 auto;
         }
 
+        .paper-pages {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
         .share-preview-stack {
             display: flex;
             flex-direction: column;
             gap: 24px;
         }
 
-        .paper-preview-page {
-            position: relative;
-            width: 794px;
-            height: 1123px;
-            overflow: hidden;
-            background: #fff;
-            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
-        }
-
-        .paper-preview-sheet {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 794px;
-        }
-
         .share-preview-canvas .paper {
-            box-shadow: none;
-        }
-
-        .share-preview-canvas > .paper {
             box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
         }
 
@@ -2888,6 +2901,11 @@
 
         const PAPER_WIDTH_PX = 794;
         const PAPER_HEIGHT_PX = 1123;
+        const PAPER_PADDING_TOP_PX = 82;
+        const PAPER_PADDING_BOTTOM_PX = 88;
+        const PAPER_PADDING_X_PX = 76;
+        const PAPER_CONTENT_WIDTH_PX = PAPER_WIDTH_PX - PAPER_PADDING_X_PX * 2;
+        const PAPER_CONTENT_HEIGHT_PX = PAPER_HEIGHT_PX - PAPER_PADDING_TOP_PX - PAPER_PADDING_BOTTOM_PX;
 
         function extractPaperSections(content) {
             const text = (content || '').trim();
@@ -2931,53 +2949,7 @@
             }).join('');
         }
 
-        function resolvePaperLayout(payload) {
-            const resolved = { ...payload, longTitle: false, showEndMark: false, pages: 1, layoutResolved: false };
-            if (!document?.body) return resolved;
-
-            const probe = document.createElement('div');
-            probe.setAttribute('aria-hidden', 'true');
-            probe.style.position = 'fixed';
-            probe.style.left = '-99999px';
-            probe.style.top = '0';
-            probe.style.width = `${PAPER_WIDTH_PX}px`;
-            probe.style.visibility = 'hidden';
-            probe.style.pointerEvents = 'none';
-            probe.style.zIndex = '-1';
-            document.body.appendChild(probe);
-
-            try {
-                probe.innerHTML = buildPaperMarkup(resolved);
-                const titleEl = probe.querySelector('.paper-title');
-                if (titleEl) {
-                    const lineHeight = parseFloat(getComputedStyle(titleEl).lineHeight) || 0;
-                    if (lineHeight && titleEl.scrollHeight > lineHeight * 1.6) {
-                        resolved.longTitle = true;
-                        probe.innerHTML = buildPaperMarkup(resolved);
-                    }
-                }
-
-                const paperEl = probe.querySelector('.paper');
-                const endMarkReserve = 54;
-                const contentHeight = paperEl?.scrollHeight || PAPER_HEIGHT_PX;
-                const pages = Math.max(1, Math.ceil(contentHeight / PAPER_HEIGHT_PX));
-                const freeSpace = pages * PAPER_HEIGHT_PX - contentHeight;
-                resolved.renderHeight = contentHeight;
-                resolved.pages = pages;
-                resolved.showEndMark = freeSpace >= endMarkReserve;
-                resolved.layoutResolved = true;
-            } finally {
-                probe.remove();
-            }
-
-            return resolved;
-        }
-
-        function ensurePaperLayout(payload) {
-            return payload?.layoutResolved ? payload : resolvePaperLayout(payload);
-        }
-
-        function buildPaperMarkup(payload) {
+        function buildPaperContentMarkup(payload) {
             const title = escapeHtml(payload.title || '未命名');
             const abstract = escapeHtml(payload.abstract || '').replace(/\n/g, '<br>');
             const notes = payload.notes || [];
@@ -2996,20 +2968,88 @@
             const endMarkHtml = payload.showEndMark ? `<div class="paper-endmark">-----End------</div>` : '';
 
             return `
-                <div class="paper">
-                    ${buildWatermarkMarkup(payload.watermark || 'Smart Reader')}
-                    <div class="paper-content">
-                        <div class="${headerClass}">
-                            <div class="paper-title">${title}</div>
-                        </div>
-                        <hr class="paper-divider">
-                        ${leadHtml}
-                        <div class="paper-body">${buildPaperBody(payload.body || '')}</div>
-                        ${notesHtml}
-                        ${endMarkHtml}
+                <div class="paper-content">
+                    <div class="${headerClass}">
+                        <div class="paper-title">${title}</div>
                     </div>
+                    <hr class="paper-divider">
+                    ${leadHtml}
+                    <div class="paper-body">${buildPaperBody(payload.body || '')}</div>
+                    ${notesHtml}
+                    ${endMarkHtml}
                 </div>
             `;
+        }
+
+        function resolvePaperLayout(payload) {
+            const resolved = { ...payload, longTitle: false, showEndMark: false, pages: 1, layoutResolved: false };
+            if (!document?.body) return resolved;
+
+            const probe = document.createElement('div');
+            probe.setAttribute('aria-hidden', 'true');
+            probe.style.position = 'fixed';
+            probe.style.left = '-99999px';
+            probe.style.top = '0';
+            probe.style.width = `${PAPER_CONTENT_WIDTH_PX}px`;
+            probe.style.visibility = 'hidden';
+            probe.style.pointerEvents = 'none';
+            probe.style.zIndex = '-1';
+            document.body.appendChild(probe);
+
+            try {
+                const measureContent = (candidate) => {
+                    probe.innerHTML = buildPaperContentMarkup(candidate);
+                    return {
+                        titleEl: probe.querySelector('.paper-title'),
+                        contentEl: probe.querySelector('.paper-content')
+                    };
+                };
+
+                let measured = measureContent(resolved);
+                const titleEl = measured.titleEl;
+                if (titleEl) {
+                    const lineHeight = parseFloat(getComputedStyle(titleEl).lineHeight) || 0;
+                    if (lineHeight && titleEl.scrollHeight > lineHeight * 1.6) {
+                        resolved.longTitle = true;
+                        measured = measureContent(resolved);
+                    }
+                }
+
+                const baseHeight = measured.contentEl?.scrollHeight || PAPER_CONTENT_HEIGHT_PX;
+                const basePages = Math.max(1, Math.ceil(baseHeight / PAPER_CONTENT_HEIGHT_PX));
+                const measuredWithEnd = measureContent({ ...resolved, showEndMark: true });
+                const endHeight = measuredWithEnd.contentEl?.scrollHeight || baseHeight;
+                const endPages = Math.max(1, Math.ceil(endHeight / PAPER_CONTENT_HEIGHT_PX));
+
+                resolved.showEndMark = endPages === basePages;
+                resolved.contentHeight = resolved.showEndMark ? endHeight : baseHeight;
+                resolved.pages = resolved.showEndMark ? endPages : basePages;
+                resolved.layoutResolved = true;
+            } finally {
+                probe.remove();
+            }
+
+            return resolved;
+        }
+
+        function ensurePaperLayout(payload) {
+            return payload?.layoutResolved ? payload : resolvePaperLayout(payload);
+        }
+
+        function buildPaperPagesMarkup(payload, wrapperClass = 'paper-pages') {
+            const contentMarkup = buildPaperContentMarkup(payload);
+            const pagesMarkup = Array.from({ length: payload.pages }, (_, index) => `
+                <div class="paper">
+                    ${buildWatermarkMarkup(payload.watermark || 'Smart Reader')}
+                    <div class="paper-viewport">
+                        <div class="paper-flow-sheet" style="transform: translateY(-${index * PAPER_CONTENT_HEIGHT_PX}px);">
+                            ${contentMarkup}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            return `<div class="${wrapperClass}">${pagesMarkup}</div>`;
         }
 
         function getPaperPayload(title, content) {
@@ -3036,22 +3076,13 @@
         function renderPaperTo(container, payload) {
             if (!container) return;
             const resolved = ensurePaperLayout(payload);
-            container.innerHTML = buildPaperMarkup(resolved);
+            container.innerHTML = buildPaperPagesMarkup(resolved);
         }
 
         function renderPaperPreviewTo(container, payload) {
             if (!container) return;
             const resolved = ensurePaperLayout(payload);
-            const markup = buildPaperMarkup(resolved);
-            const pages = Array.from({ length: resolved.pages }, (_, index) => `
-                <div class="paper-preview-page">
-                    <div class="paper-preview-sheet" style="transform: translateY(-${index * PAPER_HEIGHT_PX}px);">
-                        ${markup}
-                    </div>
-                </div>
-            `).join('');
-
-            container.innerHTML = `<div class="share-preview-stack">${pages}</div>`;
+            container.innerHTML = buildPaperPagesMarkup(resolved, 'share-preview-stack');
         }
 
         function renderPrintContent(title, content) {
