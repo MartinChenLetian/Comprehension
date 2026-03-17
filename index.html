@@ -516,13 +516,15 @@
         @media print {
             @page {
                 size: A4;
-                margin: 22mm 20mm;
+                margin: 0;
             }
 
+            html,
             body {
                 background: #fff;
                 height: auto;
                 overflow: visible;
+                margin: 0;
             }
 
             body > *:not(#print-root) {
@@ -531,11 +533,16 @@
 
             #print-root {
                 display: block;
+                width: 210mm;
+                margin: 0 auto;
+            }
+
+            #print-paper {
+                width: 210mm;
             }
 
             .paper {
-                padding: 0;
-                min-height: auto;
+                min-height: 297mm;
             }
         }
 
@@ -1033,11 +1040,19 @@
             margin-bottom: 24pt;
         }
 
+        .paper-header.paper-header-long {
+            text-align: left;
+        }
+
         .paper-title {
             font-size: 24pt;
             font-weight: 700;
             letter-spacing: 1.5px;
             line-height: 1.45;
+        }
+
+        .paper-header.paper-header-long .paper-title {
+            letter-spacing: 0.4px;
         }
 
         .paper-divider {
@@ -1049,11 +1064,16 @@
             margin: 0 auto 24pt;
         }
 
+        .paper-header.paper-header-long+.paper-divider {
+            width: 100%;
+            margin: 0 0 24pt;
+        }
+
         .paper-lead {
             font-size: 11pt;
             line-height: 1.95;
             text-align: justify;
-            text-indent: 2em;
+            text-indent: 0;
             color: #4d4032;
             margin: 0 0 18pt;
             padding-bottom: 14pt;
@@ -1069,7 +1089,7 @@
         }
 
         .paper-body p {
-            text-indent: 2em;
+            text-indent: 0;
             margin: 0 0 11pt;
         }
 
@@ -1112,6 +1132,17 @@
 
         .paper-note-item {
             margin-bottom: 8pt;
+        }
+
+        .paper-endmark {
+            margin-top: 26pt;
+            text-align: center;
+            font-size: 10.5pt;
+            line-height: 1.6;
+            letter-spacing: 1.4px;
+            color: #6a5a4a;
+            break-inside: avoid;
+            page-break-inside: avoid;
         }
 
         .paper-watermark {
@@ -2876,10 +2907,51 @@
             }).join('');
         }
 
+        function resolvePaperLayout(payload) {
+            const resolved = { ...payload, longTitle: false, showEndMark: false };
+            if (!document?.body) return resolved;
+
+            const probe = document.createElement('div');
+            probe.setAttribute('aria-hidden', 'true');
+            probe.style.position = 'fixed';
+            probe.style.left = '-99999px';
+            probe.style.top = '0';
+            probe.style.width = '794px';
+            probe.style.visibility = 'hidden';
+            probe.style.pointerEvents = 'none';
+            probe.style.zIndex = '-1';
+            document.body.appendChild(probe);
+
+            try {
+                probe.innerHTML = buildPaperMarkup(resolved);
+                const titleEl = probe.querySelector('.paper-title');
+                if (titleEl) {
+                    const lineHeight = parseFloat(getComputedStyle(titleEl).lineHeight) || 0;
+                    if (lineHeight && titleEl.scrollHeight > lineHeight * 1.6) {
+                        resolved.longTitle = true;
+                        probe.innerHTML = buildPaperMarkup(resolved);
+                    }
+                }
+
+                const paperEl = probe.querySelector('.paper');
+                const pageHeight = 1123;
+                const endMarkReserve = 54;
+                const contentHeight = paperEl?.scrollHeight || 0;
+                const remainder = contentHeight % pageHeight;
+                const freeSpace = remainder === 0 ? 0 : pageHeight - remainder;
+                resolved.showEndMark = freeSpace >= endMarkReserve;
+            } finally {
+                probe.remove();
+            }
+
+            return resolved;
+        }
+
         function buildPaperMarkup(payload) {
             const title = escapeHtml(payload.title || '未命名');
             const abstract = escapeHtml(payload.abstract || '').replace(/\n/g, '<br>');
             const notes = payload.notes || [];
+            const headerClass = payload.longTitle ? 'paper-header paper-header-long' : 'paper-header';
             const leadHtml = abstract ? `<p class="paper-lead">${abstract}</p>` : '';
             const notesHtml = notes.length ? `
                 <div class="paper-notes">
@@ -2891,18 +2963,20 @@
                     `).join('')}
                 </div>
             ` : '';
+            const endMarkHtml = payload.showEndMark ? `<div class="paper-endmark">-----End------</div>` : '';
 
             return `
                 <div class="paper">
                     ${buildWatermarkMarkup(payload.watermark || 'Smart Reader')}
                     <div class="paper-content">
-                        <div class="paper-header">
+                        <div class="${headerClass}">
                             <div class="paper-title">${title}</div>
                         </div>
                         <hr class="paper-divider">
                         ${leadHtml}
                         <div class="paper-body">${buildPaperBody(payload.body || '')}</div>
                         ${notesHtml}
+                        ${endMarkHtml}
                     </div>
                 </div>
             `;
@@ -2933,12 +3007,28 @@
 
         function renderPaperTo(container, payload) {
             if (!container) return;
-            container.innerHTML = buildPaperMarkup(payload);
+            container.innerHTML = buildPaperMarkup(resolvePaperLayout(payload));
         }
 
         function renderPrintContent(title, content) {
             const payload = getPaperPayload(title, content);
             renderPaperTo(document.getElementById('print-paper'), payload);
+        }
+
+        function printExportFallback() {
+            const previousTitle = document.title;
+            let restored = false;
+            const restore = () => {
+                if (restored) return;
+                restored = true;
+                document.title = previousTitle;
+                window.removeEventListener('afterprint', restore);
+            };
+
+            document.title = '';
+            window.addEventListener('afterprint', restore, { once: true });
+            window.print();
+            setTimeout(restore, 1500);
         }
 
         function openShare() {
@@ -3046,7 +3136,7 @@
             if (!content || !container || typeof html2pdf === 'undefined') {
                 renderPrintContent(payload.title, content);
                 closeSharePreview(true);
-                setTimeout(() => window.print(), 100);
+                setTimeout(() => printExportFallback(), 100);
                 return;
             }
 
@@ -3082,7 +3172,7 @@
             } catch (err) {
                 renderPrintContent(payload.title, content);
                 closeSharePreview(true);
-                setTimeout(() => window.print(), 120);
+                setTimeout(() => printExportFallback(), 120);
             }
         }
 
